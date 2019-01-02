@@ -18,3 +18,11 @@ source $HOME/dotfiles/configs.vim
 catch
 endtry
 ```
+
+## .tmux.conf
+Make sure you have tmux version >=2.1 installed. Then, put the config file in `$HOME/dotfiles/` and modify `$HOME/.tmux.conf` as follows:
+
+```tmux
+# source config file
+source-file ~/dotfiles/.tmux.conf
+```
