@@ -6,7 +6,14 @@ if [ -f /etc/bashrc ]; then
 fi
 
 # PS1 prompt; always escape colors with \[...\]
-export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
+# also, urxvt with screen-256color is strange!
+if [ $TERM == "screen-256color" ]; then
+    export PS1=' $ '
+elif [ $TERM == "rxvt-unicode-256color" ]; then
+    export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
+else
+    export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
+fi
 # ▶
 # 🠊
 
@@ -45,3 +52,13 @@ alias m="mupdf"
 
 # create an alias for clear
 alias c="clear"
+
+# for pintOS doc creation
+alias texi2pdf="texi2any"
+
+# prevent ranger from loading rc.conf from
+# /usr/share/doc/config/ and ~/.config/ranger
+RANGER_LOAD_DEFAULT_RC=FALSE
+
+# useful when configuring .Xresources
+alias xup="xrdb ~/dotfiles/.Xresources"

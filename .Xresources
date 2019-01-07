@@ -1,0 +1,86 @@
+! -- Window appearance --!
+URxvt*depth: 32
+URxvt*background: [95]#000000
+URxvt*foreground: White
+URxvt*geometry: 86x24
+URxvt*scrollBar: false
+
+!-- Xft settings -- !
+! 114 dpi for ThinkPad T440
+Xft.dpi:        114
+Xft.antialias:  true
+Xft.rgba:       rgb
+Xft.hinting:    true
+Xft.hintstyle:  hintfull
+
+! -- Color settings -- !
+! black
+URxvt.color0  : #000000
+URxvt.color8  : #555555
+! red
+URxvt.color1  : #AA0000
+URxvt.color9  : #FF5555
+! green
+URxvt.color2  : #00AA00
+URxvt.color10 : #55FF55
+! yellow
+URxvt.color3  : #AA5500
+URxvt.color11 : #FFFF55
+! blue
+URxvt.color4  : #0000AA
+URxvt.color12 : #5555FF
+! magenta
+URxvt.color5  : #AA00AA
+URxvt.color13 : #FF55FF
+! cyan
+URxvt.color6  : #00AAAA
+URxvt.color14 : #55FFFF
+! white
+URxvt.color7  : #AAAAAA
+URxvt.color15 : #FFFFFF
+
+! -- Fonts -- !
+URxvt.font:xft:Monospace:pixelsize=20
+URxvt.boldfont:xft:Monospace-Bold:pixelsize=20
+URxvt*letterSpace: -1
+
+! -- General Settings -- !
+URxvt*termName: rxvt-unicode-256color
+! URxvt*termName: screen-256color
+! URxvt*termName: xterm-256color
+! URxvt*termName: xterm
+! URxvt*termName: screen
+URxvt.tabbed.autohide: true
+
+! -- Program Settings, etc. -- !
+URxvt*urlLauncher: firefox
+URxvt*perl-ext-common: default,matcher
+URxvt.matcher.button: 1
+
+! -- TODO -- !
+! URxvt*urgentOnBell: false
+! URxvt*visualBell: false
+! URxvt*mapAlert: false
+! URxvt*loginShell: true
+! URxvt*scrollColor: #777777
+! URxvt*scrollstyle: plain
+! URxvt*scrollTtyKeypress: true
+! URxvt*scrollTtyOutput: false
+! URxvt*scrollWithBuffer: false
+! URxvt*secondaryScreen: true
+! URxvt*secondaryScroll: true
+! URxvt*skipScroll: true
+! URxvt*scrollBar: false
+! URxvt*scrollBar_right: false
+! URxvt*scrollBar_floating: false
+! URxvt*fading: 30
+! URxvt*utmpInhibit: false
+! URxvt*mouseWheelScrollPage: false
+! URxvt*colorUL: yellow
+! URxvt*underlineColor: yellow
+! URxvt*saveLines: 0
+! URxvt*buffered: true
+! URxvt*hold: false
+! URxvt*internalBorder:
+! URxvt*print-pipe: cat > $HOME/$(echo urxvt.dump.$(date +'%Y%M%d%H%m%S'))
+! URxvt*perl-ext:

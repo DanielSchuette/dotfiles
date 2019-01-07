@@ -26,3 +26,10 @@ Make sure you have tmux version >=2.1 installed. Then, put the config file in `$
 # source config file
 source-file ~/dotfiles/.tmux.conf
 ```
+
+## .Xresources
+Put the following line in your `.xinitrc`:
+```bash
+xrdb ~/dotfiles/.Xresources
+```
+A bash alias exists, too. `$xup` will load changes in `.Xresources` without restarting the xserver.
