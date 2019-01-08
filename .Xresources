@@ -14,6 +14,9 @@ Xft.hinting:    true
 Xft.hintstyle:  hintfull
 
 ! -- Color settings -- !
+!URxvt*colorUL: yellow
+!URxvt*underlineColor: yellow
+
 ! black
 URxvt.color0  : #000000
 URxvt.color8  : #555555
@@ -40,47 +43,54 @@ URxvt.color7  : #AAAAAA
 URxvt.color15 : #FFFFFF
 
 ! -- Fonts -- !
-URxvt.font:xft:Monospace:pixelsize=20
-URxvt.boldfont:xft:Monospace-Bold:pixelsize=20
+! -- requires Fontawesome and NerdFonts -- !
+URxvt.font: xft:Monospace:pixelsize=20,xft:Icons:size:20,xft:SauceCodePro NF:pixelsize=20
+URxvt.boldfont: xft:Monospace-Bold:pixelsize=20
 URxvt*letterSpace: -1
 
 ! -- General Settings -- !
 URxvt*termName: rxvt-unicode-256color
-! URxvt*termName: screen-256color
-! URxvt*termName: xterm-256color
-! URxvt*termName: xterm
-! URxvt*termName: screen
+! URxvt*termName: screen-256color,xterm-256color,xterm,screen
 URxvt.tabbed.autohide: true
 
 ! -- Program Settings, etc. -- !
 URxvt*urlLauncher: firefox
 URxvt*perl-ext-common: default,matcher
+URxvt*perl-ext: selection-to-clipboard
 URxvt.matcher.button: 1
 
+! secondary screens scroll as expected when
+! terminal buffer scrolling is disabled
+URxvt*secondaryScreen: 1
+URxvt*secondaryScroll: 0
+
+! -- additional options -- !
+! do not scroll with output
+! URxvt*scrollTtyOutput: false
+
+! scroll in relation to buffer (I rather 
+! use the tmux buffer for scrolling)
+! URxvt*scrollWithBuffer: false
+
+! Scroll to bottom on key press
+! URxvt*scrollTtyKeypress: true
+
 ! -- TODO -- !
+! -- TODO: match colors with tmux colors -- !
 ! URxvt*urgentOnBell: false
 ! URxvt*visualBell: false
 ! URxvt*mapAlert: false
 ! URxvt*loginShell: true
 ! URxvt*scrollColor: #777777
 ! URxvt*scrollstyle: plain
-! URxvt*scrollTtyKeypress: true
-! URxvt*scrollTtyOutput: false
-! URxvt*scrollWithBuffer: false
-! URxvt*secondaryScreen: true
-! URxvt*secondaryScroll: true
 ! URxvt*skipScroll: true
-! URxvt*scrollBar: false
 ! URxvt*scrollBar_right: false
 ! URxvt*scrollBar_floating: false
 ! URxvt*fading: 30
 ! URxvt*utmpInhibit: false
 ! URxvt*mouseWheelScrollPage: false
-! URxvt*colorUL: yellow
-! URxvt*underlineColor: yellow
 ! URxvt*saveLines: 0
 ! URxvt*buffered: true
 ! URxvt*hold: false
 ! URxvt*internalBorder:
 ! URxvt*print-pipe: cat > $HOME/$(echo urxvt.dump.$(date +'%Y%M%d%H%m%S'))
-! URxvt*perl-ext:

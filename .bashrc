@@ -11,11 +11,11 @@ if [ $TERM == "screen-256color" ]; then
     export PS1=' $ '
 elif [ $TERM == "rxvt-unicode-256color" ]; then
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
-else
+else # gnome terminal works well with icons that urxvt cannot handle
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
-fi
 # ▶
 # 🠊
+fi
 
 # extra settings for git
 source /usr/share/git-core/contrib/completion/git-prompt.sh
