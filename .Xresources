@@ -43,7 +43,8 @@ URxvt.color7  : #AAAAAA
 URxvt.color15 : #FFFFFF
 
 ! -- Fonts -- !
-! -- requires Fontawesome and NerdFonts -- !
+! -- requires Fontawesome and NerdFonts and does not work well -- !
+!URxvt.font: xft:DroidSansMono Nerd Font:pixelsize=20,xft:Icons:size:20,xft:SauceCodePro NF:pixelsize=20
 URxvt.font: xft:Monospace:pixelsize=20,xft:Icons:size:20,xft:SauceCodePro NF:pixelsize=20
 URxvt.boldfont: xft:Monospace-Bold:pixelsize=20
 URxvt*letterSpace: -1
@@ -58,6 +59,7 @@ URxvt*urlLauncher: firefox
 URxvt*perl-ext-common: default,matcher
 URxvt*perl-ext: selection-to-clipboard
 URxvt.matcher.button: 1
+URxvt.matcher.rend.0: Uline Bold fg5
 
 ! secondary screens scroll as expected when
 ! terminal buffer scrolling is disabled
