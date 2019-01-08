@@ -79,6 +79,7 @@ URxvt*secondaryScroll: 0
 
 ! -- TODO -- !
 ! -- TODO: match colors with tmux colors -- !
+! -- TODO: https://github.com/majutsushi/urxvt-font-size
 ! URxvt*urgentOnBell: false
 ! URxvt*visualBell: false
 ! URxvt*mapAlert: false
