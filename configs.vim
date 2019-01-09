@@ -90,6 +90,13 @@ highlight clear SignColumn
 " another custom script to set visual mode highlighting colors:
 hi Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
 
+" disable Background Color Erase (BCE) so that color schemes
+" render properly when inside 256-color tmux and GNU screen.
+" see also http://sunaku.github.io/vim-256color-bce.html
+if &term =~ '256color'
+    set t_ut=
+endif
+
 " re-map system clipboard copying commands
 noremap <Leader>y "+y
 noremap <Leader>Y "+Y
