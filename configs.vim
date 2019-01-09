@@ -72,23 +72,21 @@ let g:completor_gocode_binary = '/Users/daniel/Documents/GitHub/go/src/github.co
 let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3'
 
 " Colorscheme
-let g:solarized_termcolors=256 
-" required for the non-default color scheme
-colorscheme solarized 
-highlight Normal ctermbg=Black 
-" sets background color
-highlight NonText ctermbg=Black
-" sets background color of non-text
-highlight clear LineNr
-" sets background color of line number bar to that of background
-highlight clear SignColumn
-" Set background to dark
-set background=dark
-highlight clear LineNr
-" sets background color of so-called sign column to that of background
 " default color scheme: peaksea
 " to get the default appearance, comment all 'highlight' commands
 " other schemes: ir_black, solarized, mayansmoke, pyte
+let g:solarized_termcolors=256 
+" required for the non-default color scheme
+colorscheme solarized 
+
+" clear the gray background
+set background=dark
+set t_Co=256
+highlight Normal ctermbg=None
+highlight nonText ctermbg=None
+highlight clear LineNr
+highlight clear SignColumn
+
 " another custom script to set visual mode highlighting colors:
 hi Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
 
