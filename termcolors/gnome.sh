@@ -59,7 +59,7 @@ if which "$DCONF" > /dev/null 2>&1; then
         # update profile values with theme options
         dset visible-name "'$PROFILE_NAME'"
         dset palette "['#282a2e', '#a54242', '#8c9440', '#de935f', '#5f819d', '#85678f', '#5e8d87', '#707880', '#373b41', '#cc6666', '#b5bd68', '#f0c674', '#81a2be', '#b294bb', '#8abeb7', '#c5c8c6']"
-        dset background-color "'#1d1f21'"
+        dset background-color "'#000000'"
         dset foreground-color "'#c5c8c6'"
         dset bold-color "'#c5c8c6'"
         dset bold-color-same-as-fg "true"
@@ -109,7 +109,7 @@ glist_append string /apps/gnome-terminal/global/profile_list "$PROFILE_SLUG"
 
 gset string visible_name "$PROFILE_NAME"
 gset string palette "#282a2e:#a54242:#8c9440:#de935f:#5f819d:#85678f:#5e8d87:#707880:#373b41:#cc6666:#b5bd68:#f0c674:#81a2be:#b294bb:#8abeb7:#c5c8c6"
-gset string background_color "#1d1f21"
+gset string background_color "#000000"
 gset string foreground_color "#c5c8c6"
 gset string bold_color "#c5c8c6"
 gset bool   bold_color_same_as_fg "true"
