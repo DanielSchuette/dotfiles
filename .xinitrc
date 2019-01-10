@@ -37,7 +37,7 @@ fi
 xrdb ~/dotfiles/.Xresources
 
 # increase key autorepeat rate
-xset r rate 200
+exec xset r rate 200
 
 # execute i3
 exec i3
