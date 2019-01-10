@@ -5,7 +5,7 @@
 # update.sh will synchronize this repository
 # automatically.
 echo "copying .xinitrc"
-cp .xinitrc ~
+cp .xinitrc ~/.xinitrc
 
 echo "copying i3.config"
 cp i3.config ~/.config/i3/config
