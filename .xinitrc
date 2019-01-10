@@ -34,10 +34,4 @@ fi
 
 ### custom settings ###
 # load Xresources
-xrdb ~/dotfiles/.Xresources
-
-# increase key autorepeat rate
-exec xset r rate 200
-
-# execute i3
-exec i3
+#xrdb ~/dotfiles/.Xresources
