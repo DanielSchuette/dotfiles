@@ -53,8 +53,9 @@ alias m="mupdf"
 # create an alias for clear
 alias c="clear"
 
-# for pintOS doc creation
-alias texi2pdf="texi2any"
+# a few rust utilities
+alias l="exa -lah"
+alias t="tokei"
 
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger
