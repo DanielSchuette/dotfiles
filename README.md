@@ -19,6 +19,14 @@ catch
 endtry
 ```
 
+To install additional plugins, use [Pathogen](https://github.com/tpope/vim-pathogen):
+
+```bash
+# example of a nice improved syntax highlighter for js
+git clone https://github.com/pangloss/vim-javascript.git ~/.vim_runtime/my_plugins/vim-javascript
+```
+
+
 ## .tmux.conf
 Make sure you have tmux version >=2.1 installed. Then, put the config file in `$HOME/dotfiles/` and modify `$HOME/.tmux.conf` as follows:
 
