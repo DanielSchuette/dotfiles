@@ -2,18 +2,30 @@
 " some additional modifications are made to the basic.vim file as well (e.g. color scheme)
 set number
 set relativenumber
-set textwidth=0 wrapmargin=0 "disable physical line wrapping
+set nocompatible
+filetype plugin on
+syntax on
+set encoding=utf-8
 
+"Automatically deletes all trailing whitespace on save.
+autocmd BufWritePre * %s/\s\+$//e
+
+" disable physical line wrapping
+set textwidth=0 wrapmargin=0
+
+" check if file was changed outside of vim before saving ...
+set autoread
+" ... then, update the current buffer with <leader>u
+nmap <leader>u :edit<cr>
 
 " display indentation guides
-"set list listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:× 
+"set list listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×
 
 nnoremap <Space> i<Space><Right><ESC>
 nmap <S-Enter> O<ESC>
 nmap <CR> o<ESC>k
 
 set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
-
 
 " remap <ESC> to <leader>nn
 inoremap <leader>nn <ESC>
@@ -75,9 +87,9 @@ let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3
 " default color scheme: peaksea
 " to get the default appearance, comment all 'highlight' commands
 " other schemes: ir_black, solarized, mayansmoke, pyte
-let g:solarized_termcolors=256 
+let g:solarized_termcolors=256
 " required for the non-default color scheme
-colorscheme solarized 
+colorscheme solarized
 
 " clear the gray background
 set background=dark

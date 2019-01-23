@@ -57,6 +57,9 @@ alias c="clear"
 alias l="exa -lah"
 alias t="tokei"
 
+# run MonoDevelop more easily
+alias monodevelop="flatpak run com.xamarin.MonoDevelop"
+
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger
 RANGER_LOAD_DEFAULT_RC=FALSE
