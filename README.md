@@ -24,6 +24,13 @@ To install additional plugins, use [Pathogen](https://github.com/tpope/vim-patho
 ```bash
 # example of a nice improved syntax highlighter for js
 git clone https://github.com/pangloss/vim-javascript.git ~/.vim_runtime/my_plugins/vim-javascript
+
+# vim autocompletion!
+# has some dependencies, e.g. Mono for C# and python3-devel (check their documentation)
+git clone https://github.com/Valloric/YouCompleteMe.git ./YouCompleteMe
+cd YouCompleteMe
+git submodule update --init --recursive
+python3 install.py --clang-completer --go-completer --cs-completer --ts-completer --rust-completer
 ```
 
 
