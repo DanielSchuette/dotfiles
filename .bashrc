@@ -55,6 +55,7 @@ alias c="clear"
 
 # a few rust utilities
 alias l="exa -lah"
+alias ls="exa"
 alias t="tokei"
 
 # run MonoDevelop more easily
