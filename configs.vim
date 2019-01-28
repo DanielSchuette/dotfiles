@@ -86,7 +86,8 @@ let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3
 " Colorscheme
 " default color scheme: peaksea
 " to get the default appearance, comment all 'highlight' commands
-" other schemes: ir_black, solarized, mayansmoke, pyte
+" other schemes: ir_black, solarized, mayansmoke, pyte and many
+" more (check with :colorscheme <tab>)
 let g:solarized_termcolors=256
 " required for the non-default color scheme
 colorscheme solarized
@@ -114,3 +115,5 @@ noremap <Leader>y "+y
 noremap <Leader>Y "+Y
 noremap <Leader>p "+p
 noremap <Leader>P "+P
+
+" let g:ycm_filetype_specific_completion_to_disable = { 'html': 1 }
