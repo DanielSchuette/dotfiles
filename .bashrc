@@ -67,3 +67,9 @@ RANGER_LOAD_DEFAULT_RC=FALSE
 
 # useful when configuring .Xresources
 alias xup="xrdb ~/dotfiles/.Xresources"
+
+# open thunderbird more easily
+alias bird="thunderbird &"
+
+# open rider more easily
+alias rider="sh ~/JetBrains Rider-2018.3.2/bin/rider.sh &"
