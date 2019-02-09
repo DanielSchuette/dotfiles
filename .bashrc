@@ -47,6 +47,9 @@ alias v="vimx"
 alias vi="vimx"
 alias vim="vimx"
 
+# create an alias for ranger
+alias r="ranger"
+
 # create an alias for mupdf
 alias m="mupdf"
 
@@ -74,7 +77,3 @@ alias bird="thunderbird &"
 # open rider more easily
 alias rider="sh ~/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
-
-# add tfs cli to path
-export PATH=$PATH:/home/daniel/lib/vsts-cli/bin
-source '/home/daniel/lib/vsts-cli/vsts.completion'
