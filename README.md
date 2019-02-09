@@ -22,8 +22,11 @@ endtry
 To install additional plugins, use [Pathogen](https://github.com/tpope/vim-pathogen):
 
 ```bash
-# example of a nice improved syntax highlighter for js
+# a nice, improved syntax highlighter for js
 git clone https://github.com/pangloss/vim-javascript.git ~/.vim_runtime/my_plugins/vim-javascript
+
+# emmet plugin for advanced html autocompletion (remapped to <C-D>,)
+git clone https://github.com/mattn/emmet-vim.git ~/.vim_runtime/my_plugins/emmet-vim
 
 # vim autocompletion!
 # has some dependencies, e.g. Mono for C# and python3-devel (check their documentation)

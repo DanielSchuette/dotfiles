@@ -117,3 +117,6 @@ noremap <Leader>p "+p
 noremap <Leader>P "+P
 
 " let g:ycm_filetype_specific_completion_to_disable = { 'html': 1 }
+
+" emmet configs (the trailing ',' still needs to be added)
+let g:user_emmet_leader_key='<C-D>'
