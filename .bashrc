@@ -75,5 +75,5 @@ alias xup="xrdb ~/dotfiles/.Xresources"
 alias bird="thunderbird &"
 
 # open rider more easily
-alias rider="sh ~/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
+alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
