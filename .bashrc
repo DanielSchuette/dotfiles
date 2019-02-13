@@ -39,6 +39,16 @@ export GOPATH
 PATH="$HOME/code/go_src/bin:$PATH"
 export PATH
 
+# enable experimental support for modules
+# (to still respect $GOPATH, set to 'auto')
+GO111MODULE="on"
+export GO111MODULE
+
+# alias for installing tools outsite packages
+# required to install go binaries that are not
+# dependencies of a go module
+alias oldgoget="GO11MODULE=off go get"
+
 # enable vi mode
 set -o vi
 
