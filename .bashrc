@@ -66,6 +66,12 @@ alias m="mupdf"
 # create an alias for clear
 alias c="clear"
 
+# create aliases for faster navigation
+alias h="cd ~"
+alias co="cd ~/code"
+alias do="cd ~/Documents"
+alias dw="cd ~/Downloads"
+
 # a few rust utilities
 alias l="exa -lah"
 alias ls="exa"
