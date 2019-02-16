@@ -36,6 +36,8 @@ GOBIN="$HOME/code/go_src/bin"
 export GOBIN
 GOPATH="$HOME/code/go_src"
 export GOPATH
+GOROOT="" # needs to be set if go is in custom location
+export GOROOT
 PATH="$HOME/code/go_src/bin:$PATH"
 export PATH
 
@@ -47,7 +49,7 @@ export GO111MODULE
 # alias for installing tools outsite packages
 # required to install go binaries that are not
 # dependencies of a go module
-alias oldgoget="GO11MODULE=off go get"
+alias oldgoget="GO111MODULE=off go get"
 
 # enable vi mode
 set -o vi
