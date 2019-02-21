@@ -27,11 +27,11 @@ nmap <CR> o<ESC>k
 
 set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
 
-" remap <ESC> to <leader>nn
-inoremap <leader>nn <ESC>
+" remap <ESC> to <leader>n
+inoremap <leader>n <ESC>
 
-" Fast quitting
-nmap <leader>qq :q<cr>
+" Fast quitting with <leader>q
+nmap <leader>q :q<cr>
 
 " Go-Vim remaps and settings
 " disable location lists for go-vim
@@ -120,3 +120,6 @@ noremap <Leader>P "+P
 
 " emmet configs (the trailing ',' still needs to be added)
 let g:user_emmet_leader_key='<C-D>'
+
+" YCM configs
+let g:ycm_global_ycm_extra_conf = '~/dotfiles/.ycm_extra_conf.py'
