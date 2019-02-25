@@ -32,9 +32,19 @@ inoremap <leader>n <ESC>
 " fast quitting with <leader>q
 nmap <leader>q :q<cr>
 
-" fast compilation of rust files
+" move more intuitively between wrapped lines with j/k
+" instead of gj/gk
+nnoremap j gj
+nnoremap k gk
+
+" display buffer using <leader>b
+nnoremap <leader>b :ls<CR>:buffer<Space>
+
+" fast compilation of rust, js and c src files
 " could be expanded to quickly compile other languages, too
-nnoremap <leader>r :!cargo run<CR>
+autocmd FileType rust nnoremap <leader>c :!cargo run<CR>
+autocmd FileType c nnoremap <leader>c :!gcc % -o prog && ./prog<CR>
+autocmd FileType js nnoremap <leader>c :!node %<CR>
 
 " Go-Vim remaps and settings
 " disable location lists for go-vim
