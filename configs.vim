@@ -21,21 +21,27 @@ nmap <leader>u :edit<cr>
 " display indentation guides
 "set list listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×
 
+" remap space and return to do what one expects
 nnoremap <Space> i<Space><Right><ESC>
 nmap <S-Enter> O<ESC>
 nmap <CR> o<ESC>k
 
-set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
-
 " remap <ESC> to <leader>n
 inoremap <leader>n <ESC>
 
-" Fast quitting with <leader>q
+" fast quitting with <leader>q
 nmap <leader>q :q<cr>
+
+" fast compilation of rust files
+" could be expanded to quickly compile other languages, too
+nnoremap <leader>r :!cargo run<CR>
 
 " Go-Vim remaps and settings
 " disable location lists for go-vim
 " let g:go_list_type = "quickfix"
+
+" golang linter path
+set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
 
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
