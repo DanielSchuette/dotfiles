@@ -31,6 +31,9 @@ git clone https://github.com/mattn/emmet-vim.git ~/.vim_runtime/my_plugins/emmet
 # plugin for using ranger from within vim (<leader>f)
 git clone https://github.com/francoiscabrol/ranger.vim ~/.vim_runtime/my_plugins/vim-ranger
 
+# rust plugin
+git clone --depth=1 https://github.com/rust-lang/rust.vim.git ~/.vim_runtime/my_plugins/rust.vim
+
 # vim autocompletion!
 # has some dependencies, e.g. Mono for C# and python3-devel (check their documentation)
 git clone https://github.com/Valloric/YouCompleteMe.git ./YouCompleteMe
