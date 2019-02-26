@@ -1,20 +1,22 @@
 # .bashrc
-
 # Source global definitions
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+# enable vi mode
+set -o vi
+
 # PS1 prompt; always escape colors with \[...\]
 # also, urxvt with screen-256color is strange!
+# other icons I like: ▶, 🠊
 if [ $TERM == "screen-256color" ]; then
     export PS1=' $ '
 elif [ $TERM == "rxvt-unicode-256color" ]; then
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
-else # gnome terminal works well with icons that urxvt cannot handle
+else
+    # gnome terminal works well with icons that urxvt cannot handle
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
-# ▶
-# 🠊
 fi
 
 # extra settings for git
@@ -27,8 +29,9 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 export PATH
 
-# Uncomment the following line if you don't like systemctl's auto-paging feature:
-# export SYSTEMD_PAGER=
+# Uncomment the following line if you don't like
+# systemctl's auto-paging feature:
+#export SYSTEMD_PAGER=
 
 # User specific aliases and functions
 # set environment variables for go
@@ -51,8 +54,8 @@ export GO111MODULE
 # dependencies of a go module
 alias oldgoget="GO111MODULE=off go get"
 
-# enable vi mode
-set -o vi
+# set environment variables for rust
+export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 
 # create some vim aliases to always use vim-x11
 alias v="vimx"
@@ -71,7 +74,7 @@ alias c="clear"
 # create aliases for faster navigation
 alias h="cd ~"
 alias co="cd ~/code"
-alias do="cd ~/Documents"
+alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
 
 # a few rust utilities
