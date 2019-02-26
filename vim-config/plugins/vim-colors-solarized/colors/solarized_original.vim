@@ -256,7 +256,7 @@ if (has("gui_running") && g:solarized_degrade == 0)
     let s:magenta     = "#d33682"
     let s:violet      = "#6c71c4"
     let s:blue        = "#268bd2"
-    let s:cyan        = "#af9100" " FIXME: changed, not the same as term-colors
+    let s:cyan        = "#2aa198"
     "let s:green       = "#859900" "original
     let s:green       = "#719e07" "experimental
 elseif (has("gui_running") && g:solarized_degrade == 1)
@@ -278,7 +278,7 @@ elseif (has("gui_running") && g:solarized_degrade == 1)
     let s:magenta     = "#af005f"
     let s:violet      = "#5f5faf"
     let s:blue        = "#0087ff"
-    let s:cyan        = "#af9100" " FIXME: changed, not the same as term-colors
+    let s:cyan        = "#00afaf"
     let s:green       = "#5f8700"
 elseif g:solarized_termcolors != 256 && &t_Co >= 16
     let s:vmode       = "cterm"
@@ -296,7 +296,7 @@ elseif g:solarized_termcolors != 256 && &t_Co >= 16
     let s:magenta     = "5"
     let s:violet      = "13"
     let s:blue        = "4"
-    let s:cyan        = "130" " FIXME: changed, not the same as hex-colors
+    let s:cyan        = "6"
     let s:green       = "2"
 elseif g:solarized_termcolors == 256
     let s:vmode       = "cterm"
@@ -314,7 +314,7 @@ elseif g:solarized_termcolors == 256
     let s:magenta     = "125"
     let s:violet      = "61"
     let s:blue        = "33"
-    let s:cyan        = "130" " FIXME: changed, not the same as hex-colors
+    let s:cyan        = "37"
     let s:green       = "64"
 else
     let s:vmode       = "cterm"
