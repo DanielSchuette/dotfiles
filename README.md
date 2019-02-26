@@ -25,9 +25,10 @@ catch
 endtry
 ```
 
-There are two things to consider:
+There are three to things to consider:
 1. There are probably absolute file paths in `vim-config/configs.vim` and `vim-config/infect.vim` that need to be changed. Just grep for it and replace the file paths if you need to.
 2. Some plugins  need to be compiled and have dependencies that need to be installed (especially `YouCompleteMe`, it's possible that all other plugins actually work). See below for further installation instructions. If something does not work, delete the plugin dir and re-install the plugin from scratch, following the installation instructions in the respective GitHub repository.
+3. Linting with `ale` requires the respective linters to be installed. Some documentation is provided in the `ale` section in `configs.vim`.
 
 ### Deprecated way to install this vim config
 

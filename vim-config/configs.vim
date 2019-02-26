@@ -102,10 +102,10 @@ let g:lightline = {
 
 " If Fontawesome or another iconic font is installed, the following
 " icons can be used as linter warning and error indicators:
-let g:lightline#ale#indicator_checking = "\uf110  "
+"let g:lightline#ale#indicator_checking = "\uf110  "
 let g:lightline#ale#indicator_warnings = "\uf071  "
 let g:lightline#ale#indicator_errors = "\uf05e  "
-let g:lightline#ale#indicator_ok = "\uf00c  "
+"let g:lightline#ale#indicator_ok = "\uf00c  "
 
 "*********************"
 "** Custom Mappings **"
@@ -228,9 +228,12 @@ autocmd FileType c nnoremap <leader>c :!gcc % -o prog && ./prog<CR>
 autocmd FileType js nnoremap <leader>c :!node %<CR>
 
 " On save:
-" run rustfmt on all rust files in current dir
-" if file extension of current buffer == '.rs'
-autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt *.rs'
+" Run rustfmt on all rust files in current dir
+" if file extension of current buffer == '.rs'.
+" Run rustfmt with <leader>rf instead if error
+" messages are wanted.
+autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt *.rs &> /dev/null'
+nnoremap <leader>rf :!rustfmt *.rs<CR>
 
 " delete all trailing whitespace on save
 autocmd BufWritePre * %s/\s\+$//e
@@ -251,6 +254,11 @@ endif
 "********************"
 "** Plugin Configs **"
 "********************"
+" Vim-Markdown Configs
+" --------------------
+" disable automatic folding
+let g:vim_markdown_folding_disabled = 1
+
 " Emmet Configs
 " -------------
 " remap emmet leader (the actual leader (trailing ',')
@@ -346,13 +354,12 @@ let g:go_auto_sameids = 1
 " enable highlighting of linter findings
 let g:ale_set_highlights = 1
 
-" only run linting and fix files when saving them, not
-" when text changes or a new buffer is opened
+" Only run linting and fix files when saving them, not
+" when text changes. Every buffer is checked when opened,
+" too. Completions are enabled when available.
 let g:ale_lint_on_text_changed = 'never'
-let g:ale_lint_on_enter = 0
+let g:ale_lint_on_enter = 1
 let g:ale_fix_on_save = 1
-
-" enable completion where available.
 let g:ale_completion_enabled = 1
 
 " enable auto-completion using github.com/maralla/completor.vim
