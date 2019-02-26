@@ -1,0 +1,2 @@
+# ignore .bashrc backup file
+.bashrc.backup
