@@ -68,31 +68,33 @@ let g:lightline.component_expand = {
       \ }
 
 let g:lightline.component_type = {
-      \     'linter_checking': 'left',
-      \     'linter_warnings': 'warning',
-      \     'linter_errors': 'error',
-      \     'linter_ok': 'left',
+      \  'linter_checking': 'left',
+      \  'linter_warnings': 'warning',
+      \  'linter_errors': 'error',
+      \  'linter_ok': 'left',
       \ }
 
+" previous branch symbol was , but it is sticking out
+"  can be used as right major delimiter
 let g:lightline = {
-      \ 'colorscheme': 'wombat',
+      \ 'colorscheme': 'solarized',
       \ 'active': {
       \   'left': [ ['mode', 'paste'],
       \             ['fugitive', 'readonly', 'filename', 'modified'] ],
-      \   'right': [ [ 'lineinfo' ], ['percent'], ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok'] ]
+      \   'right': [ [ 'lineinfo' ], ['percent'], [ 'fileformat', 'filetype' ], ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok'] ]
       \ },
       \ 'component': {
       \   'readonly': '%{&filetype=="help"?"":&readonly?"🔒":""}',
       \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-      \   'fugitive': '%{exists("*fugitive#head")?fugitive#head():""}'
+      \   'fugitive': "%{fugitive#head()!=''?'\ ⎇ \ '.fugitive#head().'\ ':''}"
       \ },
       \ 'component_visible_condition': {
       \   'readonly': '(&filetype!="help"&& &readonly)',
       \   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
       \   'fugitive': '(exists("*fugitive#head") && ""!=fugitive#head())'
       \ },
-      \ 'separator': { 'left': ' ', 'right': ' ' },
-      \ 'subseparator': { 'left': ' ', 'right': ' ' }
+      \ 'separator': { 'left': "", 'right': " " },
+      \ 'subseparator': { 'left': "\u25B6", 'right': "|" }
       \ }
 
 " avoid garbled characters in Chinese language
