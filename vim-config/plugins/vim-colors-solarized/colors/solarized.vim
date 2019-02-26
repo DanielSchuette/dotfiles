@@ -296,7 +296,7 @@ elseif g:solarized_termcolors != 256 && &t_Co >= 16
     let s:magenta     = "5"
     let s:violet      = "13"
     let s:blue        = "4"
-    let s:cyan        = "130" " FIXME: changed, not the same as hex-colors
+    let s:cyan        = "1" " FIXME: changed, not the same as hex-colors
     let s:green       = "2"
 elseif g:solarized_termcolors == 256
     let s:vmode       = "cterm"
@@ -314,7 +314,7 @@ elseif g:solarized_termcolors == 256
     let s:magenta     = "125"
     let s:violet      = "61"
     let s:blue        = "33"
-    let s:cyan        = "130" " FIXME: changed, not the same as hex-colors
+    let s:cyan        = "1" " FIXME: is 167 better? changed, not the same as hex-colors
     let s:green       = "64"
 else
     let s:vmode       = "cterm"
@@ -349,7 +349,7 @@ else
     let s:magenta     = "DarkMagenta"   " 5
     let s:violet      = "LightMagenta"  " 5*
     let s:blue        = "DarkBlue"      " 4
-    let s:cyan        = "DarkCyan"      " 6
+    let s:cyan        = "DarkCyan"      " 6 FIXME: did not change!
     let s:green       = "DarkGreen"     " 2
 
 endif
@@ -541,6 +541,8 @@ exe "hi! Normal"         .s:fmt_none   .s:fg_base0  .s:bg_back
 exe "hi! Comment"        .s:fmt_ital   .s:fg_base01 .s:bg_none
 "       *Comment         any comment
 
+" not constants, but LITERALS! strings could be different from
+" numeric types, bools and ASCII chars though. FIXME?
 exe "hi! Constant"       .s:fmt_none   .s:fg_cyan   .s:bg_none
 "       *Constant        any constant
 "        String          a string constant: "this is a string"
