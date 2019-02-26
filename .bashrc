@@ -7,6 +7,11 @@ fi
 # enable vi mode
 set -o vi
 
+# enable inline expansion of cmds like `!!' when hitting <space>
+# typing `![beginning_of_cmd]' expands according to matching patterns,
+# e.g. `!echo' expands to the last `echo' that was run
+bind Space:magic-space
+
 # PS1 prompt; always escape colors with \[...\]
 # also, urxvt with screen-256color is strange!
 # other icons I like: ▶, 🠊
@@ -98,3 +103,6 @@ alias bird="thunderbird &"
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
+
+# resource ~/.bashrc more easily
+alias src="source ~/.bashrc"

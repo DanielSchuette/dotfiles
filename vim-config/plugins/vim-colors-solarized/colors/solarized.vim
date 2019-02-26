@@ -90,6 +90,11 @@
 " ---------------------------------------------------------------------
 " COLOR VALUES
 " ---------------------------------------------------------------------
+" XXX
+" Note: Cyan was changed to be a salmon-like color because I CANNOT stand
+" cyan. Cyan is terrible. That's why I changed it.
+" XXX
+"
 " Download palettes and files from: http://ethanschoonover.com/solarized
 "
 " L\*a\*b values are canonical (White D65, Reference D50), other values are

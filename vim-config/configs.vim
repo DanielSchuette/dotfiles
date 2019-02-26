@@ -51,57 +51,61 @@ set wrap "set wrap lines
 set laststatus=2
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 
+" avoid garbled characters in Chinese language
+let $LANG='en'
+set langmenu=en
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+
 " Lightline Config
 " ----------------
 " The only plugin configuration that is not in the 'correct' section.
 " Lightline is responsible for the status bar, that's why it is up here.
 " This config also uses lightline ale.
-let g:lightline = {
-      \ 'colorscheme': 'wombat',
-      \ }
-
-let g:lightline.component_expand = {
-      \  'linter_checking': 'lightline#ale#checking',
-      \  'linter_warnings': 'lightline#ale#warnings',
-      \  'linter_errors': 'lightline#ale#errors',
-      \  'linter_ok': 'lightline#ale#ok',
-      \ }
-
-let g:lightline.component_type = {
-      \  'linter_checking': 'left',
-      \  'linter_warnings': 'warning',
-      \  'linter_errors': 'error',
-      \  'linter_ok': 'left',
-      \ }
-
-" previous branch symbol was , but it is sticking out
-"  can be used as right major delimiter
+" The previous branch symbol was , but it is sticking out.
+" On the right site,  can be used as the major delimiter.
 let g:lightline = {
       \ 'colorscheme': 'solarized',
       \ 'active': {
       \   'left': [ ['mode', 'paste'],
       \             ['fugitive', 'readonly', 'filename', 'modified'] ],
-      \   'right': [ [ 'lineinfo' ], ['percent'], [ 'fileformat', 'filetype' ], ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok'] ]
+      \   'right': [ ['lineinfo'],
+      \              ['percent'],
+      \              ['fileformat', 'filetype'],
+      \              ['linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok'] ]
+      \ },
+      \ 'component_expand': {
+      \   'linter_checking': 'lightline#ale#checking',
+      \   'linter_warnings': 'lightline#ale#warnings',
+      \   'linter_errors':   'lightline#ale#errors',
+      \   'linter_ok':       'lightline#ale#ok'
+      \ },
+      \ 'component_type': {
+      \   'linter_checking': 'left',
+      \   'linter_warnings': 'warning',
+      \   'linter_errors':   'error',
+      \   'linter_ok':       'left'
       \ },
       \ 'component': {
       \   'readonly': '%{&filetype=="help"?"":&readonly?"🔒":""}',
       \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-      \   'fugitive': "%{fugitive#head()!=''?'\ ⎇ \ '.fugitive#head().'\ ':''}"
+      \   'fugitive': "%{fugitive#head()!=''?'\ ⎇ \ '.fugitive#head().'\ ':''}",
       \ },
       \ 'component_visible_condition': {
       \   'readonly': '(&filetype!="help"&& &readonly)',
       \   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
       \   'fugitive': '(exists("*fugitive#head") && ""!=fugitive#head())'
       \ },
-      \ 'separator': { 'left': "", 'right': " " },
-      \ 'subseparator': { 'left': "\u25B6", 'right': "|" }
+      \ 'separator': { 'left': '', 'right': ' ' },
+      \ 'subseparator': { 'left': '\u25B6', 'right': '|' }
       \ }
 
-" avoid garbled characters in Chinese language
-let $LANG='en'
-set langmenu=en
-source $VIMRUNTIME/delmenu.vim
-source $VIMRUNTIME/menu.vim
+" If Fontawesome or another iconic font is installed, the following
+" icons can be used as linter warning and error indicators:
+let g:lightline#ale#indicator_checking = "\uf110  "
+let g:lightline#ale#indicator_warnings = "\uf071  "
+let g:lightline#ale#indicator_errors = "\uf05e  "
+let g:lightline#ale#indicator_ok = "\uf00c  "
 
 "*********************"
 "** Custom Mappings **"
@@ -339,10 +343,11 @@ let g:go_auto_sameids = 1
 
 " Ale Configs
 " -----------
-" enable highlighting
+" enable highlighting of linter findings
 let g:ale_set_highlights = 1
 
-" only run linting and fix files when saving them
+" only run linting and fix files when saving them, not
+" when text changes or a new buffer is opened
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_enter = 0
 let g:ale_fix_on_save = 1
@@ -354,11 +359,24 @@ let g:ale_completion_enabled = 1
 let g:completor_gocode_binary = '/Users/daniel/Documents/GitHub/go/src/github.com/nsf/gocode/'
 let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3'
 
-" set linter
+" set linters and fixers
+" This requires the respective linters to be installed,
+" most of them have pretty good instructions on GitHub, though.
+" Start here: https://github.com/w0rp/ale or
+" here: https://github.com/w0rp/ale/blob/master/supported-tools.md.
+" Usually, tools only need to be installed to work without
+" additional settings in this file. Some language configs are set
+" manually, anyways.
 let g:ale_linters = {
-\   'javascript': ['jshint'],
+\   'javascript': ['prettier', 'jshint'],
 \   'python': ['flake8'],
-\   'go': ['go', 'golint', 'errcheck']
+\   'go': ['go', 'golint', 'errcheck'],
+\   'vim': ['vint']
+\}
+
+let g:ale_fixers = {
+\   'javascript': ['prettier'],
+\   'python': ['flake8']
 \}
 
 nmap <silent> <leader>a <Plug>(ale_next_wrap)
@@ -374,33 +392,6 @@ let g:bufExplorerShowRelativePath=1
 let g:bufExplorerFindActive=1
 let g:bufExplorerSortBy='name'
 map <leader>o :BufExplorer<cr>
-
-" Ack Searching and Cope Displaying
-" ---------------------------------
-" requires ack.vim
-" use the the_silver_searcher if possible
-if executable('ag')
-  let g:ackprg = 'ag --vimgrep --smart-case'
-endif
-
-" ack after the selected text with gv
-vnoremap <silent> gv :call VisualSelection('gv', '')<CR>
-
-" open Ack and put the cursor in the right position
-map <leader>g :Ack
-
-" <leader>r searches and replaces the selected text
-vnoremap <silent> <leader>r :call VisualSelection('replace', '')<CR>
-
-" `:help' cope for some general instructions
-"
-" When searching with Ack, display results in cope by doing
-" <leader>cc, to go to the next search result do <leader>n.
-" To go to the previous search results do <leader>p.
-map <leader>cc :botright cope<cr>
-map <leader>co ggVGy:tabnew<cr>:set syntax=qf<cr>pgg
-map <leader>n :cn<cr>
-map <leader>p :cp<cr>
 
 "*****************"
 "** Parentheses **"
