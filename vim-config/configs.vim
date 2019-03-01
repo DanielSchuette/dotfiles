@@ -141,9 +141,23 @@ nnoremap <leader>b :ls<CR>:buffer<Space>
 " this is useful if the current file was changed somewhere else
 nnoremap <leader>u :edit<CR>
 
-" toggle indentation guides (set by default)
-set list listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×
-nnoremap <leader>t :set list listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×<CR>
+" toggle indentation guides (set by default) with <leader>t
+set list
+set listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×
+
+function! ToggleListchars()
+    if &listchars ==# ''
+        echo 'toggle listchars to set'
+        set list
+        set listchars=tab:❘-,trail:·,extends:»,precedes:«,nbsp:×
+    else
+        echo 'toggle listchars to not set'
+        set nolist
+        set listchars=
+    endif
+endfunction
+
+nnoremap <leader>t :<C-U>call ToggleListchars()<CR>
 
 " remap space and return to do what one expects
 nnoremap <Space> i<Space><Right><ESC>
