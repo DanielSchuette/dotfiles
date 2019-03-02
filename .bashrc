@@ -4,8 +4,9 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
-# enable vi mode
+# enable vi mode and set EDITOR to vim
 set -o vi
+export EDITOR="vimx"
 
 # enable inline expansion of cmds like `!!' when hitting <space>
 # typing `![beginning_of_cmd]' expands according to matching patterns,
@@ -15,9 +16,9 @@ bind Space:magic-space
 # PS1 prompt; always escape colors with \[...\]
 # also, urxvt with screen-256color is strange!
 # other icons I like: ▶, 🠊
-if [ $TERM == "screen-256color" ]; then
+if [ "$TERM" == "screen-256color" ]; then
     export PS1=' $ '
-elif [ $TERM == "rxvt-unicode-256color" ]; then
+elif [ "$TERM" == "rxvt-unicode-256color" ]; then
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
 else
     # gnome terminal works well with icons that urxvt cannot handle
@@ -60,7 +61,8 @@ export GO111MODULE
 alias oldgoget="GO111MODULE=off go get"
 
 # set environment variables for rust
-export RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
+RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
+export RUST_SRC_PATH
 
 # create some vim aliases to always use vim-x11
 alias v="vimx"
@@ -92,7 +94,7 @@ alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger
-RANGER_LOAD_DEFAULT_RC=FALSE
+export RANGER_LOAD_DEFAULT_RC=FALSE
 
 # useful when configuring .Xresources
 alias xup="xrdb ~/dotfiles/.Xresources"
@@ -105,4 +107,4 @@ alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
 
 # resource ~/.bashrc more easily
-alias src="source ~/.bashrc"
+alias src="source ~/.bashrc && echo 'sourced .bashrc'"

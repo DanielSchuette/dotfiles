@@ -397,7 +397,7 @@ let g:ale_linters = {
 
 let g:ale_fixers = {
 \   'javascript': ['prettier'],
-\   'python': ['flake8']
+\   'python': ['isort', 'autopep8']
 \}
 
 nmap <silent> <leader>a <Plug>(ale_next_wrap)
