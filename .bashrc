@@ -1,4 +1,7 @@
-# .bashrc
+# This file is sourced by `~/.bashrc'.
+#-------------------#
+#- General Configs -#
+#-------------------#
 # Source global definitions
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
@@ -13,9 +16,12 @@ export EDITOR="vimx"
 # e.g. `!echo' expands to the last `echo' that was run
 bind Space:magic-space
 
-# PS1 prompt; always escape colors with \[...\]
+#------------------#
+#- PS1/PS2 Config -#
+#------------------#
+# PS1 prompt
+# always escape colors with \[...\]
 # also, urxvt with screen-256color is strange!
-# other icons I like: ▶, 🠊
 if [ "$TERM" == "screen-256color" ]; then
     export PS1=' $ '
 elif [ "$TERM" == "rxvt-unicode-256color" ]; then
@@ -25,13 +31,18 @@ else
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
 fi
 
-# extra settings for git
+# PS2 prompt
+export PS2='\[\e[91m\]      >>\[\033[0m\] '
+
+# extra settings for git-part of prompt
 source /usr/share/git-core/contrib/completion/git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWUNTRACKEDFILES=true
 
-# User specific environment
+#-----------------------#
+#- Path and Env Config -#
+#-----------------------#
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 export PATH
 
@@ -39,7 +50,6 @@ export PATH
 # systemctl's auto-paging feature:
 #export SYSTEMD_PAGER=
 
-# User specific aliases and functions
 # set environment variables for go
 GOBIN="$HOME/code/go_src/bin"
 export GOBIN
@@ -60,51 +70,51 @@ export GO111MODULE
 # dependencies of a go module
 alias oldgoget="GO111MODULE=off go get"
 
+# prevent ranger from loading rc.conf from
+# /usr/share/doc/config/ and ~/.config/ranger
+export RANGER_LOAD_DEFAULT_RC=FALSE
+
 # set environment variables for rust
 RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 export RUST_SRC_PATH
 
-# create some vim aliases to always use vim-x11
+# configure fzf layout
+export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
+
+#-----------#
+#- Aliases -#
+#-----------#
+# source ~/.bashrc more easily when changing this file
+alias src="source ~/.bashrc && echo 'sourced .bashrc'"
+
+# useful when configuring .Xresources
+alias xup="xrdb ~/dotfiles/.Xresources"
+
+# always use vim-x11 for system clipboard access
 alias v="vimx"
 alias vi="vimx"
 alias vim="vimx"
 
-# create an alias for ranger
+# create for file browsing and viewing
 alias r="ranger"
-
-# create an alias for mupdf
 alias m="mupdf"
-
-# create an alias for clear
 alias c="clear"
+alias bird="thunderbird &"
 
-# create aliases for faster navigation
+# useful for faster navigation
 alias h="cd ~"
 alias co="cd ~/code"
 alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
 
-# a few rust utilities
-alias l="exa -lah"
+# remap some GNU utils to rust utilities
 alias ls="exa"
+alias l="exa -lah"
 alias t="tokei"
 
 # run MonoDevelop more easily
 alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 
-# prevent ranger from loading rc.conf from
-# /usr/share/doc/config/ and ~/.config/ranger
-export RANGER_LOAD_DEFAULT_RC=FALSE
-
-# useful when configuring .Xresources
-alias xup="xrdb ~/dotfiles/.Xresources"
-
-# open thunderbird more easily
-alias bird="thunderbird &"
-
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
-
-# resource ~/.bashrc more easily
-alias src="source ~/.bashrc && echo 'sourced .bashrc'"
