@@ -272,8 +272,24 @@ let g:user_emmet_leader_key='<C-D>'
 " YCM Configs
 " -----------
 " set path to extra configs (including compiler flags)
-"let g:ycm_filetype_specific_completion_to_disable = { 'html': 1 }
 let g:ycm_global_ycm_extra_conf = '~/dotfiles/.ycm_extra_conf.py'
+
+" Toggle diagnostics for c files (disabled by default), this only
+" works if the server is restarted every time the variable is changed.
+" Restarting the server is actually very fragile and fails often.
+" In large C projects (glibc, linux kernel, some others), it is
+" probably best to not use YCM at all.
+function! ToggleYCMDiagnostics()
+    if g:ycm_show_diagnostics_ui ==# 1
+        let g:ycm_show_diagnostics_ui = 0
+    else
+        let g:ycm_show_diagnostics_ui = 1
+    endif
+endfunction
+
+let g:ycm_max_diagnostics_to_display = 250
+let g:ycm_show_diagnostics_ui = 0
+nnoremap <leader>yy :<C-U>call ToggleYCMDiagnostics()<CR>:<C-U>YcmRestartServer<CR>
 
 " MRU Configs
 " -----------
@@ -531,7 +547,6 @@ augroup END
 augroup javascript_lang
     autocmd!
 
-    autocmd FileType javascript call JavaScriptFold()
     autocmd FileType javascript setl fen
     autocmd FileType javascript setl nocindent
     autocmd FileType javascript imap <c-t> $log();<esc>hi
