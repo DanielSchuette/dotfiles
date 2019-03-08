@@ -79,7 +79,7 @@ RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
 export RUST_SRC_PATH
 
 # configure fzf layout
-export FZF_DEFAULT_OPTS='--layout=reverse --height 40%'
+export FZF_DEFAULT_OPTS='--layout=reverse --height 80%'
 
 #-----------#
 #- Aliases -#

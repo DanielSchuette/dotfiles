@@ -1,4 +1,11 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =2
+let g:netrw_dirhist_cnt =9
 let g:netrw_dirhist_1='/home/daniel/code/python_src/projecteuler/rust_src/src/tests'
 let g:netrw_dirhist_2='/home/daniel/bin'
+let g:netrw_dirhist_3='/home/daniel/bin/.git'
+let g:netrw_dirhist_4='/home/daniel/bin'
+let g:netrw_dirhist_5='/home/daniel'
+let g:netrw_dirhist_6='/home/daniel/code'
+let g:netrw_dirhist_7='/home/daniel/bin'
+let g:netrw_dirhist_8='/home/daniel/code/python_src/projecteuler/rust_src/src/tests'
+let g:netrw_dirhist_9='/home/daniel/code/go_src/src/github.com/DanielSchuette/goeulerproject/templates'

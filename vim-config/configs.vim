@@ -1,24 +1,23 @@
 "*********************"
 "** General Configs **"
 "*********************"
-" set line numbers, line wrapping, etc.
+set encoding=utf-8
+scriptencoding " isn't usually required with utf-8
 filetype plugin on
 filetype indent on
 syntax on
 syntax enable
 set number
 set relativenumber
-set nocompatible
-set encoding=utf-8
-set ffs=unix,dos,mac " make unix the standard file system
+set fileformats=unix,dos,mac " make unix the standard file system
 set textwidth=0 wrapmargin=0 " disable physical line wrapping
 set autoread " check if file was changed outside of vim before saving
-set so=5 " screen scrolls 5 lines before top/bottom
+set scrolloff=5 " screen scrolls 5 lines before top/bottom
 set history=500
 set wildmenu " enable command line completions
 set ruler " show current position
 set cmdheight=2 " command bar height
-set hid " hide buffers once abandoned
+set hidden " hide buffers once abandoned
 set backspace=eol,start,indent " configure backspace, p1
 set whichwrap+=<,>,h,l " configure backspace, p2
 set ignorecase " generally ignore cases in search
@@ -28,27 +27,25 @@ set incsearch " modern browser-like search
 set lazyredraw " don't redraw buffer when executing macros
 set magic " for regular expressions
 set showmatch " show matching brackets when cursor is over them
-set mat=2 " tenth of a second to blink matching brackets
+set matchtime=2 " tenth of a second to blink matching brackets
 set noerrorbells " turn error sound off, p1
 set novisualbell " turn error sound off, p2
 set t_vb= " turn error sound off, p3
-set tm=500 " turn error sound off, p4
+set timeoutlen=500 " turn error sound off, p4
 set foldcolumn=0 " extra margin to the left if >0
 set nobackup " turn backups off, p1
-set nowb " turn backups off, p2
+set nowritebackup " turn backups off, p2
 set noswapfile " turn backups off, p3
 set expandtab " spaces instead of tabs
-set smarttab " smart tabs
+set smarttab
 set shiftwidth=4 " one tab is 4 spaces
 set tabstop=4
-set lbr " set line break
-set tw=500 " line break on 500 chars
-set ai " set auto indent
-set si " set smart indent
-set wrap "set wrap lines
-
-" always should status line and edit the status line format
-set laststatus=2
+set linebreak
+set textwidth=500 " line break on 500 chars
+set autoindent
+set smartindent
+set wrap " wrap lines
+set laststatus=2 " always show status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 
 " avoid garbled characters in Chinese language
@@ -114,7 +111,7 @@ let g:lightline#ale#indicator_errors = "\uf05e  "
 map 0 ^
 
 " leader is set to ,
-let mapleader = ","
+let mapleader = ','
 
 " remap <ESC> to <leader>n for fast return to normal mode
 inoremap <leader>n <ESC>
@@ -210,11 +207,6 @@ map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove
 map <leader>t<leader> :tabnext
 
-" let 'tl' toggle between this and the last accessed tab
-let g:lasttab = 1
-nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
-au TabLeave * let g:lasttab = tabpagenr()
-
 " opens a new tab with the current buffer's path
 " useful when editing files in the same directory
 map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
@@ -222,48 +214,46 @@ map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 " switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
-" ppecify the behavior when switching between buffers
+" specify the behavior when switching between buffers
 try
   set switchbuf=useopen,usetab,newtab
-  set stal=2
+  set showtabline=2
 catch
 endtry
-
-" return to last edit position when opening files
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 "******************"
 "** Autocommands **"
 "******************"
-" fast compilation of rust, js and c src files
-" could be expanded to quickly compile other languages, too
-autocmd FileType rust nnoremap <leader>c :!cargo run<CR>
-autocmd FileType c nnoremap <leader>c :!gcc % -o prog && ./prog<CR>
-autocmd FileType js nnoremap <leader>c :!node %<CR>
+augroup on_open
+    " clear out previous autocmds in this group (should always be done)
+    autocmd!
+    " return to last edit position when opening files
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup END
+
+augroup fast_compilation
+    autocmd!
+
+    " fast compilation of rust, js and c src files
+    " could be expanded to quickly compile other languages, too
+    autocmd FileType rust nnoremap <leader>c :!cargo run<CR>
+    autocmd FileType c nnoremap <leader>c :!gcc % -o prog && ./prog<CR>
+    autocmd FileType js nnoremap <leader>c :!node %<CR>
+augroup END
 
 " On save:
-" Run rustfmt on all rust files in current dir
-" if file extension of current buffer == '.rs'.
-" Run rustfmt with <leader>rf instead if error
-" messages are wanted.
-autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt *.rs &> /dev/null'
+" Run rustfmt on all rust files in current dir if file
+" extension of current buffer == '.rs'. Run rustfmt with
+" <leader>rf instead if error messages are wanted.
+" Also, delete all trailing whitespace on save.
 nnoremap <leader>rf :!rustfmt *.rs<CR>
 
-" delete all trailing whitespace on save
-autocmd BufWritePre * %s/\s\+$//e
+augroup on_save
+    autocmd!
 
-" delete trailing white space on save, another way to do it
-fun! CleanExtraSpaces()
-    let save_cursor = getpos(".")
-    let old_query = getreg('/')
-    silent! %s/\s\+$//e
-    call setpos('.', save_cursor)
-    call setreg('/', old_query)
-endfun
-
-if has("autocmd")
-    autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee :call CleanExtraSpaces()
-endif
+    autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt *.rs &> /dev/null'
+    autocmd BufWritePre * %s/\s\+$//e
+augroup END
 
 "********************"
 "** Plugin Configs **"
@@ -297,7 +287,7 @@ map <leader>m :MRU<CR>
 set hidden
 
 " only require if not in path (only as a fallback)
-let g:racer_cmd = "/home/daniel/.cargo/bin/racer"
+let g:racer_cmd = '/home/daniel/.cargo/bin/racer'
 
 " experimental completer for full function definitions
 let g:racer_experimental_completer = 1
@@ -305,10 +295,14 @@ let g:racer_experimental_completer = 1
 " plugin mappings for seeing definitions and docs
 " ALWAYS use <leader> with `r' mappings to be able
 " to use regular replace with `r' i normal mode
-au FileType rust nmap gd <Plug>(rust-def)
-au FileType rust nmap gs <Plug>(rust-def-split)
-au FileType rust nmap gx <Plug>(rust-def-vertical)
-au FileType rust nmap <leader>rd <Plug>(rust-doc)
+augroup rust_lang
+    autocmd!
+
+    autocmd FileType rust nmap gd <Plug>(rust-def)
+    autocmd FileType rust nmap gs <Plug>(rust-def-split)
+    autocmd FileType rust nmap gx <Plug>(rust-def-vertical)
+    autocmd FileType rust nmap <leader>rd <Plug>(rust-doc)
+augroup END
 
 " Git Gutter Configs
 " ------------------
@@ -319,10 +313,10 @@ nnoremap <silent> <leader>d :GitGutterToggle<cr>
 " Vim Go Configs
 " --------------
 " set `goimports' to be used to format src files
-let g:go_fmt_command = "goimports"
+let g:go_fmt_command = 'goimports'
 
 " add golang linter path to runtime path
-set rtp+=$GOPATH/src/github.com/golang/lint/misc/vim
+set runtimepath+=$GOPATH/src/github.com/golang/lint/misc/vim
 
 " disable location lists for go-vim
 "let g:go_list_type = "quickfix"
@@ -337,11 +331,15 @@ function! s:build_go_files()
   endif
 endfunction
 
-" build go files automatically
-autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+augroup go_lang
+    autocmd!
 
-" toggle test coverage profile with <leader>c
-autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+    " build go files automatically with <leader>b, toggle test coverage
+    " profile with <leader>c and call go-info with <leader>i
+    autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+    autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+    autocmd FileType go nmap <Leader>i <Plug>(go-info)
+augroup END
 
 " some optional go syntax highlighting
 "let g:go_highlight_function_calls = 1
@@ -353,12 +351,9 @@ let g:go_highlight_extra_types = 1
 let g:go_highlight_build_constraints = 1
 let g:go_highlight_generate_tags = 1
 
-" call go info with <leader>i
-autocmd FileType go nmap <Leader>i <Plug>(go-info)
-
-" automatically display go info with an update time of 100ms
+" automatically display go info
 let g:go_auto_type_info = 1
-set updatetime=100
+set updatetime=500
 
 " automatically highlight matching identifiers
 let g:go_auto_sameids = 1
@@ -367,6 +362,13 @@ let g:go_auto_sameids = 1
 " -----------
 " enable highlighting of linter findings
 let g:ale_set_highlights = 1
+
+" change the error and warning signs ale uses
+let g:ale_sign_warning = '**'
+let g:ale_sign_error = '??'
+
+" re-format the error messages
+let g:ale_echo_msg_format = '[%linter%] %s'
 
 " Only run linting and fix files when saving them, not
 " when text changes. Every buffer is checked when opened,
@@ -389,22 +391,39 @@ let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3
 " additional settings in this file. Some language configs are set
 " manually, anyways.
 let g:ale_linters = {
-\   'javascript': ['prettier', 'jshint'],
+\   'javascript': ['prettier', 'eslint', 'jshint'],
 \   'python': ['flake8'],
 \   'go': ['go', 'golint', 'errcheck'],
 \   'vim': ['vint']
 \}
 
 let g:ale_fixers = {
-\   'javascript': ['prettier'],
+\   'json': ['prettier'],
 \   'python': ['isort', 'autopep8']
 \}
 
+" Using `prettier' as a fixer can be annoying, e.g. when writing jsx. If
+" that is the case, just toggle running fixers on save with <leader>j.
+function! ToggleAleFixers()
+    if g:ale_fix_on_save ==# '1'
+        let g:ale_fix_on_save = 0
+    else
+        let g:ale_fix_on_save = 1
+    endif
+endfunction
+
+nnoremap <leader>j :<C-U>call ToggleAleFixers()<CR>
+
+" go to the next ale warning/error with <leader>a
 nmap <silent> <leader>a <Plug>(ale_next_wrap)
 
 " Omni Complete Config
 " --------------------
-autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+augroup css_lang
+    autocmd!
+
+    autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+augroup END
 
 " BufExplorer Config
 " ------------------
@@ -442,7 +461,7 @@ inoremap $e ""<esc>i
 " Disable Background Color Erase (BCE) so that color schemes
 " render properly when inside 256-color tmux and GNU screen.
 " See also http://sunaku.github.io/vim-256color-bce.html.
-if &term =~ '256color'
+if &term =~? '256color'
     set t_ut=
 endif
 
@@ -457,7 +476,7 @@ endif
 
 " enable 256 colors palette in Gnome Terminal
 let g:solarized_termcolors=256
-if $COLORTERM == 'gnome-terminal'
+if $COLORTERM ==? 'gnome-terminal'
     set t_Co=256
 endif
 
@@ -472,45 +491,54 @@ highlight clear LineNr
 highlight clear SignColumn
 hi Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
 
+" toggle a color column to visualize a line width of 80 chars with <leader>cc
+function! ToggleColorColumn()
+    if &colorcolumn ==# 80
+        set colorcolumn=
+    else
+        set colorcolumn=80
+        highlight ColorColumn ctermbg=0
+    endif
+endfunction
+
+nnoremap <leader>cc :<C-U>call ToggleColorColumn()<CR>
+
 "********************************"
 "** File Type Specific Configs **"
 "********************************"
 " Python
 let python_highlight_all = 1
-au FileType python syn keyword pythonDecorator True None False self
-au BufNewFile,BufRead *.jinja set syntax=htmljinja
-au FileType python map <buffer> F :set foldmethod=indent<cr>
-au FileType python inoremap <buffer> $r return
-au FileType python inoremap <buffer> $i import
-au FileType python inoremap <buffer> $p print
-au FileType python inoremap <buffer> $f # --- <esc>a
-au FileType python map <buffer> <leader>1 /class
-au FileType python map <buffer> <leader>2 /def
-au FileType python map <buffer> <leader>C ?class
-au FileType python map <buffer> <leader>D ?def
-au FileType python set cindent
-au FileType python set cinkeys-=0#
-au FileType python set indentkeys-=0#
+augroup python_lang
+    autocmd!
+
+    autocmd FileType python syn keyword pythonDecorator True None False self
+    autocmd BufNewFile,BufRead *.jinja set syntax=htmljinja
+    autocmd FileType python map <buffer> F :set foldmethod=indent<cr>
+    autocmd FileType python inoremap <buffer> $r return
+    autocmd FileType python inoremap <buffer> $i import
+    autocmd FileType python inoremap <buffer> $p print
+    autocmd FileType python inoremap <buffer> $f # --- <esc>a
+    autocmd FileType python map <buffer> <leader>1 /class
+    autocmd FileType python map <buffer> <leader>2 /def
+    autocmd FileType python map <buffer> <leader>C ?class
+    autocmd FileType python map <buffer> <leader>D ?def
+    autocmd FileType python set cindent
+    autocmd FileType python set cinkeys-=0#
+    autocmd FileType python set indentkeys-=0#
+augroup END
 
 " JavaScript
-au FileType javascript call JavaScriptFold()
-au FileType javascript setl fen
-au FileType javascript setl nocindent
-au FileType javascript imap <c-t> $log();<esc>hi
-au FileType javascript imap <c-a> alert();<esc>hi
-au FileType javascript inoremap <buffer> $r return
-au FileType javascript inoremap <buffer> $f // --- PH<esc>FP2xi
+augroup javascript_lang
+    autocmd!
 
-function! JavaScriptFold()
-    setl foldmethod=syntax
-    setl foldlevelstart=1
-    syn region foldBraces start=/{/ end=/}/ transparent fold keepend extend
-
-    function! FoldText()
-        return substitute(getline(v:foldstart), '{.*', '{...}', '')
-    endfunction
-    setl foldtext=FoldText()
-endfunction
+    autocmd FileType javascript call JavaScriptFold()
+    autocmd FileType javascript setl fen
+    autocmd FileType javascript setl nocindent
+    autocmd FileType javascript imap <c-t> $log();<esc>hi
+    autocmd FileType javascript imap <c-a> alert();<esc>hi
+    autocmd FileType javascript inoremap <buffer> $r return
+    autocmd FileType javascript inoremap <buffer> $f // --- PH<esc>FP2xi
+augroup END
 
 "**********************"
 "** Helper Functions **"
@@ -523,11 +551,11 @@ function! HasPaste()
     return ''
 endfunction
 
-" Don't close window, when deleting a buffer
+" Don't close window when deleting a buffer
 command! Bclose call <SID>BufcloseCloseIt()
 function! <SID>BufcloseCloseIt()
-    let l:currentBufNum = bufnr("%")
-    let l:alternateBufNum = bufnr("#")
+    let l:currentBufNum = bufnr('%')
+    let l:alternateBufNum = bufnr('#')
 
     if buflisted(l:alternateBufNum)
         buffer #
@@ -535,30 +563,30 @@ function! <SID>BufcloseCloseIt()
         bnext
     endif
 
-    if bufnr("%") == l:currentBufNum
+    if bufnr('%') == l:currentBufNum
         new
     endif
 
     if buflisted(l:currentBufNum)
-        execute("bdelete! ".l:currentBufNum)
+        execute('bdelete! '.l:currentBufNum)
     endif
 endfunction
 
 function! CmdLine(str)
-    call feedkeys(":" . a:str)
+    call feedkeys(':' . a:str)
 endfunction
 
 function! VisualSelection(direction, extra_filter) range
     let l:saved_reg = @"
-    execute "normal! vgvy"
+    execute 'normal! vgvy'
 
     let l:pattern = escape(@", "\\/.*'$^~[]")
-    let l:pattern = substitute(l:pattern, "\n$", "", "")
+    let l:pattern = substitute(l:pattern, "\n$", '', '')
 
-    if a:direction == 'gv'
+    if a:direction ==? 'gv'
         call CmdLine("Ack '" . l:pattern . "' " )
-    elseif a:direction == 'replace'
-        call CmdLine("%s" . '/'. l:pattern . '/')
+    elseif a:direction ==? 'replace'
+        call CmdLine('%s' . '/'. l:pattern . '/')
     endif
 
     let @/ = l:pattern
@@ -566,5 +594,5 @@ function! VisualSelection(direction, extra_filter) range
 endfunction
 
 func! CurrentFileDir(cmd)
-    return a:cmd . " " . expand("%:p:h") . "/"
+    return a:cmd . ' ' . expand('%:p:h') . '/'
 endfunc
