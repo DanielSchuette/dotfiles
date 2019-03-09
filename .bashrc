@@ -28,7 +28,7 @@ elif [ "$TERM" == "rxvt-unicode-256color" ]; then
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
 else
     # gnome terminal works well with icons that urxvt cannot handle
-    export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] 🠞 '
+    export PS1='\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 "(%s)") 🠞 \[\033[0m\]'
 fi
 
 # PS2 prompt
@@ -102,14 +102,22 @@ alias c="clear"
 alias bird="thunderbird &"
 
 # useful for faster navigation
+alias p="pwd"
 alias h="cd ~"
 alias co="cd ~/code"
+alias py="cd ~/code/python_src"
+alias go="cd ~/code/go_src"
+alias rs="cd ~/code/rust_src"
 alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
+alias dot="cd ~/dotfiles"
+alias bashrc="v ~/dotfiles/.bashrc"
+alias vimrc="v ~/dotfiles/vim-config/configs.vim"
+alias tmux_conf="v ~/dotfiles/.tmux.conf"
 
 # remap some GNU utils to rust utilities
-alias ls="exa"
-alias l="exa -lah"
+alias ls="exa --git"
+alias l="exa -lahF --git"
 alias t="tokei"
 
 # run MonoDevelop more easily
