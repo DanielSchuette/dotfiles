@@ -96,9 +96,9 @@ alias vi="vimx"
 alias vim="vimx"
 
 # create for file browsing and viewing
-alias r="ranger"
-alias m="mupdf"
 alias c="clear"
+alias f="ranger"
+alias m="mupdf"
 alias bird="thunderbird &"
 
 # useful for faster navigation
@@ -119,6 +119,9 @@ alias tmux_conf="v ~/dotfiles/.tmux.conf"
 alias ls="exa --git"
 alias l="exa -lahF --git"
 alias t="tokei"
+
+# access music player more easily
+alias n="ncmpcpp --screen=media_library"
 
 # run MonoDevelop more easily
 alias monodevelop="flatpak run com.xamarin.MonoDevelop"
