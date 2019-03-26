@@ -177,6 +177,9 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " disable highlight when <leader># is pressed
 map <leader># :noh<cr>
 
+" <leader>r executes a `run.sh' script (useful for complex builds)
+nnoremap <leader>r :!chmod +x run.sh && ./run.sh<CR>
+
 "**********************"
 "** Buffers and Tabs **"
 "**********************"

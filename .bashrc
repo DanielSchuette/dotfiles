@@ -45,6 +45,10 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 #-----------------------#
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 export PATH
+PATH="/opt/mssql/bin:$PATH"
+export PATH
+PATH="/opt/mssql-tools/bin:$PATH"
+export PATH
 
 # Uncomment the following line if you don't like
 # systemctl's auto-paging feature:
@@ -106,7 +110,7 @@ alias p="pwd"
 alias h="cd ~"
 alias co="cd ~/code"
 alias py="cd ~/code/python_src"
-alias go="cd ~/code/go_src"
+alias go_src="cd ~/code/go_src"
 alias rs="cd ~/code/rust_src"
 alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
@@ -129,3 +133,23 @@ alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM=xterm # looks like rider requires this
+
+# Suppress annoying GTK warnings that mess up gnome-term.
+# Solution adapted from: http://askubuntu.com/questions/505594.
+# The following generates a function named $1 which:
+# - executes $(which $1) [with args]
+# - suppresses output lines which match $2
+# e.g. adding: _suppress echo "hello\|world"
+# will generate this function:
+# echo() { $(which echo) "$@" 2>&1 | tr -d '\r' | grep -v "hello\|world"; }
+# and from now on, using echo will work normally except that lines with
+# hello or world will not show at the output
+# to see the generated functions, replace eval with echo below
+# the 'tr' filter makes sure no spurious empty lines pass from some commands
+_suppress() {
+  eval "$1() { \$(which $1) \"\$@\" 2>&1 | tr -d '\r' | grep -v \"$2\"; }"
+}
+
+_suppress gedit          "Gtk-WARNING\|connect to accessibility bus"
+_suppress firefox        "Gtk-WARNING\|g_slice_set_config\|Gtk\|WARNING\|Warning"
+#_suppress fox            "Gtk-WARNING\|g_slice_set_config"
