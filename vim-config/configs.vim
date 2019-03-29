@@ -249,12 +249,12 @@ augroup END
 " extension of current buffer == '.rs'. Run rustfmt with
 " <leader>rf instead if error messages are wanted.
 " Also, delete all trailing whitespace on save.
-nnoremap <leader>rf :!rustfmt *.rs<CR>
+nnoremap <leader>rf :!rustfmt % *.rs<CR>
 
 augroup on_save
     autocmd!
 
-    autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt *.rs &> /dev/null'
+    autocmd BufNewFile,BufWritePost *.rs silent execute '!rustfmt % *.rs &> /dev/null'
     autocmd BufWritePre * %s/\s\+$//e
 augroup END
 
