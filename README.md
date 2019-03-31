@@ -30,8 +30,8 @@ There are three to things to consider:
 2. Some plugins  need to be compiled and have dependencies that need to be installed (especially `YouCompleteMe`, it's possible that all other plugins actually work). See below for further installation instructions. If something does not work, delete the plugin dir and re-install the plugin from scratch, following the installation instructions in the respective GitHub repository.
 3. Linting with `ale` requires the respective linters to be installed. Some documentation is provided in the `ale` section in `configs.vim`.
 
-### Custom Syntax files
-To add custom syntax files, create `~/.vim/syntax/` and `~/.vim/ftdetect/`. Syntax files go into the first directory, an entry in the second directory ensure that the filetype is detected correctly:
+### Additional syntax files
+To add additional syntax files, create `~/.vim/syntax/` and `~/.vim/ftdetect/` if these directories don't exist. Syntax files go into the first directory, a one-line file in the second directory ensures that the filetype is detected correctly. An `Oberon` example:
 
 ```bash
 cp ~/dotfiles/vim_config/syntax/oberon.vim ~/.vim/syntax/oberon.vim
