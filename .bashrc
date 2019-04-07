@@ -101,6 +101,7 @@ alias vim="vimx"
 
 # create for file browsing and viewing
 alias c="clear"
+alias ex="exit" # shadows vim's `ex'
 alias f="ranger"
 alias m="mupdf"
 alias bird="thunderbird &"
