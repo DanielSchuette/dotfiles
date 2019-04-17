@@ -133,7 +133,7 @@ alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
-export TERM=xterm # looks like rider requires this
+export TERM=xterm-256color
 
 # Suppress annoying GTK warnings that mess up gnome-term.
 # Solution adapted from: http://askubuntu.com/questions/505594.

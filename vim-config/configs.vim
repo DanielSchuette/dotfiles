@@ -224,12 +224,17 @@ try
 catch
 endtry
 
+" use tab to switch between buffers that are open in
+" the same window (much more intuitive than ctrl-ww
+nnoremap <TAB> <c-w>w
+
 "******************"
 "** Autocommands **"
 "******************"
 augroup on_open
     " clear out previous autocmds in this group (should always be done)
     autocmd!
+
     " return to last edit position when opening files
     autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 augroup END
@@ -261,10 +266,27 @@ augroup END
 "********************"
 "** Plugin Configs **"
 "********************"
+" Ctags
+" Vim supports ctags natively, but some of the keybindings are
+" awkward by default. They are redefined here. Tagbar must be
+" installed separately.
+nnoremap <leader>ct <C-]>
+nnoremap <leader>cT <C-t>
+nnoremap <leader>tb :TagbarToggle<CR>
+
 " Vim-Markdown Configs
 " --------------------
 " disable automatic folding
 let g:vim_markdown_folding_disabled = 1
+
+" Vim-Clang-Format Configs
+" ------------------------
+augroup clang_format
+    autocmd!
+
+    autocmd FileType c,cpp,objc nnoremap <buffer><Leader>cf :<C-u>ClangFormat<CR>
+    autocmd FileType c,cpp,objc vnoremap <buffer><Leader>cf :ClangFormat<CR>
+augroup END
 
 " Emmet Configs
 " -------------
