@@ -106,7 +106,7 @@ alias f="ranger"
 alias m="mupdf"
 alias bird="thunderbird &"
 
-# useful for faster navigation
+# useful for faster navigation and file manipulation
 alias p="pwd"
 alias h="cd ~"
 alias co="cd ~/code"
@@ -124,6 +124,7 @@ alias tmux_conf="v ~/dotfiles/.tmux.conf"
 alias ls="exa --git"
 alias l="exa -lahF --git"
 alias t="tokei"
+alias b="bat"
 
 # access music player more easily
 alias n="ncmpcpp --screen=media_library"
