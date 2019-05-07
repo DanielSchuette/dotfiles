@@ -1,0 +1,14 @@
+:VinfoC	vinfo.txt	/*:VinfoC*
+:VinfoClean	vinfo.txt	/*:VinfoClean*
+:VinfoN	vinfo.txt	/*:VinfoN*
+:VinfoNext	vinfo.txt	/*:VinfoNext*
+:VinfoP	vinfo.txt	/*:VinfoP*
+:VinfoPrevious	vinfo.txt	/*:VinfoPrevious*
+Vinfo	vinfo.txt	/*Vinfo*
+vinfo	vinfo.txt	/*vinfo*
+vinfo-contents	vinfo.txt	/*vinfo-contents*
+vinfo-credits	vinfo.txt	/*vinfo-credits*
+vinfo-intro	vinfo.txt	/*vinfo-intro*
+vinfo-repository	vinfo.txt	/*vinfo-repository*
+vinfo-usage	vinfo.txt	/*vinfo-usage*
+vinfo.txt	vinfo.txt	/*vinfo.txt*
