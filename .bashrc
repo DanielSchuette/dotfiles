@@ -115,7 +115,7 @@ alias go_src="cd ~/code/go_src"
 alias rs="cd ~/code/rust_src"
 alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
-alias dotfile="cd ~/dotfiles" # `dot' shadows graphviz
+alias dotfiles="cd ~/dotfiles" # `dot' shadows graphviz
 alias bashrc="v ~/dotfiles/.bashrc"
 alias vimrc="v ~/dotfiles/vim-config/configs.vim"
 alias tmux_conf="v ~/dotfiles/.tmux.conf"
@@ -125,6 +125,9 @@ alias ls="exa --git"
 alias l="exa -lahF --git"
 alias t="tokei"
 alias b="bat"
+
+# copy to system clipboard by default
+alias xclip="xclip -selection clipboard"
 
 # access music player more easily
 alias n="ncmpcpp --screen=media_library"
