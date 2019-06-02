@@ -1,8 +1,10 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_cnt =8
 let g:netrw_dirhist_1='/home/daniel/code/rand/libc/musl/src'
 let g:netrw_dirhist_2='/home/daniel/code/rand/libc/musl/src/internal'
 let g:netrw_dirhist_3='/home/daniel/code/python_src/projecteuler/rust_src/src/tests'
 let g:netrw_dirhist_4='/home/daniel/Downloads/openslide-3.4.1'
 let g:netrw_dirhist_5='/usr/share/info'
 let g:netrw_dirhist_6='/home/daniel/code/python_src/PID_pendulum/PID_pendulum'
+let g:netrw_dirhist_7='/tmp/mozilla_daniel0'
+let g:netrw_dirhist_8='/home/daniel/code/python_src/curseradio_improved/curseradio_improved'
