@@ -423,8 +423,8 @@ let g:ale_fix_on_save = 1
 let g:ale_completion_enabled = 1
 
 " enable auto-completion using github.com/maralla/completor.vim
-let g:completor_gocode_binary = '/Users/daniel/Documents/GitHub/go/src/github.com/nsf/gocode/'
-let g:completor_python_binary = '/Library/Frameworks/Python.framework/Versions/3.7/bin/python3'
+let g:completor_gocode_binary = '/home/daniel/code/go_src/src/github.com/nsf/gocode/'
+let g:completor_python_binary = '/usr/bin/python3'
 
 " set linters and fixers
 " This requires the respective linters to be installed,
@@ -559,6 +559,8 @@ function! ToggleColorColumn()
     else
         set colorcolumn=80
         highlight ColorColumn ctermbg=0
+        highlight OverLength ctermfg=white
+        match OverLength /\%81v.\+/
     endif
 endfunction
 
