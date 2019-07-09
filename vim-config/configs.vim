@@ -99,10 +99,10 @@ let g:lightline = {
 
 " If Fontawesome or another iconic font is installed, the following
 " icons can be used as linter warning and error indicators:
-"let g:lightline#ale#indicator_checking = "\uf110  "
 let g:lightline#ale#indicator_warnings = "\uf071  "
 let g:lightline#ale#indicator_errors = "\uf05e  "
-"let g:lightline#ale#indicator_ok = "\uf00c  "
+let g:lightline#ale#indicator_checking = "\uf110"
+let g:lightline#ale#indicator_ok = "\uf00c"
 
 "*********************"
 "** Custom Mappings **"
@@ -123,7 +123,7 @@ nmap <leader>q :q<cr>
 nmap <leader>w :w!<cr>
 
 " :W sudo saves the file
-" (useful for handling the permission-denied error)
+" (eliminates the painful permission-denied error)
 command W w !sudo tee % > /dev/null
 
 " move more intuitively between wrapped lines with j/k
@@ -150,14 +150,14 @@ function! ToggleListchars()
     else
         echo 'toggle listchars to not set'
         set nolist
+
         set listchars=
     endif
 endfunction
 
 nnoremap <leader>t :<C-U>call ToggleListchars()<CR>
 
-" remap space and return to do what one expects
-nnoremap <Space> i<Space><Right><ESC>
+" remap return to do what one expects
 nmap <S-Enter> O<ESC>
 nmap <CR> o<ESC>k
 
@@ -179,6 +179,9 @@ map <leader># :noh<cr>
 
 " <leader>r executes a `run.sh' script (useful for complex builds)
 nnoremap <leader>r :!chmod +x run.sh && ./run.sh<CR>
+
+" in vim-help buffers, follow links more easily (single tab is for buffers)
+nnoremap <TAB><TAB> <C-]>
 
 "**********************"
 "** Buffers and Tabs **"
@@ -208,11 +211,11 @@ map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove
-map <leader>t<leader> :tabnext
+map <leader>t<leader> :tabnext<cr>
 
 " opens a new tab with the current buffer's path
 " useful when editing files in the same directory
-map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
+map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/<cr>
 
 " switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
@@ -458,6 +461,23 @@ nnoremap <leader>j :<C-U>call ToggleAleFixers()<CR>
 " go to the next ale warning/error with <leader>a
 nmap <silent> <leader>a <Plug>(ale_next_wrap)
 
+" check if the current working dir is part of a list of
+" exceptions for which linting should be turned off by default
+" (e.g. large repos like the linux kernel where header files
+" are often not found -> those errors are annoying)
+function! s:CheckWorkingDir() abort
+    let l:is_kernel = expand('%:p:h') =~? '/kernel/'
+    let l:is_linux = expand('%:p:h') =~? '/linux/'
+    if l:is_kernel || l:is_linux
+        echo 'Turning linting off for ' . expand('%:p:h') . '.'
+        :ALEDisable
+    endif
+endfunction
+augroup ale_disable_on_startup
+    autocmd!
+    autocmd VimEnter * call s:CheckWorkingDir()
+augroup END
+
 " Omni Complete Config
 " --------------------
 augroup css_lang
@@ -633,6 +653,6 @@ function! VisualSelection(direction, extra_filter) range
     let @" = l:saved_reg
 endfunction
 
-func! CurrentFileDir(cmd)
+function! CurrentFileDir(cmd)
     return a:cmd . ' ' . expand('%:p:h') . '/'
 endfunc

@@ -1,0 +1,38 @@
+==============================================================================
+File: |libc.info|,  Node: |Default_Thread_Attributes|,  Up: |Non_POSIX_Extensions|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         *Default_Thread_Attributes*
+
+35.2.2.1 Setting Process-wide defaults for thread attributes
+------------------------------------------------------------
+
+The GNU C Library provides non-standard API functions to set and get the
+default attributes used in the creation of threads in a process.
+
+ -- Function: int pthread_getattr_default_np (pthread_attr_t *ATTR)
+
+     Preliminary: | MT-Safe | AS-Unsafe lock | AC-Unsafe lock | *Note
+     POSIX Safety Concepts::.
+
+     Get the default attribute values and set ATTR to match.  This
+     function returns 0 on success and a non-zero error code on failure.
+
+ -- Function: int pthread_setattr_default_np (pthread_attr_t *ATTR)
+
+     Preliminary: | MT-Safe | AS-Unsafe heap lock | AC-Unsafe lock mem |
+     *Note POSIX Safety Concepts::.
+
+     Set the default attribute values to match the values in ATTR.  The
+     function returns 0 on success and a non-zero error code on failure.
+     The following error codes are defined for this function:
+
+     'EINVAL'
+          At least one of the values in ATTR does not qualify as valid
+          for the attributes or the stack address is set in the
+          attribute.
+     'ENOMEM'
+          The system does not have sufficient memory.
+
+vim:tw=78:ts=8:ft=help:norl:
+vim:ft=help bt=nowrite bufhidden=delete readonly nomodifiable nobuflisted:

@@ -130,14 +130,14 @@ alias b="bat"
 alias xclip="xclip -selection clipboard"
 
 # access music player more easily
-alias n="ncmpcpp --screen=media_library"
+alias n="sudo ncmpcpp --screen=media_library --bindings=\$HOME/.ncmpcpp/bindings --config=\$HOME/.ncmpcpp/config"
 
 # run MonoDevelop more easily
 alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
-export TERM=xterm-256color
+export TERM="tmux-256color"
 
 # Suppress annoying GTK warnings that mess up gnome-term.
 # Solution adapted from: http://askubuntu.com/questions/505594.
