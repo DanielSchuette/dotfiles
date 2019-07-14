@@ -62,23 +62,5 @@ Put the following line in your `.xinitrc`:
 ```bash
 xrdb ~/dotfiles/.Xresources
 ```
+
 A bash alias exists, too. `$xup` will load changes in `.Xresources` without restarting the xserver.
-
-## install.sh/update.sh
-Files like `i3.config` and `.xinitrc` are usually installed into a default location like `~` or `~/.config/`. To achieve that, the respective version from this repository can automatically be installed with:
-
-```bash
-$./install.sh
-```
-
-After changing the file in those locations, this repository can easily be updated as follows:
-
-```bash
-$./update.sh
-```
-
-Lastly, all configs can be removed, too:
-
-```bash
-$./remove.sh
-```
