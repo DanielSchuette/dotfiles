@@ -4,11 +4,11 @@
 
 ### Installation
 
-Just clone this repository into `/home/user/dotfiles`. Then create the following `.vimrc`:
+Just clone this repository into `$HOME/dotfiles`. Then create the following `.vimrc` in `$HOME`:
 
 ```vim
-" `~/.vimrc' that source all dependencies in
-" `~/dotfiles/vim-config'.
+" `~/.vimrc' that source all dependencies in `~/dotfiles/vim-config'.
+
 " set runtime path
 set runtimepath+=~/dotfiles/vim-config
 
@@ -25,9 +25,12 @@ catch
 endtry
 ```
 
-There are three to things to consider:
-1. There are probably absolute file paths in `vim-config/configs.vim` and `vim-config/infect.vim` that need to be changed. Just grep for it and replace the file paths if you need to.
-2. Some plugins  need to be compiled and have dependencies that need to be installed (especially `YouCompleteMe`, it's possible that all other plugins actually work). See below for further installation instructions. If something does not work, delete the plugin dir and re-install the plugin from scratch, following the installation instructions in the respective GitHub repository.
+### Plugins
+**There are three to things to consider:**
+1. There might be absolute file paths in `vim-config/configs.vim` that I have overlooked and that need to be fixed. A pull request would be awesome because then I could fix the issue permanently in this repository.
+
+2. Some plugins need to be compiled from source and/or have dependencies that need to be installed for the plugin to function properly (especially `YouCompleteMe` and `racer`, everything else should work without any problems). See the respective documentation of any plugin that does not work for installation instructions. It is likely that you have to delete the respective plugin in `vim-config/plugins/` and re-install it from scratch.
+
 3. Linting with `ale` requires the respective linters to be installed. Some documentation is provided in the `ale` section in `configs.vim`.
 
 ### Additional syntax files
@@ -38,48 +41,8 @@ cp ~/dotfiles/vim_config/syntax/oberon.vim ~/.vim/syntax/oberon.vim
 cp ~/dotfiles/vim_config/syntax/ft.vim ~/.vim/ftdetect/oberon.vim
 ```
 
-### Deprecated way to install this vim config
-
-**Warning**: The `vim-config` can now be cloned and should work out of the box.
-
-You must have `https://github.com/amix/vimrc` installed! Then, put `configs.vim` in `$HOME/dotfiles/` and modify `$HOME/.vimrc` as follows:
-
-```vim
-" source configs.vim from $HOME/dotfiles
-try
-source $HOME/dotfiles/configs.vim
-catch
-endtry
-```
-
-To install additional plugins, use [Pathogen](https://github.com/tpope/vim-pathogen):
-
-```bash
-# a nice, improved syntax highlighter for js
-git clone https://github.com/pangloss/vim-javascript.git ~/.vim_runtime/my_plugins/vim-javascript
-
-# emmet plugin for advanced html autocompletion (remapped to <C-D>,)
-git clone https://github.com/mattn/emmet-vim.git ~/.vim_runtime/my_plugins/emmet-vim
-
-# plugin for using ranger from within vim (<leader>f)
-git clone https://github.com/francoiscabrol/ranger.vim ~/.vim_runtime/my_plugins/vim-ranger
-
-# rust plugin
-git clone --depth=1 https://github.com/rust-lang/rust.vim.git ~/.vim_runtime/my_plugins/rust.vim
-
-# racer rust (for completions)
-git clone --depth=1 https://github.com/racer-rust/vim-racer.git ~/.vim_runtime/my_plugins/vim-racer
-
-# vim autocompletion!
-# has some dependencies, e.g. Mono for C# and python3-devel (check their documentation)
-git clone https://github.com/Valloric/YouCompleteMe.git ./YouCompleteMe
-cd YouCompleteMe
-git submodule update --init --recursive
-python3 install.py --clang-completer --go-completer --cs-completer --ts-completer --rust-completer
-```
-
 ## .bashrc
-Works on Fedora. Install in `$HOME/dotfiles/` and modify `$HOME/.bashrc` as follows:
+Install in `$HOME/dotfiles/` and modify `$HOME/.bashrc` as follows:
 
 ```bash
 # source .bashrc from $HOME/dotfiles
@@ -87,7 +50,7 @@ source $HOME/dotfiles/.bashrc
 ```
 
 ## .tmux.conf
-Make sure you have tmux version >=2.1 installed. Then, put the config file in `$HOME/dotfiles/` and modify `$HOME/.tmux.conf` as follows:
+Make sure you have tmux version >=2.9 installed (i.e. the first version that uses the new configuration file syntax). Then, put the config file in `$HOME/dotfiles/` and modify `$HOME/.tmux.conf` as follows:
 
 ```tmux
 # source config file

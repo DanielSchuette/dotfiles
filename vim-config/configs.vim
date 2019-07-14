@@ -332,7 +332,7 @@ map <leader>m :MRU<CR>
 set hidden
 
 " only require if not in path (only as a fallback)
-let g:racer_cmd = '/home/daniel/.cargo/bin/racer'
+let g:racer_cmd = '~/.cargo/bin/racer'
 
 " experimental completer for full function definitions
 let g:racer_experimental_completer = 1
@@ -424,7 +424,7 @@ let g:ale_fix_on_save = 1
 let g:ale_completion_enabled = 1
 
 " enable auto-completion using github.com/maralla/completor.vim
-let g:completor_gocode_binary = '/home/daniel/code/go_src/src/github.com/nsf/gocode/'
+let g:completor_gocode_binary = '~/code/go_src/src/github.com/nsf/gocode/'
 let g:completor_python_binary = '/usr/bin/python3'
 
 " set linters and fixers
