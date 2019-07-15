@@ -47,6 +47,7 @@ set smartindent
 set wrap " wrap lines
 set laststatus=2 " always show status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
+set noshowmode " because lightline shows the mode
 
 " avoid garbled characters in Chinese language
 let $LANG='en'
@@ -59,13 +60,14 @@ source $VIMRUNTIME/menu.vim
 " The only plugin configuration that is not in the 'correct' section.
 " Lightline is responsible for the status bar, that's why it is up here.
 " This config also uses lightline ale.
-" The previous branch symbol was , but it is sticking out.
+" With some fonts, it looks better to use ⎇ as a branch symbol..
 " On the right site,  can be used as the major delimiter.
+" Also, instead of showing the absolute file path, 'filename' can be used.
 let g:lightline = {
       \ 'colorscheme': 'solarized',
       \ 'active': {
       \   'left': [ ['mode', 'paste'],
-      \             ['fugitive', 'readonly', 'filename', 'modified'] ],
+      \             ['fugitive', 'readonly', 'absolutepath', 'modified'] ],
       \   'right': [ ['lineinfo'],
       \              ['percent'],
       \              ['fileformat', 'filetype'],
@@ -86,7 +88,7 @@ let g:lightline = {
       \ 'component': {
       \   'readonly': '%{&filetype=="help"?"":&readonly?"🔒":""}',
       \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-      \   'fugitive': "%{fugitive#head()!=''?'\ ⎇ \ '.fugitive#head().'\ ':''}",
+      \   'fugitive': "%{fugitive#head()!=''?'\\ '.fugitive#head().'\ ':''}",
       \ },
       \ 'component_visible_condition': {
       \   'readonly': '(&filetype!="help"&& &readonly)',
