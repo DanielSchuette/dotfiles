@@ -1,0 +1,78 @@
+==============================================================================
+File: libc.info,  Node: |Exit_Status|,  Next: |Cleanups_on_Exit|,  Prev: |Normal_Termination|,  Up: |Program_Termination|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       *Exit_Status*
+
+25.7.2 Exit Status
+------------------
+
+When a program exits, it can return to the parent process a small amount
+of information about the cause of termination, using the "exit status".
+This is a value between 0 and 255 that the exiting process passes as an
+argument to 'exit'.
+
+   Normally you should use the exit status to report very broad
+information about success or failure.  You can't provide a lot of detail
+about the reasons for the failure, and most parent processes would not
+want much detail anyway.
+
+   There are conventions for what sorts of status values certain
+programs should return.  The most common convention is simply 0 for
+success and 1 for failure.  Programs that perform comparison use a
+different convention: they use status 1 to indicate a mismatch, and
+status 2 to indicate an inability to compare.  Your program should
+follow an existing convention if an existing convention makes sense for
+it.
+
+   A general convention reserves status values 128 and up for special
+purposes.  In particular, the value 128 is used to indicate failure to
+execute another program in a subprocess.  This convention is not
+universally obeyed, but it is a good idea to follow it in your programs.
+
+   Warning: Don't try to use the number of errors as the exit status.
+This is actually not very useful; a parent process would generally not
+care how many errors occurred.  Worse than that, it does not work,
+because the status value is truncated to eight bits.  Thus, if the
+program tried to report 256 errors, the parent would receive a report of
+0 errors--that is, success.
+
+   For the same reason, it does not work to use the value of 'errno' as
+the exit status--these can exceed 255.
+
+   *Portability note:* Some non-POSIX systems use different conventions
+for exit status values.  For greater portability, you can use the macros
+'EXIT_SUCCESS' and 'EXIT_FAILURE' for the conventional status value for
+success and failure, respectively.  They are declared in the file
+'stdlib.h'.
+
+ -- Macro: int EXIT_SUCCESS
+
+     This macro can be used with the 'exit' function to indicate
+     successful program completion.
+
+     On POSIX systems, the value of this macro is '0'.  On other
+     systems, the value might be some other (possibly non-constant)
+     integer expression.
+
+ -- Macro: int EXIT_FAILURE
+
+     This macro can be used with the 'exit' function to indicate
+     unsuccessful program completion in a general sense.
+
+     On POSIX systems, the value of this macro is '1'.  On other
+     systems, the value might be some other (possibly non-constant)
+     integer expression.  Other nonzero status values also indicate
+     failures.  Certain programs use different nonzero status values to
+     indicate particular kinds of "non-success".  For example, 'diff'
+     uses status value '1' to mean that the files are different, and '2'
+     or more to mean that there was difficulty in opening the files.
+
+   Don't confuse a program's exit status with a process' termination
+status.  There are lots of ways a process can terminate besides having
+its program finish.  In the event that the process termination _is_
+caused by program termination (i.e., 'exit'), though, the program's exit
+status becomes part of the process' termination status.
+
+vim:tw=78:ts=8:ft=help:norl:
+vim:ft=help bt=nowrite bufhidden=delete readonly nomodifiable nobuflisted:

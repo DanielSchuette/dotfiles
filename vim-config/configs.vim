@@ -275,7 +275,7 @@ augroup END
 " Vim supports ctags natively, but some of the keybindings are
 " awkward by default. They are redefined here. Tagbar must be
 " installed separately.
-set tags=./tags,tags;$HOME " where to look for tags file
+set tags=./tags,tags; " where to look for tags file
 nnoremap <leader>ct <C-]>
 nnoremap <leader>cT <C-t>
 nnoremap <leader>tb :TagbarToggle<CR>
