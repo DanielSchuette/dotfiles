@@ -49,6 +49,10 @@ set laststatus=2 " always show status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 set noshowmode " because lightline shows the mode
 
+" force python v2 (whodis only works with this version)
+if has('python')
+endif
+
 " avoid garbled characters in Chinese language
 let $LANG='en'
 set langmenu=en
