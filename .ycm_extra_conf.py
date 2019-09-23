@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
-
 import os
 
 import ycm_core
@@ -28,16 +27,16 @@ flags = [
     '-Werror',
     '-fexceptions',
     '-DNDEBUG',
-    # '-std=c++11',  # use for C++ projects
     '-std=c99',
     '-x',
-    'c',  # set to c++ for C++ projects
+    # '-std=c++11',  # use for C++ projects
+    'c',
     '-isystem',
     '/usr/include',
     '-isystem',
     '/usr/local/include',
+    '-ISUB./include'
 ]
-
 
 # Set this to the absolute path to the folder (NOT the file!) containing the
 # compile_commands.json file to use that instead of 'flags'. See here for
