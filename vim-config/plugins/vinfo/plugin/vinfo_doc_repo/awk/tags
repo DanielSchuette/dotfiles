@@ -1,0 +1,15 @@
+AWKLIBPATH_Variable	awk00.txt	/*AWKLIBPATH_Variable*
+AWKPATH_Variable	awk00.txt	/*AWKPATH_Variable*
+Command_Line	awk00.txt	/*Command_Line*
+Environment_Variables	awk00.txt	/*Environment_Variables*
+Exit_Status	awk00.txt	/*Exit_Status*
+Include_Files	awk00.txt	/*Include_Files*
+Invoking_Gawk	awk00.txt	/*Invoking_Gawk*
+Invoking_Summary	awk00.txt	/*Invoking_Summary*
+Loading_Shared_Libraries	awk00.txt	/*Loading_Shared_Libraries*
+Naming_Standard_Input	awk00.txt	/*Naming_Standard_Input*
+Obsolete	awk00.txt	/*Obsolete*
+Options	awk00.txt	/*Options*
+Other_Arguments	awk00.txt	/*Other_Arguments*
+Other_Environment_Variables	awk00.txt	/*Other_Environment_Variables*
+Undocumented	awk00.txt	/*Undocumented*

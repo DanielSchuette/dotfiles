@@ -1,0 +1,342 @@
+     a copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of a
+     storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly and
+     finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from you
+     under this License.  If your rights have been terminated and not
+     permanently reinstated, receipt of a copy of some or all of the
+     same material does not give you any rights to use it.
+
+  10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     <http://www.gnu.org/copyleft/>.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If the
+     Document does not specify a version number of this License, you may
+     choose any version ever published (not as a draft) by the Free
+     Software Foundation.  If the Document specifies that a proxy can
+     decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+  11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+ADDENDUM: How to use this License for your documents
+=====-----------------------------------------------
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts."  line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit
+their use in free software.
+
+==============================================================================
+File: |binutils.info|,  Node: |Binutils_Index|,  Prev: |GNU_Free_Documentation_License|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    *Binutils_Index*
+
+Binutils Index
+*****=========
+
+
+MENU
+
+* -enable-deterministic-archives:        ar cmdline.          (line 145)
+* -enable-deterministic-archives <1>:    ar cmdline.          (line 222)
+* -enable-deterministic-archives <2>:    objcopy.             (line 343)
+* -enable-deterministic-archives <3>:    objcopy.             (line 353)
+* -enable-deterministic-archives <4>:    ranlib.              (line  32)
+* -enable-deterministic-archives <5>:    ranlib.              (line  44)
+* -enable-deterministic-archives <6>:    strip.               (line 149)
+* -enable-deterministic-archives <7>:    strip.               (line 159)
+* .stab:                                 objdump.             (line 618)
+* Add prefix to absolute paths:          objdump.             (line 453)
+* addr2line:                             addr2line.           (line   6)
+* address to file name and line number:  addr2line.           (line   6)
+* all header information, object file:   objdump.             (line 740)
+* ar:                                    ar.                  (line   6)
+* ar compatibility:                      ar.                  (line  60)
+* architecture:                          objdump.             (line 213)
+* architectures available:               objdump.             (line 198)
+* archive contents:                      ranlib.              (line   6)
+* Archive file symbol index information: readelf.             (line 176)
+* archive headers:                       objdump.             (line  69)
+* archives:                              ar.                  (line   6)
+* base files:                            dlltool.             (line 124)
+* bug criteria:                          Bug Criteria.        (line   6)
+* bug reports:                           Bug Reporting.       (line   6)
+* bugs:                                  Reporting Bugs.      (line   6)
+* bugs, reporting:                       Bug Reporting.       (line   6)
+* c++filt:                               c++filt.             (line   6)
+* changing object addresses:             objcopy.             (line 388)
+* changing section address:              objcopy.             (line 398)
+* changing section LMA:                  objcopy.             (line 407)
+* changing section VMA:                  objcopy.             (line 420)
+* changing start address:                objcopy.             (line 383)
+* collections of files:                  ar.                  (line   6)
+* compatibility, ar:                     ar.                  (line  60)
+* contents of archive:                   ar cmdline.          (line  97)
+* crash:                                 Bug Criteria.        (line   9)
+* creating archives:                     ar cmdline.          (line 139)
+* creating thin archive:                 ar cmdline.          (line 208)
+* cxxfilt:                               c++filt.             (line  14)
+* dates in archive:                      ar cmdline.          (line 178)
+* debug symbols:                         objdump.             (line 618)
+* debugging symbols:                     nm.                  (line 148)
+* deleting from archive:                 ar cmdline.          (line  26)
+* demangling C++ symbols:                c++filt.             (line   6)
+* demangling in nm:                      nm.                  (line 156)
+* demangling in objdump:                 objdump.             (line  97)
+* demangling in objdump <1>:             addr2line.           (line  84)
+* deterministic archives:                ar cmdline.          (line 145)
+* deterministic archives <1>:            ar cmdline.          (line 222)
+* deterministic archives <2>:            objcopy.             (line 343)
+* deterministic archives <3>:            objcopy.             (line 353)
+* deterministic archives <4>:            ranlib.              (line  32)
+* deterministic archives <5>:            ranlib.              (line  44)
+* deterministic archives <6>:            strip.               (line 149)
+* deterministic archives <7>:            strip.               (line 159)
+* disassembling object code:             objdump.             (line 119)
+* disassembly architecture:              objdump.             (line 213)
+* disassembly endianness:                objdump.             (line 148)
+* disassembly, with source:              objdump.             (line 449)
+* discarding symbols:                    strip.               (line   6)
+* DLL:                                   dlltool.             (line   6)
+* dlltool:                               dlltool.             (line   6)
+* dynamic relocation entries, in object file: objdump.        (line 437)
+* dynamic symbol table entries, printing: objdump.            (line 717)
+* dynamic symbols:                       nm.                  (line 168)
+* ELF dynamic section information:       readelf.             (line 125)
+* ELF dynamic symbol table information:  readelf.             (line 100)
+* ELF file header information:           readelf.             (line  63)
+* ELF file information:                  readelf.             (line   6)
+* ELF notes:                             readelf.             (line 110)
+* ELF object file format:                objdump.             (line 618)
+* ELF program header information:        readelf.             (line  69)
+* ELF reloc information:                 readelf.             (line 114)
+* ELF section group information:         readelf.             (line  80)
+* ELF section information:               readelf.             (line  75)
+* ELF section information <1>:           readelf.             (line  85)
+* ELF segment information:               readelf.             (line  69)
+* ELF symbol table information:          readelf.             (line  90)
+* ELF version sections information:      readelf.             (line 129)
+* elfedit:                               elfedit.             (line   6)
+* endianness:                            objdump.             (line 148)
+* error on valid input:                  Bug Criteria.        (line  12)
+* external symbols:                      nm.                  (line 180)
+* external symbols <1>:                  nm.                  (line 244)
+* external symbols <2>:                  nm.                  (line 258)
+* extract from archive:                  ar cmdline.          (line 114)
+* fatal signal:                          Bug Criteria.        (line   9)
+* file name:                             nm.                  (line 142)
+* header information, all:               objdump.             (line 740)
+* input .def file:                       dlltool.             (line 120)
+* input file name:                       nm.                  (line 142)
+* Instruction width:                     objdump.             (line 470)
+* libraries:                             ar.                  (line  25)
+* listings strings:                      strings.             (line   6)
+* machine instructions:                  objdump.             (line 119)
+* moving in archive:                     ar cmdline.          (line  34)
+* MRI compatibility, ar:                 ar scripts.          (line   8)
+* name duplication in archive:           ar cmdline.          (line 108)
+* name length:                           ar.                  (line  18)
+* nm:                                    nm.                  (line   6)
+* nm compatibility:                      nm.                  (line 152)
+* nm compatibility <1>:                  nm.                  (line 174)
+* nm format:                             nm.                  (line 152)
+* nm format <1>:                         nm.                  (line 174)
+* not writing archive index:             ar cmdline.          (line 201)
+* objdump:                               objdump.             (line   6)
+* objdump inlines:                       nm.                  (line 196)
+* object code format:                    nm.                  (line 310)
+* object code format <1>:                objdump.             (line  83)
+* object code format <2>:                size.                (line  84)
+* object code format <3>:                strings.             (line  94)
+* object code format <4>:                addr2line.           (line  79)
+* object file header:                    objdump.             (line 154)
+* object file information:               objdump.             (line   6)
+* object file offsets:                   objdump.             (line 159)
+* object file sections:                  objdump.             (line 444)
+* object formats available:              objdump.             (line 198)
+* offsets of files:                      ar cmdline.          (line 183)
+* operations on archive:                 ar cmdline.          (line  22)
+* plugins:                               ar cmdline.          (line 256)
+* plugins <1>:                           nm.                  (line 261)
+* printing from archive:                 ar cmdline.          (line  46)
+* printing strings:                      strings.             (line   6)
+* quick append to archive:               ar cmdline.          (line  54)
+* radix for section sizes:               size.                (line  66)
+* ranlib:                                ranlib.              (line   6)
+* ranlib <1>:                            ar cmdline.          (line  91)
+* readelf:                               readelf.             (line   6)
+* relative placement in archive:         ar cmdline.          (line 127)
+* relocation entries, in object file:    objdump.             (line 431)
+* removing symbols:                      strip.               (line   6)
+* repeated names in archive:             ar cmdline.          (line 108)
+* replacement in archive:                ar cmdline.          (line  73)
+* reporting bugs:                        Reporting Bugs.      (line   6)
+* scripts, ar:                           ar scripts.          (line   8)
+* section addresses in objdump:          objdump.             (line  75)
+* section headers:                       objdump.             (line 175)
+* section information:                   objdump.             (line 203)
+* section sizes:                         size.                (line   6)
+* sections, full contents:               objdump.             (line 444)
+* size:                                  size.                (line   6)
+* size display format:                   size.                (line  27)
+* size number format:                    size.                (line  66)
+* sorting symbols:                       nm.                  (line 211)
+* source code context:                   objdump.             (line 168)
+* source disassembly:                    objdump.             (line 449)
+* source file name:                      nm.                  (line 142)
+* source filenames for object files:     objdump.             (line 207)
+* stab:                                  objdump.             (line 618)
+* start-address:                         objdump.             (line 627)
+* stop-address:                          objdump.             (line 631)
+* strings:                               strings.             (line   6)
+* strings, printing:                     strings.             (line   6)
+* strip:                                 strip.               (line   6)
+* Strip absolute paths:                  objdump.             (line 456)
+* symbol index:                          ar.                  (line  28)
+* symbol index <1>:                      ranlib.              (line   6)
+* symbol index, listing:                 nm.                  (line 233)
+* symbol line numbers:                   nm.                  (line 188)
+* symbol table entries, printing:        objdump.             (line 636)
+* symbols:                               nm.                  (line   6)
+* symbols, discarding:                   strip.               (line   6)
+* thin archives:                         ar.                  (line  40)
+* undefined symbols:                     nm.                  (line 244)
+* undefined symbols <1>:                 nm.                  (line 258)
+* Unix compatibility, ar:                ar cmdline.          (line   8)
+* unwind information:                    readelf.             (line 119)
+* Update ELF header:                     elfedit.             (line   6)
+* updating an archive:                   ar cmdline.          (line 213)
+* version:                               Top.                 (line   6)
+* VMA in objdump:                        objdump.             (line  75)
+* wide output, printing:                 objdump.             (line 746)
+* writing archive index:                 ar cmdline.          (line 195)
+
+
+vim:tw=78:ts=8:ft=help:norl:
+vim:ft=help bt=nowrite bufhidden=delete readonly nomodifiable nobuflisted:

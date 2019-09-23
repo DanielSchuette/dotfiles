@@ -1,0 +1,3262 @@
+
+'exec_prefix'
+     A prefix used in constructing the default values of some of the
+     variables listed below.  The default value of 'exec_prefix' should
+     be '$(prefix)'.  (If you are using Autoconf, write it as
+     '@exec_prefix@'.)
+
+     Generally, '$(exec_prefix)' is used for directories that contain
+     machine-specific files (such as executables and subroutine
+     libraries), while '$(prefix)' is used directly for other
+     directories.
+
+     Running 'make install' with a different value of 'exec_prefix' from
+     the one used to build the program should _not_ recompile the
+     program.
+
+   Executable programs are installed in one of the following
+directories.
+
+'bindir'
+     The directory for installing executable programs that users can
+     run.  This should normally be '/usr/local/bin', but write it as
+     '$(exec_prefix)/bin'.  (If you are using Autoconf, write it as
+     '@bindir@'.)
+
+'sbindir'
+     The directory for installing executable programs that can be run
+     from the shell, but are only generally useful to system
+     administrators.  This should normally be '/usr/local/sbin', but
+     write it as '$(exec_prefix)/sbin'.  (If you are using Autoconf,
+     write it as '@sbindir@'.)
+
+'libexecdir'
+     The directory for installing executable programs to be run by other
+     programs rather than by users.  This directory should normally be
+     '/usr/local/libexec', but write it as '$(exec_prefix)/libexec'.
+     (If you are using Autoconf, write it as '@libexecdir@'.)
+
+     The definition of 'libexecdir' is the same for all packages, so you
+     should install your data in a subdirectory thereof.  Most packages
+     install their data under '$(libexecdir)/PACKAGE-NAME/', possibly
+     within additional subdirectories thereof, such as
+     '$(libexecdir)/PACKAGE-NAME/MACHINE/VERSION'.
+
+   Data files used by the program during its execution are divided into
+categories in two ways.
+
+   * Some files are normally modified by programs; others are never
+     normally modified (though users may edit some of these).
+
+   * Some files are architecture-independent and can be shared by all
+     machines at a site; some are architecture-dependent and can be
+     shared only by machines of the same kind and operating system;
+     others may never be shared between two machines.
+
+   This makes for six different possibilities.  However, we want to
+discourage the use of architecture-dependent files, aside from object
+files and libraries.  It is much cleaner to make other data files
+architecture-independent, and it is generally not hard.
+
+   Here are the variables Makefiles should use to specify directories to
+put these various kinds of files in:
+
+'datarootdir'
+     The root of the directory tree for read-only
+     architecture-independent data files.  This should normally be
+     '/usr/local/share', but write it as '$(prefix)/share'.  (If you are
+     using Autoconf, write it as '@datarootdir@'.)  'datadir''s default
+     value is based on this variable; so are 'infodir', 'mandir', and
+     others.
+
+'datadir'
+     The directory for installing idiosyncratic read-only
+     architecture-independent data files for this program.  This is
+     usually the same place as 'datarootdir', but we use the two
+     separate variables so that you can move these program-specific
+     files without altering the location for Info files, man pages, etc.
+
+     This should normally be '/usr/local/share', but write it as
+     '$(datarootdir)'.  (If you are using Autoconf, write it as
+     '@datadir@'.)
+
+     The definition of 'datadir' is the same for all packages, so you
+     should install your data in a subdirectory thereof.  Most packages
+     install their data under '$(datadir)/PACKAGE-NAME/'.
+
+'sysconfdir'
+     The directory for installing read-only data files that pertain to a
+     single machine-that is to say, files for configuring a host.
+     Mailer and network configuration files, '/etc/passwd', and so forth
+     belong here.  All the files in this directory should be ordinary
+     ASCII text files.  This directory should normally be
+     '/usr/local/etc', but write it as '$(prefix)/etc'.  (If you are
+     using Autoconf, write it as '@sysconfdir@'.)
+
+     Do not install executables here in this directory (they probably
+     belong in '$(libexecdir)' or '$(sbindir)').  Also do not install
+     files that are modified in the normal course of their use (programs
+     whose purpose is to change the configuration of the system
+     excluded).  Those probably belong in '$(localstatedir)'.
+
+'sharedstatedir'
+     The directory for installing architecture-independent data files
+     which the programs modify while they run.  This should normally be
+     '/usr/local/com', but write it as '$(prefix)/com'.  (If you are
+     using Autoconf, write it as '@sharedstatedir@'.)
+
+'localstatedir'
+     The directory for installing data files which the programs modify
+     while they run, and that pertain to one specific machine.  Users
+     should never need to modify files in this directory to configure
+     the package's operation; put such configuration information in
+     separate files that go in '$(datadir)' or '$(sysconfdir)'.
+     '$(localstatedir)' should normally be '/usr/local/var', but write
+     it as '$(prefix)/var'.  (If you are using Autoconf, write it as
+     '@localstatedir@'.)
+
+'runstatedir'
+     The directory for installing data files which the programs modify
+     while they run, that pertain to one specific machine, and which
+     need not persist longer than the execution of the program--which is
+     generally long-lived, for example, until the next reboot.  PID
+     files for system daemons are a typical use.  In addition, this
+     directory should not be cleaned except perhaps at reboot, while the
+     general '/tmp' ('TMPDIR') may be cleaned arbitrarily.  This should
+     normally be '/var/run', but write it as '$(localstatedir)/run'.
+     Having it as a separate variable allows the use of '/run' if
+     desired, for example.  (If you are using Autoconf 2.70 or later,
+     write it as '@runstatedir@'.)
+
+   These variables specify the directory for installing certain specific
+types of files, if your program has them.  Every GNU package should have
+Info files, so every program needs 'infodir', but not all need 'libdir'
+or 'lispdir'.
+
+'includedir'
+     The directory for installing header files to be included by user
+     programs with the C '#include' preprocessor directive.  This should
+     normally be '/usr/local/include', but write it as
+     '$(prefix)/include'.  (If you are using Autoconf, write it as
+     '@includedir@'.)
+
+     Most compilers other than GCC do not look for header files in
+     directory '/usr/local/include'.  So installing the header files
+     this way is only useful with GCC. Sometimes this is not a problem
+     because some libraries are only really intended to work with GCC.
+     But some libraries are intended to work with other compilers.  They
+     should install their header files in two places, one specified by
+     'includedir' and one specified by 'oldincludedir'.
+
+'oldincludedir'
+     The directory for installing '#include' header files for use with
+     compilers other than GCC. This should normally be '/usr/include'.
+     (If you are using Autoconf, you can write it as '@oldincludedir@'.)
+
+     The Makefile commands should check whether the value of
+     'oldincludedir' is empty.  If it is, they should not try to use it;
+     they should cancel the second installation of the header files.
+
+     A package should not replace an existing header in this directory
+     unless the header came from the same package.  Thus, if your Foo
+     package provides a header file 'foo.h', then it should install the
+     header file in the 'oldincludedir' directory if either (1) there is
+     no 'foo.h' there or (2) the 'foo.h' that exists came from the Foo
+     package.
+
+     To tell whether 'foo.h' came from the Foo package, put a magic
+     string in the file--part of a comment--and 'grep' for that string.
+
+'docdir'
+     The directory for installing documentation files (other than Info)
+     for this package.  By default, it should be
+     '/usr/local/share/doc/YOURPKG', but it should be written as
+     '$(datarootdir)/doc/YOURPKG'.  (If you are using Autoconf, write it
+     as '@docdir@'.)  The YOURPKG subdirectory, which may include a
+     version number, prevents collisions among files with common names,
+     such as 'README'.
+
+'infodir'
+     The directory for installing the Info files for this package.  By
+     default, it should be '/usr/local/share/info', but it should be
+     written as '$(datarootdir)/info'.  (If you are using Autoconf,
+     write it as '@infodir@'.)  'infodir' is separate from 'docdir' for
+     compatibility with existing practice.
+
+'htmldir'
+'dvidir'
+'pdfdir'
+'psdir'
+     Directories for installing documentation files in the particular
+     format.  They should all be set to '$(docdir)' by default.  (If you
+     are using Autoconf, write them as '@htmldir@', '@dvidir@', etc.)
+     Packages which supply several translations of their documentation
+     should install them in '$(htmldir)/'LL, '$(pdfdir)/'LL, etc.  where
+     LL is a locale abbreviation such as 'en' or 'pt_BR'.
+
+'libdir'
+     The directory for object files and libraries of object code.  Do
+     not install executables here, they probably ought to go in
+     '$(libexecdir)' instead.  The value of 'libdir' should normally be
+     '/usr/local/lib', but write it as '$(exec_prefix)/lib'.  (If you
+     are using Autoconf, write it as '@libdir@'.)
+
+'lispdir'
+     The directory for installing any Emacs Lisp files in this package.
+     By default, it should be '/usr/local/share/emacs/site-lisp', but it
+     should be written as '$(datarootdir)/emacs/site-lisp'.
+
+     If you are using Autoconf, write the default as '@lispdir@'.  In
+     order to make '@lispdir@' work, you need the following lines in
+     your 'configure.ac' file:
+
+          lispdir='${datarootdir}/emacs/site-lisp'
+          AC_SUBST(lispdir)
+
+'localedir'
+     The directory for installing locale-specific message catalogs for
+     this package.  By default, it should be '/usr/local/share/locale',
+     but it should be written as '$(datarootdir)/locale'.  (If you are
+     using Autoconf, write it as '@localedir@'.)  This directory usually
+     has a subdirectory per locale.
+
+   Unix-style man pages are installed in one of the following:
+
+'mandir'
+     The top-level directory for installing the man pages (if any) for
+     this package.  It will normally be '/usr/local/share/man', but you
+     should write it as '$(datarootdir)/man'.  (If you are using
+     Autoconf, write it as '@mandir@'.)
+
+'man1dir'
+     The directory for installing section 1 man pages.  Write it as
+     '$(mandir)/man1'.
+'man2dir'
+     The directory for installing section 2 man pages.  Write it as
+     '$(mandir)/man2'
+'...'
+
+     *Don't make the primary documentation for any GNU software be a man
+     page.  Write a manual in Texinfo instead.  Man pages are just for
+     the sake of people running GNU software on Unix, which is a
+     secondary application only.*
+
+'manext'
+     The file name extension for the installed man page.  This should
+     contain a period followed by the appropriate digit; it should
+     normally be '.1'.
+
+'man1ext'
+     The file name extension for installed section 1 man pages.
+'man2ext'
+     The file name extension for installed section 2 man pages.
+'...'
+     Use these names instead of 'manext' if the package needs to install
+     man pages in more than one section of the manual.
+
+   And finally, you should set the following variable:
+
+'srcdir'
+     The directory for the sources being compiled.  The value of this
+     variable is normally inserted by the 'configure' shell script.  (If
+     you are using Autoconf, use 'srcdir = @srcdir@'.)
+
+   For example:
+
+     # Common prefix for installation directories.
+     # NOTE: This directory must exist when you start the install.
+     prefix = /usr/local
+     datarootdir = $(prefix)/share
+     datadir = $(datarootdir)
+     exec_prefix = $(prefix)
+     # Where to put the executable for the command 'gcc'.
+     bindir = $(exec_prefix)/bin
+     # Where to put the directories used by the compiler.
+     libexecdir = $(exec_prefix)/libexec
+     # Where to put the Info files.
+     infodir = $(datarootdir)/info
+
+   If your program installs a large number of files into one of the
+standard user-specified directories, it might be useful to group them
+into a subdirectory particular to that program.  If you do this, you
+should write the 'install' rule to create these subdirectories.
+
+   Do not expect the user to include the subdirectory name in the value
+of any of the variables listed above.  The idea of having a uniform set
+of variable names for installation directories is to enable the user to
+specify the exact same values for several different GNU packages.  In
+order for this to be useful, all the packages must be designed so that
+they will work sensibly when the user does so.
+
+   At times, not all of these variables may be implemented in the
+current release of Autoconf and/or Automake; but as of Autoconf 2.60, we
+believe all of them are.  When any are missing, the descriptions here
+serve as specifications for what Autoconf will implement.  As a
+programmer, you can either use a development version of Autoconf or
+avoid using these variables until a stable release is made which
+supports them.
+
+==============================================================================
+File: make.info,  Node: |Standard_Targets|,  Next: |Install_Command_Categories|,  Prev: |Directory_Variables|,  Up: |Makefile_Conventions|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  *Standard_Targets*
+
+16.6 Standard Targets for Users
+-------------------------------
+
+All GNU programs should have the following targets in their Makefiles:
+
+'all'
+     Compile the entire program.  This should be the default target.
+     This target need not rebuild any documentation files; Info files
+     should normally be included in the distribution, and DVI (and other
+     documentation format) files should be made only when explicitly
+     asked for.
+
+     By default, the Make rules should compile and link with '-g', so
+     that executable programs have debugging symbols.  Otherwise, you
+     are essentially helpless in the face of a crash, and it is often
+     far from easy to reproduce with a fresh build.
+
+'install'
+     Compile the program and copy the executables, libraries, and so on
+     to the file names where they should reside for actual use.  If
+     there is a simple test to verify that a program is properly
+     installed, this target should run that test.
+
+     Do not strip executables when installing them.  This helps eventual
+     debugging that may be needed later, and nowadays disk space is
+     cheap and dynamic loaders typically ensure debug sections are not
+     loaded during normal execution.  Users that need stripped binaries
+     may invoke the 'install-strip' target to do that.
+
+     If possible, write the 'install' target rule so that it does not
+     modify anything in the directory where the program was built,
+     provided 'make all' has just been done.  This is convenient for
+     building the program under one user name and installing it under
+     another.
+
+     The commands should create all the directories in which files are
+     to be installed, if they don't already exist.  This includes the
+     directories specified as the values of the variables 'prefix' and
+     'exec_prefix', as well as all subdirectories that are needed.  One
+     way to do this is by means of an 'installdirs' target as described
+     below.
+
+     Use '-' before any command for installing a man page, so that
+     'make' will ignore any errors.  This is in case there are systems
+     that don't have the Unix man page documentation system installed.
+
+     The way to install Info files is to copy them into '$(infodir)'
+     with '$(INSTALL_DATA)' (*note Command Variables::), and then run
+     the 'install-info' program if it is present.  'install-info' is a
+     program that edits the Info 'dir' file to add or update the menu
+     entry for the given Info file; it is part of the Texinfo package.
+
+     Here is a sample rule to install an Info file that also tries to
+     handle some additional situations, such as 'install-info' not being
+     present.
+
+          do-install-info: foo.info installdirs
+                  $(NORMAL_INSTALL)
+          # Prefer an info file in . to one in srcdir.
+                  if test -f foo.info; then d=.; \
+                   else d="$(srcdir)"; fi; \
+                  $(INSTALL_DATA) $$d/foo.info \
+                    "$(DESTDIR)$(infodir)/foo.info"
+          # Run install-info only if it exists.
+          # Use 'if' instead of just prepending '-' to the
+          # line so we notice real errors from install-info.
+          # Use '$(SHELL) -c' because some shells do not
+          # fail gracefully when there is an unknown command.
+                  $(POST_INSTALL)
+                  if $(SHELL) -c 'install-info --version' \
+                     >/dev/null 2>&1; then \
+                    install-info --dir-file="$(DESTDIR)$(infodir)/dir" \
+                                 "$(DESTDIR)$(infodir)/foo.info"; \
+                  else true; fi
+
+     When writing the 'install' target, you must classify all the
+     commands into three categories: normal ones, "pre-installation"
+     commands and "post-installation" commands.  *Note Install Command
+     Categories::.
+
+'install-html'
+'install-dvi'
+'install-pdf'
+'install-ps'
+     These targets install documentation in formats other than Info;
+     they're intended to be called explicitly by the person installing
+     the package, if that format is desired.  GNU prefers Info files, so
+     these must be installed by the 'install' target.
+
+     When you have many documentation files to install, we recommend
+     that you avoid collisions and clutter by arranging for these
+     targets to install in subdirectories of the appropriate
+     installation directory, such as 'htmldir'.  As one example, if your
+     package has multiple manuals, and you wish to install HTML
+     documentation with many files (such as the "split" mode output by
+     'makeinfo --html'), you'll certainly want to use subdirectories, or
+     two nodes with the same name in different manuals will overwrite
+     each other.
+
+     Please make these 'install-FORMAT' targets invoke the commands for
+     the FORMAT target, for example, by making FORMAT a dependency.
+
+'uninstall'
+     Delete all the installed files--the copies that the 'install' and
+     'install-*' targets create.
+
+     This rule should not modify the directories where compilation is
+     done, only the directories where files are installed.
+
+     The uninstallation commands are divided into three categories, just
+     like the installation commands.  *Note Install Command
+     Categories::.
+
+'install-strip'
+     Like 'install', but strip the executable files while installing
+     them.  In simple cases, this target can use the 'install' target in
+     a simple way:
+
+          install-strip:
+                  $(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' \
+                          install
+
+     But if the package installs scripts as well as real executables,
+     the 'install-strip' target can't just refer to the 'install'
+     target; it has to strip the executables but not the scripts.
+
+     'install-strip' should not strip the executables in the build
+     directory which are being copied for installation.  It should only
+     strip the copies that are installed.
+
+     Normally we do not recommend stripping an executable unless you are
+     sure the program has no bugs.  However, it can be reasonable to
+     install a stripped executable for actual execution while saving the
+     unstripped executable elsewhere in case there is a bug.
+
+'clean'
+     Delete all files in the current directory that are normally created
+     by building the program.  Also delete files in other directories if
+     they are created by this makefile.  However, don't delete the files
+     that record the configuration.  Also preserve files that could be
+     made by building, but normally aren't because the distribution
+     comes with them.  There is no need to delete parent directories
+     that were created with 'mkdir -p', since they could have existed
+     anyway.
+
+     Delete '.dvi' files here if they are not part of the distribution.
+
+'distclean'
+     Delete all files in the current directory (or created by this
+     makefile) that are created by configuring or building the program.
+     If you have unpacked the source and built the program without
+     creating any other files, 'make distclean' should leave only the
+     files that were in the distribution.  However, there is no need to
+     delete parent directories that were created with 'mkdir -p', since
+     they could have existed anyway.
+
+'mostlyclean'
+     Like 'clean', but may refrain from deleting a few files that people
+     normally don't want to recompile.  For example, the 'mostlyclean'
+     target for GCC does not delete 'libgcc.a', because recompiling it
+     is rarely necessary and takes a lot of time.
+
+'maintainer-clean'
+     Delete almost everything that can be reconstructed with this
+     Makefile.  This typically includes everything deleted by
+     'distclean', plus more: C source files produced by Bison, tags
+     tables, Info files, and so on.
+
+     The reason we say "almost everything" is that running the command
+     'make maintainer-clean' should not delete 'configure' even if
+     'configure' can be remade using a rule in the Makefile.  More
+     generally, 'make maintainer-clean' should not delete anything that
+     needs to exist in order to run 'configure' and then begin to build
+     the program.  Also, there is no need to delete parent directories
+     that were created with 'mkdir -p', since they could have existed
+     anyway.  These are the only exceptions; 'maintainer-clean' should
+     delete everything else that can be rebuilt.
+
+     The 'maintainer-clean' target is intended to be used by a
+     maintainer of the package, not by ordinary users.  You may need
+     special tools to reconstruct some of the files that 'make
+     maintainer-clean' deletes.  Since these files are normally included
+     in the distribution, we don't take care to make them easy to
+     reconstruct.  If you find you need to unpack the full distribution
+     again, don't blame us.
+
+     To help make users aware of this, the commands for the special
+     'maintainer-clean' target should start with these two:
+
+          @echo 'This command is intended for maintainers to use; it'
+          @echo 'deletes files that may need special tools to rebuild.'
+
+'TAGS'
+     Update a tags table for this program.
+
+'info'
+     Generate any Info files needed.  The best way to write the rules is
+     as follows:
+
+          info: foo.info
+
+          foo.info: foo.texi chap1.texi chap2.texi
+                  $(MAKEINFO) $(srcdir)/foo.texi
+
+     You must define the variable 'MAKEINFO' in the Makefile.  It should
+     run the 'makeinfo' program, which is part of the Texinfo
+     distribution.
+
+     Normally a GNU distribution comes with Info files, and that means
+     the Info files are present in the source directory.  Therefore, the
+     Make rule for an info file should update it in the source
+     directory.  When users build the package, ordinarily Make will not
+     update the Info files because they will already be up to date.
+
+'dvi'
+'html'
+'pdf'
+'ps'
+     Generate documentation files in the given format.  These targets
+     should always exist, but any or all can be a no-op if the given
+     output format cannot be generated.  These targets should not be
+     dependencies of the 'all' target; the user must manually invoke
+     them.
+
+     Here's an example rule for generating DVI files from Texinfo:
+
+          dvi: foo.dvi
+
+          foo.dvi: foo.texi chap1.texi chap2.texi
+                  $(TEXI2DVI) $(srcdir)/foo.texi
+
+     You must define the variable 'TEXI2DVI' in the Makefile.  It should
+     run the program 'texi2dvi', which is part of the Texinfo
+     distribution.  ('texi2dvi' uses TeX to do the real work of
+     formatting.  TeX is not distributed with Texinfo.)  Alternatively,
+     write only the dependencies, and allow GNU 'make' to provide the
+     command.
+
+     Here's another example, this one for generating HTML from Texinfo:
+
+          html: foo.html
+
+          foo.html: foo.texi chap1.texi chap2.texi
+                  $(TEXI2HTML) $(srcdir)/foo.texi
+
+     Again, you would define the variable 'TEXI2HTML' in the Makefile;
+     for example, it might run 'makeinfo --no-split --html' ('makeinfo'
+     is part of the Texinfo distribution).
+
+'dist'
+     Create a distribution tar file for this program.  The tar file
+     should be set up so that the file names in the tar file start with
+     a subdirectory name which is the name of the package it is a
+     distribution for.  This name can include the version number.
+
+     For example, the distribution tar file of GCC version 1.40 unpacks
+     into a subdirectory named 'gcc-1.40'.
+
+     The easiest way to do this is to create a subdirectory
+     appropriately named, use 'ln' or 'cp' to install the proper files
+     in it, and then 'tar' that subdirectory.
+
+     Compress the tar file with 'gzip'.  For example, the actual
+     distribution file for GCC version 1.40 is called 'gcc-1.40.tar.gz'.
+     It is ok to support other free compression formats as well.
+
+     The 'dist' target should explicitly depend on all non-source files
+     that are in the distribution, to make sure they are up to date in
+     the distribution.  *Note Making Releases: (standards)Releases.
+
+'check'
+     Perform self-tests (if any).  The user must build the program
+     before running the tests, but need not install the program; you
+     should write the self-tests so that they work when the program is
+     built but not installed.
+
+   The following targets are suggested as conventional names, for
+programs in which they are useful.
+
+'installcheck'
+     Perform installation tests (if any).  The user must build and
+     install the program before running the tests.  You should not
+     assume that '$(bindir)' is in the search path.
+
+'installdirs'
+     It's useful to add a target named 'installdirs' to create the
+     directories where files are installed, and their parent
+     directories.  There is a script called 'mkinstalldirs' which is
+     convenient for this; you can find it in the Gnulib package.  You
+     can use a rule like this:
+
+          # Make sure all installation directories (e.g. $(bindir))
+          # actually exist by making them if necessary.
+          installdirs: mkinstalldirs
+                  $(srcdir)/mkinstalldirs $(bindir) $(datadir) \
+                                          $(libdir) $(infodir) \
+                                          $(mandir)
+
+     or, if you wish to support 'DESTDIR' (strongly encouraged),
+
+          # Make sure all installation directories (e.g. $(bindir))
+          # actually exist by making them if necessary.
+          installdirs: mkinstalldirs
+                  $(srcdir)/mkinstalldirs \
+                      $(DESTDIR)$(bindir) $(DESTDIR)$(datadir) \
+                      $(DESTDIR)$(libdir) $(DESTDIR)$(infodir) \
+                      $(DESTDIR)$(mandir)
+
+     This rule should not modify the directories where compilation is
+     done.  It should do nothing but create installation directories.
+
+==============================================================================
+File: make.info,  Node: |Install_Command_Categories|,  Prev: |Standard_Targets|,  Up: |Makefile_Conventions|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        *Install_Command_Categories*
+
+16.7 Install Command Categories
+-------------------------------
+
+When writing the 'install' target, you must classify all the commands
+into three categories: normal ones, "pre-installation" commands and
+"post-installation" commands.
+
+   Normal commands move files into their proper places, and set their
+modes.  They may not alter any files except the ones that come entirely
+from the package they belong to.
+
+   Pre-installation and post-installation commands may alter other
+files; in particular, they can edit global configuration files or data
+bases.
+
+   Pre-installation commands are typically executed before the normal
+commands, and post-installation commands are typically run after the
+normal commands.
+
+   The most common use for a post-installation command is to run
+'install-info'.  This cannot be done with a normal command, since it
+alters a file (the Info directory) which does not come entirely and
+solely from the package being installed.  It is a post-installation
+command because it needs to be done after the normal command which
+installs the package's Info files.
+
+   Most programs don't need any pre-installation commands, but we have
+the feature just in case it is needed.
+
+   To classify the commands in the 'install' rule into these three
+categories, insert "category lines" among them.  A category line
+specifies the category for the commands that follow.
+
+   A category line consists of a tab and a reference to a special Make
+variable, plus an optional comment at the end.  There are three
+variables you can use, one for each category; the variable name
+specifies the category.  Category lines are no-ops in ordinary execution
+because these three Make variables are normally undefined (and you
+_should not_ define them in the makefile).
+
+   Here are the three possible category lines, each with a comment that
+explains what it means:
+
+             $(PRE_INSTALL)     # Pre-install commands follow.
+             $(POST_INSTALL)    # Post-install commands follow.
+             $(NORMAL_INSTALL)  # Normal commands follow.
+
+   If you don't use a category line at the beginning of the 'install'
+rule, all the commands are classified as normal until the first category
+line.  If you don't use any category lines, all the commands are
+classified as normal.
+
+   These are the category lines for 'uninstall':
+
+             $(PRE_UNINSTALL)     # Pre-uninstall commands follow.
+             $(POST_UNINSTALL)    # Post-uninstall commands follow.
+             $(NORMAL_UNINSTALL)  # Normal commands follow.
+
+   Typically, a pre-uninstall command would be used for deleting entries
+from the Info directory.
+
+   If the 'install' or 'uninstall' target has any dependencies which act
+as subroutines of installation, then you should start _each_
+dependency's commands with a category line, and start the main target's
+commands with a category line also.  This way, you can ensure that each
+command is placed in the right category regardless of which of the
+dependencies actually run.
+
+   Pre-installation and post-installation commands should not run any
+programs except for these:
+
+     [ basename bash cat chgrp chmod chown cmp cp dd diff echo
+     egrep expand expr false fgrep find getopt grep gunzip gzip
+     hostname install install-info kill ldconfig ln ls md5sum
+     mkdir mkfifo mknod mv printenv pwd rm rmdir sed sort tee
+     test touch true uname xargs yes
+
+   The reason for distinguishing the commands in this way is for the
+sake of making binary packages.  Typically a binary package contains all
+the executables and other files that need to be installed, and has its
+own method of installing them--so it does not need to run the normal
+installation commands.  But installing the binary package does need to
+execute the pre-installation and post-installation commands.
+
+   Programs to build binary packages work by extracting the
+pre-installation and post-installation commands.  Here is one way of
+extracting the pre-installation commands (the '-s' option to 'make' is
+needed to silence messages about entering subdirectories):
+
+     make -s -n install -o all \
+           PRE_INSTALL=pre-install \
+           POST_INSTALL=post-install \
+           NORMAL_INSTALL=normal-install \
+       | gawk -f pre-install.awk
+
+where the file 'pre-install.awk' could contain this:
+
+     $0 ~ /^(normal-install|post-install)[ \t]*$/ {on = 0}
+     on {print $0}
+     $0 ~ /^pre-install[ \t]*$/ {on = 1}
+
+==============================================================================
+File: make.info,  Node: |Quick_Reference|,  Next: |Error_Messages|,  Prev: |Makefile_Conventions|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   *Quick_Reference*
+
+Appendix A Quick Reference
+==========================
+
+This appendix summarizes the directives, text manipulation functions,
+and special variables which GNU 'make' understands.  *Note Special
+Targets::, *note Catalogue of Built-In Rules: Catalogue of Rules, and
+*note Summary of Options: Options Summary, for other summaries.
+
+   Here is a summary of the directives GNU 'make' recognizes:
+
+'define VARIABLE'
+'define VARIABLE ='
+'define VARIABLE :='
+'define VARIABLE ::='
+'define VARIABLE +='
+'define VARIABLE ?='
+'endef'
+     Define multi-line variables.
+     *Note Multi-Line::.
+
+'undefine VARIABLE'
+     Undefining variables.
+     *Note Undefine Directive::.
+
+'ifdef VARIABLE'
+'ifndef VARIABLE'
+'ifeq (A,B)'
+'ifeq "A" "B"'
+'ifeq 'A' 'B''
+'ifneq (A,B)'
+'ifneq "A" "B"'
+'ifneq 'A' 'B''
+'else'
+'endif'
+     Conditionally evaluate part of the makefile.
+     *Note Conditionals::.
+
+'include FILE'
+'-include FILE'
+'sinclude FILE'
+     Include another makefile.
+     *Note Including Other Makefiles: Include.
+
+'override VARIABLE-ASSIGNMENT'
+     Define a variable, overriding any previous definition, even one
+     from the command line.
+     *Note The 'override' Directive: Override Directive.
+
+'export'
+     Tell 'make' to export all variables to child processes by default.
+     *Note Communicating Variables to a Sub-'make': Variables/Recursion.
+
+'export VARIABLE'
+'export VARIABLE-ASSIGNMENT'
+'unexport VARIABLE'
+     Tell 'make' whether or not to export a particular variable to child
+     processes.
+     *Note Communicating Variables to a Sub-'make': Variables/Recursion.
+
+'private VARIABLE-ASSIGNMENT'
+     Do not allow this variable assignment to be inherited by
+     prerequisites.
+     *Note Suppressing Inheritance::.
+
+'vpath PATTERN PATH'
+     Specify a search path for files matching a '%' pattern.
+     *Note The 'vpath' Directive: Selective Search.
+
+'vpath PATTERN'
+     Remove all search paths previously specified for PATTERN.
+
+'vpath'
+     Remove all search paths previously specified in any 'vpath'
+     directive.
+
+   Here is a summary of the built-in functions (*note Functions::):
+
+'$(subst FROM,TO,TEXT)'
+     Replace FROM with TO in TEXT.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(patsubst PATTERN,REPLACEMENT,TEXT)'
+     Replace words matching PATTERN with REPLACEMENT in TEXT.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(strip STRING)'
+     Remove excess whitespace characters from STRING.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(findstring FIND,TEXT)'
+     Locate FIND in TEXT.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(filter PATTERN...,TEXT)'
+     Select words in TEXT that match one of the PATTERN words.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(filter-out PATTERN...,TEXT)'
+     Select words in TEXT that _do not_ match any of the PATTERN words.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(sort LIST)'
+     Sort the words in LIST lexicographically, removing duplicates.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(word N,TEXT)'
+     Extract the Nth word (one-origin) of TEXT.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(words TEXT)'
+     Count the number of words in TEXT.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(wordlist S,E,TEXT)'
+     Returns the list of words in TEXT from S to E.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(firstword NAMES...)'
+     Extract the first word of NAMES.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(lastword NAMES...)'
+     Extract the last word of NAMES.
+     *Note Functions for String Substitution and Analysis: Text
+     Functions.
+
+'$(dir NAMES...)'
+     Extract the directory part of each file name.
+     *Note Functions for File Names: File Name Functions.
+
+'$(notdir NAMES...)'
+     Extract the non-directory part of each file name.
+     *Note Functions for File Names: File Name Functions.
+
+'$(suffix NAMES...)'
+     Extract the suffix (the last '.' and following characters) of each
+     file name.
+     *Note Functions for File Names: File Name Functions.
+
+'$(basename NAMES...)'
+     Extract the base name (name without suffix) of each file name.
+     *Note Functions for File Names: File Name Functions.
+
+'$(addsuffix SUFFIX,NAMES...)'
+     Append SUFFIX to each word in NAMES.
+     *Note Functions for File Names: File Name Functions.
+
+'$(addprefix PREFIX,NAMES...)'
+     Prepend PREFIX to each word in NAMES.
+     *Note Functions for File Names: File Name Functions.
+
+'$(join LIST1,LIST2)'
+     Join two parallel lists of words.
+     *Note Functions for File Names: File Name Functions.
+
+'$(wildcard PATTERN...)'
+     Find file names matching a shell file name pattern (_not_ a '%'
+     pattern).
+     *Note The Function 'wildcard': Wildcard Function.
+
+'$(realpath NAMES...)'
+     For each file name in NAMES, expand to an absolute name that does
+     not contain any '.', '..', nor symlinks.
+     *Note Functions for File Names: File Name Functions.
+
+'$(abspath NAMES...)'
+     For each file name in NAMES, expand to an absolute name that does
+     not contain any '.' or '..' components, but preserves symlinks.
+     *Note Functions for File Names: File Name Functions.
+
+'$(error TEXT...)'
+     When this function is evaluated, 'make' generates a fatal error
+     with the message TEXT.
+     *Note Functions That Control Make: Make Control Functions.
+
+'$(warning TEXT...)'
+     When this function is evaluated, 'make' generates a warning with
+     the message TEXT.
+     *Note Functions That Control Make: Make Control Functions.
+
+'$(shell COMMAND)'
+     Execute a shell command and return its output.
+     *Note The 'shell' Function: Shell Function.
+
+'$(origin VARIABLE)'
+     Return a string describing how the 'make' variable VARIABLE was
+     defined.
+     *Note The 'origin' Function: Origin Function.
+
+'$(flavor VARIABLE)'
+     Return a string describing the flavor of the 'make' variable
+     VARIABLE.
+     *Note The 'flavor' Function: Flavor Function.
+
+'$(foreach VAR,WORDS,TEXT)'
+     Evaluate TEXT with VAR bound to each word in WORDS, and concatenate
+     the results.
+     *Note The 'foreach' Function: Foreach Function.
+
+'$(if CONDITION,THEN-PART[,ELSE-PART])'
+     Evaluate the condition CONDITION; if it's non-empty substitute the
+     expansion of the THEN-PART otherwise substitute the expansion of
+     the ELSE-PART.
+     *Note Functions for Conditionals: Conditional Functions.
+
+'$(or CONDITION1[,CONDITION2[,CONDITION3...]])'
+     Evaluate each condition CONDITIONN one at a time; substitute the
+     first non-empty expansion.  If all expansions are empty, substitute
+     the empty string.
+     *Note Functions for Conditionals: Conditional Functions.
+
+'$(and CONDITION1[,CONDITION2[,CONDITION3...]])'
+     Evaluate each condition CONDITIONN one at a time; if any expansion
+     results in the empty string substitute the empty string.  If all
+     expansions result in a non-empty string, substitute the expansion
+     of the last CONDITION.
+     *Note Functions for Conditionals: Conditional Functions.
+
+'$(call VAR,PARAM,...)'
+     Evaluate the variable VAR replacing any references to '$(1)',
+     '$(2)' with the first, second, etc. PARAM values.
+     *Note The 'call' Function: Call Function.
+
+'$(eval TEXT)'
+     Evaluate TEXT then read the results as makefile commands.  Expands
+     to the empty string.
+     *Note The 'eval' Function: Eval Function.
+
+'$(file OP FILENAME,TEXT)'
+     Expand the arguments, then open the file FILENAME using mode OP and
+     write TEXT to that file.
+     *Note The 'file' Function: File Function.
+
+'$(value VAR)'
+     Evaluates to the contents of the variable VAR, with no expansion
+     performed on it.
+     *Note The 'value' Function: Value Function.
+
+   Here is a summary of the automatic variables.  *Note Automatic
+Variables::, for full information.
+
+'$@'
+     The file name of the target.
+
+'$%'
+     The target member name, when the target is an archive member.
+
+'$<'
+     The name of the first prerequisite.
+
+'$?'
+     The names of all the prerequisites that are newer than the target,
+     with spaces between them.  For prerequisites which are archive
+     members, only the named member is used (*note Archives::).
+
+'$^'
+'$+'
+     The names of all the prerequisites, with spaces between them.  For
+     prerequisites which are archive members, only the named member is
+     used (*note Archives::).  The value of '$^' omits duplicate
+     prerequisites, while '$+' retains them and preserves their order.
+
+'$*'
+     The stem with which an implicit rule matches (*note How Patterns
+     Match: Pattern Match.).
+
+'$(@D)'
+'$(@F)'
+     The directory part and the file-within-directory part of '$@'.
+
+'$(*D)'
+'$(*F)'
+     The directory part and the file-within-directory part of '$*'.
+
+'$(%D)'
+'$(%F)'
+     The directory part and the file-within-directory part of '$%'.
+
+'$(<D)'
+'$(<F)'
+     The directory part and the file-within-directory part of '$<'.
+
+'$(^D)'
+'$(^F)'
+     The directory part and the file-within-directory part of '$^'.
+
+'$(+D)'
+'$(+F)'
+     The directory part and the file-within-directory part of '$+'.
+
+'$(?D)'
+'$(?F)'
+     The directory part and the file-within-directory part of '$?'.
+
+   These variables are used specially by GNU 'make':
+
+'MAKEFILES'
+
+     Makefiles to be read on every invocation of 'make'.
+     *Note The Variable 'MAKEFILES': MAKEFILES Variable.
+
+'VPATH'
+
+     Directory search path for files not found in the current directory.
+     *Note 'VPATH' Search Path for All Prerequisites: General Search.
+
+'SHELL'
+
+     The name of the system default command interpreter, usually
+     '/bin/sh'.  You can set 'SHELL' in the makefile to change the shell
+     used to run recipes.  *Note Recipe Execution: Execution.  The
+     'SHELL' variable is handled specially when importing from and
+     exporting to the environment.  *Note Choosing the Shell::.
+
+'MAKESHELL'
+
+     On MS-DOS only, the name of the command interpreter that is to be
+     used by 'make'.  This value takes precedence over the value of
+     'SHELL'.  *Note MAKESHELL variable: Execution.
+
+'MAKE'
+
+     The name with which 'make' was invoked.  Using this variable in
+     recipes has special meaning.  *Note How the 'MAKE' Variable Works:
+     MAKE Variable.
+
+'MAKE_VERSION'
+
+     The built-in variable 'MAKE_VERSION' expands to the version number
+     of the GNU 'make' program.
+
+'MAKE_HOST'
+
+     The built-in variable 'MAKE_HOST' expands to a string representing
+     the host that GNU 'make' was built to run on.
+
+'MAKELEVEL'
+
+     The number of levels of recursion (sub-'make's).
+     *Note Variables/Recursion::.
+
+'MAKEFLAGS'
+
+     The flags given to 'make'.  You can set this in the environment or
+     a makefile to set flags.
+     *Note Communicating Options to a Sub-'make': Options/Recursion.
+
+     It is _never_ appropriate to use 'MAKEFLAGS' directly in a recipe
+     line: its contents may not be quoted correctly for use in the
+     shell.  Always allow recursive 'make''s to obtain these values
+     through the environment from its parent.
+
+'GNUMAKEFLAGS'
+
+     Other flags parsed by 'make'.  You can set this in the environment
+     or a makefile to set 'make' command-line flags.  GNU 'make' never
+     sets this variable itself.  This variable is only needed if you'd
+     like to set GNU 'make'-specific flags in a POSIX-compliant
+     makefile.  This variable will be seen by GNU 'make' and ignored by
+     other 'make' implementations.  It's not needed if you only use GNU
+     'make'; just use 'MAKEFLAGS' directly.  *Note Communicating Options
+     to a Sub-'make': Options/Recursion.
+
+'MAKECMDGOALS'
+
+     The targets given to 'make' on the command line.  Setting this
+     variable has no effect on the operation of 'make'.
+     *Note Arguments to Specify the Goals: Goals.
+
+'CURDIR'
+
+     Set to the absolute pathname of the current working directory
+     (after all '-C' options are processed, if any).  Setting this
+     variable has no effect on the operation of 'make'.
+     *Note Recursive Use of 'make': Recursion.
+
+'SUFFIXES'
+
+     The default list of suffixes before 'make' reads any makefiles.
+
+'.LIBPATTERNS'
+     Defines the naming of the libraries 'make' searches for, and their
+     order.
+     *Note Directory Search for Link Libraries: Libraries/Search.
+
+==============================================================================
+File: make.info,  Node: |Error_Messages|,  Next: |Complex_Makefile|,  Prev: |Quick_Reference|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    *Error_Messages*
+
+Appendix B Errors Generated by Make
+===================================
+
+Here is a list of the more common errors you might see generated by
+'make', and some information about what they mean and how to fix them.
+
+   Sometimes 'make' errors are not fatal, especially in the presence of
+a '-' prefix on a recipe line, or the '-k' command line option.  Errors
+that are fatal are prefixed with the string '***'.
+
+   Error messages are all either prefixed with the name of the program
+(usually 'make'), or, if the error is found in a makefile, the name of
+the file and line number containing the problem.
+
+   In the table below, these common prefixes are left off.
+
+'[FOO] Error NN'
+'[FOO] SIGNAL DESCRIPTION'
+     These errors are not really 'make' errors at all.  They mean that a
+     program that 'make' invoked as part of a recipe returned a non-0
+     error code ('Error NN'), which 'make' interprets as failure, or it
+     exited in some other abnormal fashion (with a signal of some type).
+     *Note Errors in Recipes: Errors.
+
+     If no '***' is attached to the message, then the sub-process failed
+     but the rule in the makefile was prefixed with the '-' special
+     character, so 'make' ignored the error.
+
+'missing separator. Stop.'
+'missing separator (did you mean TAB instead of 8 spaces?). Stop.'
+     This means that 'make' could not understand much of anything about
+     the makefile line it just read.  GNU 'make' looks for various
+     separators (':', '=', recipe prefix characters, etc.)  to indicate
+     what kind of line it's parsing.  This message means it couldn't
+     find a valid one.
+
+     One of the most common reasons for this message is that you (or
+     perhaps your oh-so-helpful editor, as is the case with many
+     MS-Windows editors) have attempted to indent your recipe lines with
+     spaces instead of a tab character.  In this case, 'make' will use
+     the second form of the error above.  Remember that every line in
+     the recipe must begin with a tab character (unless you set
+     '.RECIPEPREFIX'; *note Special Variables::).  Eight spaces do not
+     count.  *Note Rule Syntax::.
+
+'recipe commences before first target. Stop.'
+'missing rule before recipe. Stop.'
+     This means the first thing in the makefile seems to be part of a
+     recipe: it begins with a recipe prefix character and doesn't appear
+     to be a legal 'make' directive (such as a variable assignment).
+     Recipes must always be associated with a target.
+
+     The second form is generated if the line has a semicolon as the
+     first non-whitespace character; 'make' interprets this to mean you
+     left out the "target: prerequisite" section of a rule.  *Note Rule
+     Syntax::.
+
+'No rule to make target `XXX'.'
+'No rule to make target `XXX', needed by `YYY'.'
+     This means that 'make' decided it needed to build a target, but
+     then couldn't find any instructions in the makefile on how to do
+     that, either explicit or implicit (including in the default rules
+     database).
+
+     If you want that file to be built, you will need to add a rule to
+     your makefile describing how that target can be built.  Other
+     possible sources of this problem are typos in the makefile (if that
+     file name is wrong) or a corrupted source tree (if that file is not
+     supposed to be built, but rather only a prerequisite).
+
+'No targets specified and no makefile found. Stop.'
+'No targets. Stop.'
+     The former means that you didn't provide any targets to be built on
+     the command line, and 'make' couldn't find any makefiles to read
+     in.  The latter means that some makefile was found, but it didn't
+     contain any default goal and none was given on the command line.
+     GNU 'make' has nothing to do in these situations.  *Note Arguments
+     to Specify the Makefile: Makefile Arguments.
+
+'Makefile `XXX' was not found.'
+'Included makefile `XXX' was not found.'
+     A makefile specified on the command line (first form) or included
+     (second form) was not found.
+
+'warning: overriding recipe for target `XXX''
+'warning: ignoring old recipe for target `XXX''
+     GNU 'make' allows only one recipe to be specified per target
+     (except for double-colon rules).  If you give a recipe for a target
+     which already has been defined to have one, this warning is issued
+     and the second recipe will overwrite the first.  *Note Multiple
+     Rules for One Target: Multiple Rules.
+
+'Circular XXX <- YYY dependency dropped.'
+     This means that 'make' detected a loop in the dependency graph:
+     after tracing the prerequisite YYY of target XXX, and its
+     prerequisites, etc., one of them depended on XXX again.
+
+'Recursive variable `XXX' references itself (eventually). Stop.'
+     This means you've defined a normal (recursive) 'make' variable XXX
+     that, when it's expanded, will refer to itself (XXX).  This is not
+     allowed; either use simply-expanded variables (':=' or '::=') or
+     use the append operator ('+=').  *Note How to Use Variables: Using
+     Variables.
+
+'Unterminated variable reference. Stop.'
+     This means you forgot to provide the proper closing parenthesis or
+     brace in your variable or function reference.
+
+'insufficient arguments to function `XXX'. Stop.'
+     This means you haven't provided the requisite number of arguments
+     for this function.  See the documentation of the function for a
+     description of its arguments.  *Note Functions for Transforming
+     Text: Functions.
+
+'missing target pattern. Stop.'
+'multiple target patterns. Stop.'
+'target pattern contains no `%'. Stop.'
+'mixed implicit and static pattern rules. Stop.'
+     These are generated for malformed static pattern rules.  The first
+     means there's no pattern in the target section of the rule; the
+     second means there are multiple patterns in the target section; the
+     third means the target doesn't contain a pattern character ('%');
+     and the fourth means that all three parts of the static pattern
+     rule contain pattern characters ('%')-only the first two parts
+     should.  If you see these errors and you aren't trying to create a
+     static pattern rule, check the value of any variables in your
+     target and prerequisite lists to be sure they do not contain
+     colons.  *Note Syntax of Static Pattern Rules: Static Usage.
+
+'warning: -jN forced in submake: disabling jobserver mode.'
+     This warning and the next are generated if 'make' detects error
+     conditions related to parallel processing on systems where
+     sub-'make's can communicate (*note Communicating Options to a
+     Sub-'make': Options/Recursion.).  This warning is generated if a
+     recursive invocation of a 'make' process is forced to have '-jN' in
+     its argument list (where N is greater than one).  This could
+     happen, for example, if you set the 'MAKE' environment variable to
+     'make -j2'.  In this case, the sub-'make' doesn't communicate with
+     other 'make' processes and will simply pretend it has two jobs of
+     its own.
+
+'warning: jobserver unavailable: using -j1. Add `+' to parent make rule.'
+     In order for 'make' processes to communicate, the parent will pass
+     information to the child.  Since this could result in problems if
+     the child process isn't actually a 'make', the parent will only do
+     this if it thinks the child is a 'make'.  The parent uses the
+     normal algorithms to determine this (*note How the 'MAKE' Variable
+     Works: MAKE Variable.).  If the makefile is constructed such that
+     the parent doesn't know the child is a 'make' process, then the
+     child will receive only part of the information necessary.  In this
+     case, the child will generate this warning message and proceed with
+     its build in a sequential manner.
+
+==============================================================================
+File: make.info,  Node: |Complex_Makefile|,  Next: |GNU_Free_Documentation_License|,  Prev: |Error_Messages|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  *Complex_Makefile*
+
+Appendix C Complex Makefile Example
+===================================
+
+Here is the makefile for the GNU 'tar' program.  This is a moderately
+complex makefile.  The first line uses a '#!' setting to allow the
+makefile to be executed directly.
+
+   Because it is the first target, the default goal is 'all'.  An
+interesting feature of this makefile is that 'testpad.h' is a source
+file automatically created by the 'testpad' program, itself compiled
+from 'testpad.c'.
+
+   If you type 'make' or 'make all', then 'make' creates the 'tar'
+executable, the 'rmt' daemon that provides remote tape access, and the
+'tar.info' Info file.
+
+   If you type 'make install', then 'make' not only creates 'tar',
+'rmt', and 'tar.info', but also installs them.
+
+   If you type 'make clean', then 'make' removes the '.o' files, and the
+'tar', 'rmt', 'testpad', 'testpad.h', and 'core' files.
+
+   If you type 'make distclean', then 'make' not only removes the same
+files as does 'make clean' but also the 'TAGS', 'Makefile', and
+'config.status' files.  (Although it is not evident, this makefile (and
+'config.status') is generated by the user with the 'configure' program,
+which is provided in the 'tar' distribution, but is not shown here.)
+
+   If you type 'make realclean', then 'make' removes the same files as
+does 'make distclean' and also removes the Info files generated from
+'tar.texinfo'.
+
+   In addition, there are targets 'shar' and 'dist' that create
+distribution kits.
+
+     #!/usr/bin/make -f
+     # Generated automatically from Makefile.in by configure.
+     # Un*x Makefile for GNU tar program.
+     # Copyright (C) 1991 Free Software Foundation, Inc.
+
+     # This program is free software; you can redistribute
+     # it and/or modify it under the terms of the GNU
+     # General Public License ...
+     ...
+     ...
+
+     SHELL = /bin/sh
+
+     #### Start of system configuration section. ####
+
+     srcdir = .
+
+     # If you use gcc, you should either run the
+     # fixincludes script that comes with it or else use
+     # gcc with the -traditional option.  Otherwise ioctl
+     # calls will be compiled incorrectly on some systems.
+     CC = gcc -O
+     YACC = bison -y
+     INSTALL = /usr/local/bin/install -c
+     INSTALLDATA = /usr/local/bin/install -c -m 644
+
+     # Things you might add to DEFS:
+     # -DSTDC_HEADERS        If you have ANSI C headers and
+     #                       libraries.
+     # -DPOSIX               If you have POSIX.1 headers and
+     #                       libraries.
+     # -DBSD42               If you have sys/dir.h (unless
+     #                       you use -DPOSIX), sys/file.h,
+     #                       and st_blocks in `struct stat'.
+     # -DUSG                 If you have System V/ANSI C
+     #                       string and memory functions
+     #                       and headers, sys/sysmacros.h,
+     #                       fcntl.h, getcwd, no valloc,
+     #                       and ndir.h (unless
+     #                       you use -DDIRENT).
+     # -DNO_MEMORY_H         If USG or STDC_HEADERS but do not
+     #                       include memory.h.
+     # -DDIRENT              If USG and you have dirent.h
+     #                       instead of ndir.h.
+     # -DSIGTYPE=int         If your signal handlers
+     #                       return int, not void.
+     # -DNO_MTIO             If you lack sys/mtio.h
+     #                       (magtape ioctls).
+     # -DNO_REMOTE           If you do not have a remote shell
+     #                       or rexec.
+     # -DUSE_REXEC           To use rexec for remote tape
+     #                       operations instead of
+     #                       forking rsh or remsh.
+     # -DVPRINTF_MISSING     If you lack vprintf function
+     #                       (but have _doprnt).
+     # -DDOPRNT_MISSING      If you lack _doprnt function.
+     #                       Also need to define
+     #                       -DVPRINTF_MISSING.
+     # -DFTIME_MISSING       If you lack ftime system call.
+     # -DSTRSTR_MISSING      If you lack strstr function.
+     # -DVALLOC_MISSING      If you lack valloc function.
+     # -DMKDIR_MISSING       If you lack mkdir and
+     #                       rmdir system calls.
+     # -DRENAME_MISSING      If you lack rename system call.
+     # -DFTRUNCATE_MISSING   If you lack ftruncate
+     #                       system call.
+     # -DV7                  On Version 7 Unix (not
+     #                       tested in a long time).
+     # -DEMUL_OPEN3          If you lack a 3-argument version
+     #                       of open, and want to emulate it
+     #                       with system calls you do have.
+     # -DNO_OPEN3            If you lack the 3-argument open
+     #                       and want to disable the tar -k
+     #                       option instead of emulating open.
+     # -DXENIX               If you have sys/inode.h
+     #                       and need it 94 to be included.
+
+     DEFS =  -DSIGTYPE=int -DDIRENT -DSTRSTR_MISSING \
+             -DVPRINTF_MISSING -DBSD42
+     # Set this to rtapelib.o unless you defined NO_REMOTE,
+     # in which case make it empty.
+     RTAPELIB = rtapelib.o
+     LIBS =
+     DEF_AR_FILE = /dev/rmt8
+     DEFBLOCKING = 20
+
+     CDEBUG = -g
+     CFLAGS = $(CDEBUG) -I. -I$(srcdir) $(DEFS) \
+             -DDEF_AR_FILE=\"$(DEF_AR_FILE)\" \
+             -DDEFBLOCKING=$(DEFBLOCKING)
+     LDFLAGS = -g
+
+     prefix = /usr/local
+     # Prefix for each installed program,
+     # normally empty or `g'.
+     binprefix =
+
+     # The directory to install tar in.
+     bindir = $(prefix)/bin
+
+     # The directory to install the info files in.
+     infodir = $(prefix)/info
+
+     #### End of system configuration section. ####
+
+     SRCS_C  = tar.c create.c extract.c buffer.c   \
+               getoldopt.c update.c gnu.c mangle.c \
+               version.c list.c names.c diffarch.c \
+               port.c wildmat.c getopt.c getopt1.c \
+               regex.c
+     SRCS_Y  = getdate.y
+     SRCS    = $(SRCS_C) $(SRCS_Y)
+     OBJS    = $(SRCS_C:.c=.o) $(SRCS_Y:.y=.o) $(RTAPELIB)
+     AUX =   README COPYING ChangeLog Makefile.in  \
+             makefile.pc configure configure.in \
+             tar.texinfo tar.info* texinfo.tex \
+             tar.h port.h open3.h getopt.h regex.h \
+             rmt.h rmt.c rtapelib.c alloca.c \
+             msd_dir.h msd_dir.c tcexparg.c \
+             level-0 level-1 backup-specs testpad.c
+
+     .PHONY: all
+     all:    tar rmt tar.info
+
+     tar:    $(OBJS)
+             $(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+
+     rmt:    rmt.c
+             $(CC) $(CFLAGS) $(LDFLAGS) -o $@ rmt.c
+
+     tar.info: tar.texinfo
+             makeinfo tar.texinfo
+
+     .PHONY: install
+     install: all
+             $(INSTALL) tar $(bindir)/$(binprefix)tar
+             -test ! -f rmt || $(INSTALL) rmt /etc/rmt
+             $(INSTALLDATA) $(srcdir)/tar.info* $(infodir)
+
+     $(OBJS): tar.h port.h testpad.h
+     regex.o buffer.o tar.o: regex.h
+     # getdate.y has 8 shift/reduce conflicts.
+
+     testpad.h: testpad
+             ./testpad
+
+     testpad: testpad.o
+             $(CC) -o $@ testpad.o
+
+     TAGS:   $(SRCS)
+             etags $(SRCS)
+
+     .PHONY: clean
+     clean:
+             rm -f *.o tar rmt testpad testpad.h core
+
+     .PHONY: distclean
+     distclean: clean
+             rm -f TAGS Makefile config.status
+
+     .PHONY: realclean
+     realclean: distclean
+             rm -f tar.info*
+
+     .PHONY: shar
+     shar: $(SRCS) $(AUX)
+             shar $(SRCS) $(AUX) | compress \
+               > tar-`sed -e '/version_string/!d' \
+                          -e 's/[^0-9.]*\([0-9.]*\).*/\1/' \
+                          -e q
+                          version.c`.shar.Z
+
+     .PHONY: dist
+     dist: $(SRCS) $(AUX)
+             echo tar-`sed \
+                  -e '/version_string/!d' \
+                  -e 's/[^0-9.]*\([0-9.]*\).*/\1/' \
+                  -e q
+                  version.c` > .fname
+             -rm -rf `cat .fname`
+             mkdir `cat .fname`
+             ln $(SRCS) $(AUX) `cat .fname`
+             tar chZf `cat .fname`.tar.Z `cat .fname`
+             -rm -rf `cat .fname` .fname
+
+     tar.zoo: $(SRCS) $(AUX)
+             -rm -rf tmp.dir
+             -mkdir tmp.dir
+             -rm tar.zoo
+             for X in $(SRCS) $(AUX) ; do \
+                 echo $$X ; \
+                 sed 's/$$/^M/' $$X \
+                 > tmp.dir/$$X ; done
+             cd tmp.dir ; zoo aM ../tar.zoo *
+             -rm -rf tmp.dir
+
+==============================================================================
+File: make.info,  Node: |GNU_Free_Documentation_License|,  Next: |Concept_Index|,  Prev: |Complex_Makefile|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    *GNU_Free_Documentation_License*
+
+C.1 GNU Free Documentation License
+----------------------------------
+
+                     Version 1.3, 3 November 2008
+
+     Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc.
+     <http://fsf.org/>
+
+     Everyone is permitted to copy and distribute verbatim copies
+     of this license document, but changing it is not allowed.
+
+  0. PREAMBLE
+
+     The purpose of this License is to make a manual, textbook, or other
+     functional and useful document "free" in the sense of freedom: to
+     assure everyone the effective freedom to copy and redistribute it,
+     with or without modifying it, either commercially or
+     noncommercially.  Secondarily, this License preserves for the
+     author and publisher a way to get credit for their work, while not
+     being considered responsible for modifications made by others.
+
+     This License is a kind of "copyleft", which means that derivative
+     works of the document must themselves be free in the same sense.
+     It complements the GNU General Public License, which is a copyleft
+     license designed for free software.
+
+     We have designed this License in order to use it for manuals for
+     free software, because free software needs free documentation: a
+     free program should come with manuals providing the same freedoms
+     that the software does.  But this License is not limited to
+     software manuals; it can be used for any textual work, regardless
+     of subject matter or whether it is published as a printed book.  We
+     recommend this License principally for works whose purpose is
+     instruction or reference.
+
+  1. APPLICABILITY AND DEFINITIONS
+
+     This License applies to any manual or other work, in any medium,
+     that contains a notice placed by the copyright holder saying it can
+     be distributed under the terms of this License.  Such a notice
+     grants a world-wide, royalty-free license, unlimited in duration,
+     to use that work under the conditions stated herein.  The
+     "Document", below, refers to any such manual or work.  Any member
+     of the public is a licensee, and is addressed as "you".  You accept
+     the license if you copy, modify or distribute the work in a way
+     requiring permission under copyright law.
+
+     A "Modified Version" of the Document means any work containing the
+     Document or a portion of it, either copied verbatim, or with
+     modifications and/or translated into another language.
+
+     A "Secondary Section" is a named appendix or a front-matter section
+     of the Document that deals exclusively with the relationship of the
+     publishers or authors of the Document to the Document's overall
+     subject (or to related matters) and contains nothing that could
+     fall directly within that overall subject.  (Thus, if the Document
+     is in part a textbook of mathematics, a Secondary Section may not
+     explain any mathematics.)  The relationship could be a matter of
+     historical connection with the subject or with related matters, or
+     of legal, commercial, philosophical, ethical or political position
+     regarding them.
+
+     The "Invariant Sections" are certain Secondary Sections whose
+     titles are designated, as being those of Invariant Sections, in the
+     notice that says that the Document is released under this License.
+     If a section does not fit the above definition of Secondary then it
+     is not allowed to be designated as Invariant.  The Document may
+     contain zero Invariant Sections.  If the Document does not identify
+     any Invariant Sections then there are none.
+
+     The "Cover Texts" are certain short passages of text that are
+     listed, as Front-Cover Texts or Back-Cover Texts, in the notice
+     that says that the Document is released under this License.  A
+     Front-Cover Text may be at most 5 words, and a Back-Cover Text may
+     be at most 25 words.
+
+     A "Transparent" copy of the Document means a machine-readable copy,
+     represented in a format whose specification is available to the
+     general public, that is suitable for revising the document
+     straightforwardly with generic text editors or (for images composed
+     of pixels) generic paint programs or (for drawings) some widely
+     available drawing editor, and that is suitable for input to text
+     formatters or for automatic translation to a variety of formats
+     suitable for input to text formatters.  A copy made in an otherwise
+     Transparent file format whose markup, or absence of markup, has
+     been arranged to thwart or discourage subsequent modification by
+     readers is not Transparent.  An image format is not Transparent if
+     used for any substantial amount of text.  A copy that is not
+     "Transparent" is called "Opaque".
+
+     Examples of suitable formats for Transparent copies include plain
+     ASCII without markup, Texinfo input format, LaTeX input format,
+     SGML or XML using a publicly available DTD, and standard-conforming
+     simple HTML, PostScript or PDF designed for human modification.
+     Examples of transparent image formats include PNG, XCF and JPG.
+     Opaque formats include proprietary formats that can be read and
+     edited only by proprietary word processors, SGML or XML for which
+     the DTD and/or processing tools are not generally available, and
+     the machine-generated HTML, PostScript or PDF produced by some word
+     processors for output purposes only.
+
+     The "Title Page" means, for a printed book, the title page itself,
+     plus such following pages as are needed to hold, legibly, the
+     material this License requires to appear in the title page.  For
+     works in formats which do not have any title page as such, "Title
+     Page" means the text near the most prominent appearance of the
+     work's title, preceding the beginning of the body of the text.
+
+     The "publisher" means any person or entity that distributes copies
+     of the Document to the public.
+
+     A section "Entitled XYZ" means a named subunit of the Document
+     whose title either is precisely XYZ or contains XYZ in parentheses
+     following text that translates XYZ in another language.  (Here XYZ
+     stands for a specific section name mentioned below, such as
+     "Acknowledgements", "Dedications", "Endorsements", or "History".)
+     To "Preserve the Title" of such a section when you modify the
+     Document means that it remains a section "Entitled XYZ" according
+     to this definition.
+
+     The Document may include Warranty Disclaimers next to the notice
+     which states that this License applies to the Document.  These
+     Warranty Disclaimers are considered to be included by reference in
+     this License, but only as regards disclaiming warranties: any other
+     implication that these Warranty Disclaimers may have is void and
+     has no effect on the meaning of this License.
+
+  2. VERBATIM COPYING
+
+     You may copy and distribute the Document in any medium, either
+     commercially or noncommercially, provided that this License, the
+     copyright notices, and the license notice saying this License
+     applies to the Document are reproduced in all copies, and that you
+     add no other conditions whatsoever to those of this License.  You
+     may not use technical measures to obstruct or control the reading
+     or further copying of the copies you make or distribute.  However,
+     you may accept compensation in exchange for copies.  If you
+     distribute a large enough number of copies you must also follow the
+     conditions in section 3.
+
+     You may also lend copies, under the same conditions stated above,
+     and you may publicly display copies.
+
+  3. COPYING IN QUANTITY
+
+     If you publish printed copies (or copies in media that commonly
+     have printed covers) of the Document, numbering more than 100, and
+     the Document's license notice requires Cover Texts, you must
+     enclose the copies in covers that carry, clearly and legibly, all
+     these Cover Texts: Front-Cover Texts on the front cover, and
+     Back-Cover Texts on the back cover.  Both covers must also clearly
+     and legibly identify you as the publisher of these copies.  The
+     front cover must present the full title with all words of the title
+     equally prominent and visible.  You may add other material on the
+     covers in addition.  Copying with changes limited to the covers, as
+     long as they preserve the title of the Document and satisfy these
+     conditions, can be treated as verbatim copying in other respects.
+
+     If the required texts for either cover are too voluminous to fit
+     legibly, you should put the first ones listed (as many as fit
+     reasonably) on the actual cover, and continue the rest onto
+     adjacent pages.
+
+     If you publish or distribute Opaque copies of the Document
+     numbering more than 100, you must either include a machine-readable
+     Transparent copy along with each Opaque copy, or state in or with
+     each Opaque copy a computer-network location from which the general
+     network-using public has access to download using public-standard
+     network protocols a complete Transparent copy of the Document, free
+     of added material.  If you use the latter option, you must take
+     reasonably prudent steps, when you begin distribution of Opaque
+     copies in quantity, to ensure that this Transparent copy will
+     remain thus accessible at the stated location until at least one
+     year after the last time you distribute an Opaque copy (directly or
+     through your agents or retailers) of that edition to the public.
+
+     It is requested, but not required, that you contact the authors of
+     the Document well before redistributing any large number of copies,
+     to give them a chance to provide you with an updated version of the
+     Document.
+
+  4. MODIFICATIONS
+
+     You may copy and distribute a Modified Version of the Document
+     under the conditions of sections 2 and 3 above, provided that you
+     release the Modified Version under precisely this License, with the
+     Modified Version filling the role of the Document, thus licensing
+     distribution and modification of the Modified Version to whoever
+     possesses a copy of it.  In addition, you must do these things in
+     the Modified Version:
+
+       A. Use in the Title Page (and on the covers, if any) a title
+          distinct from that of the Document, and from those of previous
+          versions (which should, if there were any, be listed in the
+          History section of the Document).  You may use the same title
+          as a previous version if the original publisher of that
+          version gives permission.
+
+       B. List on the Title Page, as authors, one or more persons or
+          entities responsible for authorship of the modifications in
+          the Modified Version, together with at least five of the
+          principal authors of the Document (all of its principal
+          authors, if it has fewer than five), unless they release you
+          from this requirement.
+
+       C. State on the Title page the name of the publisher of the
+          Modified Version, as the publisher.
+
+       D. Preserve all the copyright notices of the Document.
+
+       E. Add an appropriate copyright notice for your modifications
+          adjacent to the other copyright notices.
+
+       F. Include, immediately after the copyright notices, a license
+          notice giving the public permission to use the Modified
+          Version under the terms of this License, in the form shown in
+          the Addendum below.
+
+       G. Preserve in that license notice the full lists of Invariant
+          Sections and required Cover Texts given in the Document's
+          license notice.
+
+       H. Include an unaltered copy of this License.
+
+       I. Preserve the section Entitled "History", Preserve its Title,
+          and add to it an item stating at least the title, year, new
+          authors, and publisher of the Modified Version as given on the
+          Title Page.  If there is no section Entitled "History" in the
+          Document, create one stating the title, year, authors, and
+          publisher of the Document as given on its Title Page, then add
+          an item describing the Modified Version as stated in the
+          previous sentence.
+
+       J. Preserve the network location, if any, given in the Document
+          for public access to a Transparent copy of the Document, and
+          likewise the network locations given in the Document for
+          previous versions it was based on.  These may be placed in the
+          "History" section.  You may omit a network location for a work
+          that was published at least four years before the Document
+          itself, or if the original publisher of the version it refers
+          to gives permission.
+
+       K. For any section Entitled "Acknowledgements" or "Dedications",
+          Preserve the Title of the section, and preserve in the section
+          all the substance and tone of each of the contributor
+          acknowledgements and/or dedications given therein.
+
+       L. Preserve all the Invariant Sections of the Document, unaltered
+          in their text and in their titles.  Section numbers or the
+          equivalent are not considered part of the section titles.
+
+       M. Delete any section Entitled "Endorsements".  Such a section
+          may not be included in the Modified Version.
+
+       N. Do not retitle any existing section to be Entitled
+          "Endorsements" or to conflict in title with any Invariant
+          Section.
+
+       O. Preserve any Warranty Disclaimers.
+
+     If the Modified Version includes new front-matter sections or
+     appendices that qualify as Secondary Sections and contain no
+     material copied from the Document, you may at your option designate
+     some or all of these sections as invariant.  To do this, add their
+     titles to the list of Invariant Sections in the Modified Version's
+     license notice.  These titles must be distinct from any other
+     section titles.
+
+     You may add a section Entitled "Endorsements", provided it contains
+     nothing but endorsements of your Modified Version by various
+     parties--for example, statements of peer review or that the text
+     has been approved by an organization as the authoritative
+     definition of a standard.
+
+     You may add a passage of up to five words as a Front-Cover Text,
+     and a passage of up to 25 words as a Back-Cover Text, to the end of
+     the list of Cover Texts in the Modified Version.  Only one passage
+     of Front-Cover Text and one of Back-Cover Text may be added by (or
+     through arrangements made by) any one entity.  If the Document
+     already includes a cover text for the same cover, previously added
+     by you or by arrangement made by the same entity you are acting on
+     behalf of, you may not add another; but you may replace the old
+     one, on explicit permission from the previous publisher that added
+     the old one.
+
+     The author(s) and publisher(s) of the Document do not by this
+     License give permission to use their names for publicity for or to
+     assert or imply endorsement of any Modified Version.
+
+  5. COMBINING DOCUMENTS
+
+     You may combine the Document with other documents released under
+     this License, under the terms defined in section 4 above for
+     modified versions, provided that you include in the combination all
+     of the Invariant Sections of all of the original documents,
+     unmodified, and list them all as Invariant Sections of your
+     combined work in its license notice, and that you preserve all
+     their Warranty Disclaimers.
+
+     The combined work need only contain one copy of this License, and
+     multiple identical Invariant Sections may be replaced with a single
+     copy.  If there are multiple Invariant Sections with the same name
+     but different contents, make the title of each such section unique
+     by adding at the end of it, in parentheses, the name of the
+     original author or publisher of that section if known, or else a
+     unique number.  Make the same adjustment to the section titles in
+     the list of Invariant Sections in the license notice of the
+     combined work.
+
+     In the combination, you must combine any sections Entitled
+     "History" in the various original documents, forming one section
+     Entitled "History"; likewise combine any sections Entitled
+     "Acknowledgements", and any sections Entitled "Dedications".  You
+     must delete all sections Entitled "Endorsements."
+
+  6. COLLECTIONS OF DOCUMENTS
+
+     You may make a collection consisting of the Document and other
+     documents released under this License, and replace the individual
+     copies of this License in the various documents with a single copy
+     that is included in the collection, provided that you follow the
+     rules of this License for verbatim copying of each of the documents
+     in all other respects.
+
+     You may extract a single document from such a collection, and
+     distribute it individually under this License, provided you insert
+     a copy of this License into the extracted document, and follow this
+     License in all other respects regarding verbatim copying of that
+     document.
+
+  7. AGGREGATION WITH INDEPENDENT WORKS
+
+     A compilation of the Document or its derivatives with other
+     separate and independent documents or works, in or on a volume of a
+     storage or distribution medium, is called an "aggregate" if the
+     copyright resulting from the compilation is not used to limit the
+     legal rights of the compilation's users beyond what the individual
+     works permit.  When the Document is included in an aggregate, this
+     License does not apply to the other works in the aggregate which
+     are not themselves derivative works of the Document.
+
+     If the Cover Text requirement of section 3 is applicable to these
+     copies of the Document, then if the Document is less than one half
+     of the entire aggregate, the Document's Cover Texts may be placed
+     on covers that bracket the Document within the aggregate, or the
+     electronic equivalent of covers if the Document is in electronic
+     form.  Otherwise they must appear on printed covers that bracket
+     the whole aggregate.
+
+  8. TRANSLATION
+
+     Translation is considered a kind of modification, so you may
+     distribute translations of the Document under the terms of section
+     4.  Replacing Invariant Sections with translations requires special
+     permission from their copyright holders, but you may include
+     translations of some or all Invariant Sections in addition to the
+     original versions of these Invariant Sections.  You may include a
+     translation of this License, and all the license notices in the
+     Document, and any Warranty Disclaimers, provided that you also
+     include the original English version of this License and the
+     original versions of those notices and disclaimers.  In case of a
+     disagreement between the translation and the original version of
+     this License or a notice or disclaimer, the original version will
+     prevail.
+
+     If a section in the Document is Entitled "Acknowledgements",
+     "Dedications", or "History", the requirement (section 4) to
+     Preserve its Title (section 1) will typically require changing the
+     actual title.
+
+  9. TERMINATION
+
+     You may not copy, modify, sublicense, or distribute the Document
+     except as expressly provided under this License.  Any attempt
+     otherwise to copy, modify, sublicense, or distribute it is void,
+     and will automatically terminate your rights under this License.
+
+     However, if you cease all violation of this License, then your
+     license from a particular copyright holder is reinstated (a)
+     provisionally, unless and until the copyright holder explicitly and
+     finally terminates your license, and (b) permanently, if the
+     copyright holder fails to notify you of the violation by some
+     reasonable means prior to 60 days after the cessation.
+
+     Moreover, your license from a particular copyright holder is
+     reinstated permanently if the copyright holder notifies you of the
+     violation by some reasonable means, this is the first time you have
+     received notice of violation of this License (for any work) from
+     that copyright holder, and you cure the violation prior to 30 days
+     after your receipt of the notice.
+
+     Termination of your rights under this section does not terminate
+     the licenses of parties who have received copies or rights from you
+     under this License.  If your rights have been terminated and not
+     permanently reinstated, receipt of a copy of some or all of the
+     same material does not give you any rights to use it.
+
+  10. FUTURE REVISIONS OF THIS LICENSE
+
+     The Free Software Foundation may publish new, revised versions of
+     the GNU Free Documentation License from time to time.  Such new
+     versions will be similar in spirit to the present version, but may
+     differ in detail to address new problems or concerns.  See
+     <http://www.gnu.org/copyleft/>.
+
+     Each version of the License is given a distinguishing version
+     number.  If the Document specifies that a particular numbered
+     version of this License "or any later version" applies to it, you
+     have the option of following the terms and conditions either of
+     that specified version or of any later version that has been
+     published (not as a draft) by the Free Software Foundation.  If the
+     Document does not specify a version number of this License, you may
+     choose any version ever published (not as a draft) by the Free
+     Software Foundation.  If the Document specifies that a proxy can
+     decide which future versions of this License can be used, that
+     proxy's public statement of acceptance of a version permanently
+     authorizes you to choose that version for the Document.
+
+  11. RELICENSING
+
+     "Massive Multiauthor Collaboration Site" (or "MMC Site") means any
+     World Wide Web server that publishes copyrightable works and also
+     provides prominent facilities for anybody to edit those works.  A
+     public wiki that anybody can edit is an example of such a server.
+     A "Massive Multiauthor Collaboration" (or "MMC") contained in the
+     site means any set of copyrightable works thus published on the MMC
+     site.
+
+     "CC-BY-SA" means the Creative Commons Attribution-Share Alike 3.0
+     license published by Creative Commons Corporation, a not-for-profit
+     corporation with a principal place of business in San Francisco,
+     California, as well as future copyleft versions of that license
+     published by that same organization.
+
+     "Incorporate" means to publish or republish a Document, in whole or
+     in part, as part of another Document.
+
+     An MMC is "eligible for relicensing" if it is licensed under this
+     License, and if all works that were first published under this
+     License somewhere other than this MMC, and subsequently
+     incorporated in whole or in part into the MMC, (1) had no cover
+     texts or invariant sections, and (2) were thus incorporated prior
+     to November 1, 2008.
+
+     The operator of an MMC Site may republish an MMC contained in the
+     site under CC-BY-SA on the same site at any time before August 1,
+     2009, provided the MMC is eligible for relicensing.
+
+ADDENDUM: How to use this License for your documents
+----------------------------------------------------
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and license
+notices just after the title page:
+
+       Copyright (C)  YEAR  YOUR NAME.
+       Permission is granted to copy, distribute and/or modify this document
+       under the terms of the GNU Free Documentation License, Version 1.3
+       or any later version published by the Free Software Foundation;
+       with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+       Texts.  A copy of the license is included in the section entitled ``GNU
+       Free Documentation License''.
+
+   If you have Invariant Sections, Front-Cover Texts and Back-Cover
+Texts, replace the "with...Texts." line with this:
+
+         with the Invariant Sections being LIST THEIR TITLES, with
+         the Front-Cover Texts being LIST, and with the Back-Cover Texts
+         being LIST.
+
+   If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+   If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of free
+software license, such as the GNU General Public License, to permit
+their use in free software.
+
+==============================================================================
+File: make.info,  Node: |Concept_Index|,  Next: |Name_Index|,  Prev: |GNU_Free_Documentation_License|,  Up: |Top|
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     *Concept_Index*
+
+Index of Concepts
+=================
+
+
+MENU
+
+* !=:                                    Setting.             (line   6)
+* !=, expansion:                         Reading Makefiles.   (line  33)
+* # (comments), in makefile:             Makefile Contents.   (line  41)
+* # (comments), in recipes:              Recipe Syntax.       (line  29)
+* #include:                              Automatic Prerequisites.
+                                                              (line  16)
+* $, in function call:                   Syntax of Functions. (line   6)
+* $, in rules:                           Rule Syntax.         (line  33)
+* $, in variable name:                   Computed Names.      (line   6)
+* $, in variable reference:              Reference.           (line   6)
+* %, in pattern rules:                   Pattern Intro.       (line   9)
+* %, quoting in patsubst:                Text Functions.      (line  26)
+* %, quoting in static pattern:          Static Usage.        (line  37)
+* %, quoting in vpath:                   Selective Search.    (line  39)
+* %, quoting with \ (backslash):         Selective Search.    (line  39)
+* %, quoting with \ (backslash) <1>:     Static Usage.        (line  37)
+* %, quoting with \ (backslash) <2>:     Text Functions.      (line  26)
+* * (wildcard character):                Wildcards.           (line   6)
+* +, and define:                         Canned Recipes.      (line  49)
+* +, and recipe execution:               Instead of Execution.
+                                                              (line  67)
+* +, and recipes:                        MAKE Variable.       (line  18)
+* +=:                                    Appending.           (line   6)
+* +=, expansion:                         Reading Makefiles.   (line  33)
+* +=, expansion <1>:                     Reading Makefiles.   (line  33)
+* ,v (RCS file extension):               Catalogue of Rules.  (line 163)
+* - (in recipes):                        Errors.              (line  19)
+* -, and define:                         Canned Recipes.      (line  49)
+* --always-make:                         Options Summary.     (line  15)
+* --assume-new:                          Instead of Execution.
+                                                              (line  41)
+* --assume-new <1>:                      Options Summary.     (line 284)
+* --assume-new, and recursion:           Options/Recursion.   (line  22)
+* --assume-old:                          Avoiding Compilation.
+                                                              (line   6)
+* --assume-old <1>:                      Options Summary.     (line 163)
+* --assume-old, and recursion:           Options/Recursion.   (line  22)
+* --check-symlink-times:                 Options Summary.     (line 144)
+* --debug:                               Options Summary.     (line  43)
+* --directory:                           Recursion.           (line  20)
+* --directory <1>:                       Options Summary.     (line  26)
+* --directory, and --print-directory:    -w Option.           (line  20)
+* --directory, and recursion:            Options/Recursion.   (line  22)
+* --dry-run:                             Echoing.             (line  18)
+* --dry-run <1>:                         Instead of Execution.
+                                                              (line  14)
+* --dry-run <2>:                         Options Summary.     (line 154)
+* --environment-overrides:               Options Summary.     (line  85)
+* --eval:                                Options Summary.     (line  89)
+* --file:                                Makefile Names.      (line  23)
+* --file <1>:                            Makefile Arguments.  (line   6)
+* --file <2>:                            Options Summary.     (line  97)
+* --file, and recursion:                 Options/Recursion.   (line  22)
+* --help:                                Options Summary.     (line 103)
+* --ignore-errors:                       Errors.              (line  30)
+* --ignore-errors <1>:                   Options Summary.     (line 108)
+* --include-dir:                         Include.             (line  53)
+* --include-dir <1>:                     Options Summary.     (line 113)
+* --jobs:                                Parallel.            (line   6)
+* --jobs <1>:                            Options Summary.     (line 120)
+* --jobs, and recursion:                 Options/Recursion.   (line  25)
+* --just-print:                          Echoing.             (line  18)
+* --just-print <1>:                      Instead of Execution.
+                                                              (line  14)
+* --just-print <2>:                      Options Summary.     (line 153)
+* --keep-going:                          Errors.              (line  47)
+* --keep-going <1>:                      Testing.             (line  16)
+* --keep-going <2>:                      Options Summary.     (line 129)
+* --load-average:                        Parallel.            (line  35)
+* --load-average <1>:                    Options Summary.     (line 136)
+* --makefile:                            Makefile Names.      (line  23)
+* --makefile <1>:                        Makefile Arguments.  (line   6)
+* --makefile <2>:                        Options Summary.     (line  98)
+* --max-load:                            Parallel.            (line  35)
+* --max-load <1>:                        Options Summary.     (line 137)
+* --new-file:                            Instead of Execution.
+                                                              (line  41)
+* --new-file <1>:                        Options Summary.     (line 283)
+* --new-file, and recursion:             Options/Recursion.   (line  22)
+* --no-builtin-rules:                    Options Summary.     (line 209)
+* --no-builtin-variables:                Options Summary.     (line 222)
+* --no-keep-going:                       Options Summary.     (line 238)
+* --no-print-directory:                  -w Option.           (line  20)
+* --no-print-directory <1>:              Options Summary.     (line 275)
+* --old-file:                            Avoiding Compilation.
+                                                              (line   6)
+* --old-file <1>:                        Options Summary.     (line 162)
+* --old-file, and recursion:             Options/Recursion.   (line  22)
+* --output-sync:                         Parallel Output.     (line  11)
+* --output-sync <1>:                     Options Summary.     (line 171)
+* --print-data-base:                     Options Summary.     (line 187)
+* --print-directory:                     Options Summary.     (line 267)
+* --print-directory, and --directory:    -w Option.           (line  20)
+* --print-directory, and recursion:      -w Option.           (line  20)
+* --print-directory, disabling:          -w Option.           (line  20)
+* --question:                            Instead of Execution.
+                                                              (line  32)
+* --question <1>:                        Options Summary.     (line 201)
+* --quiet:                               Echoing.             (line  24)
+* --quiet <1>:                           Options Summary.     (line 232)
+* --recon:                               Echoing.             (line  18)
+* --recon <1>:                           Instead of Execution.
+                                                              (line  14)
+* --recon <2>:                           Options Summary.     (line 155)
+* --silent:                              Echoing.             (line  24)
+* --silent <1>:                          Options Summary.     (line 231)
+* --stop:                                Options Summary.     (line 239)
+* --touch:                               Instead of Execution.
+                                                              (line  24)
+* --touch <1>:                           Options Summary.     (line 247)
+* --touch, and recursion:                MAKE Variable.       (line  35)
+* --trace:                               Options Summary.     (line 254)
+* --version:                             Options Summary.     (line 262)
+* --warn-undefined-variables:            Options Summary.     (line 292)
+* --what-if:                             Instead of Execution.
+                                                              (line  41)
+* --what-if <1>:                         Options Summary.     (line 282)
+* -b:                                    Options Summary.     (line   9)
+* -B:                                    Options Summary.     (line  14)
+* -C:                                    Recursion.           (line  20)
+* -C <1>:                                Options Summary.     (line  25)
+* -C, and -w:                            -w Option.           (line  20)
+* -C, and recursion:                     Options/Recursion.   (line  22)
+* -d:                                    Options Summary.     (line  33)
+* -e:                                    Options Summary.     (line  84)
+* -e (shell flag):                       Automatic Prerequisites.
+                                                              (line  65)
+* -f:                                    Makefile Names.      (line  23)
+* -f <1>:                                Makefile Arguments.  (line   6)
+* -f <2>:                                Options Summary.     (line  96)
+* -f, and recursion:                     Options/Recursion.   (line  22)
+* -h:                                    Options Summary.     (line 102)
+* -I:                                    Include.             (line  53)
+* -i:                                    Errors.              (line  30)
+* -i <1>:                                Options Summary.     (line 107)
+* -I <1>:                                Options Summary.     (line 112)
+* -j:                                    Parallel.            (line   6)
+* -j <1>:                                Options Summary.     (line 119)
+* -j, and archive update:                Archive Pitfalls.    (line   6)
+* -j, and recursion:                     Options/Recursion.   (line  25)
+* -k:                                    Errors.              (line  47)
+* -k <1>:                                Testing.             (line  16)
+* -k <2>:                                Options Summary.     (line 128)
+* -l:                                    Options Summary.     (line 135)
+* -L:                                    Options Summary.     (line 143)
+* -l (library search):                   Libraries/Search.    (line   6)
+* -l (load average):                     Parallel.            (line  35)
+* -m:                                    Options Summary.     (line  10)
+* -M (to compiler):                      Automatic Prerequisites.
+                                                              (line  18)
+* -MM (to GNU compiler):                 Automatic Prerequisites.
+                                                              (line  67)
+* -n:                                    Echoing.             (line  18)
+* -n <1>:                                Instead of Execution.
+                                                              (line  14)
+* -n <2>:                                Options Summary.     (line 152)
+* -O:                                    Parallel Output.     (line  11)
+* -o:                                    Avoiding Compilation.
+                                                              (line   6)
+* -o <1>:                                Options Summary.     (line 161)
+* -O <1>:                                Options Summary.     (line 170)
+* -o, and recursion:                     Options/Recursion.   (line  22)
+* -p:                                    Options Summary.     (line 186)
+* -q:                                    Instead of Execution.
+                                                              (line  32)
+* -q <1>:                                Options Summary.     (line 200)
+* -r:                                    Options Summary.     (line 208)
+* -R:                                    Options Summary.     (line 221)
+* -s:                                    Echoing.             (line  24)
+* -s <1>:                                Options Summary.     (line 230)
+* -S:                                    Options Summary.     (line 237)
+* -t:                                    Instead of Execution.
+                                                              (line  24)
+* -t <1>:                                Options Summary.     (line 246)
+* -t, and recursion:                     MAKE Variable.       (line  35)
+* -v:                                    Options Summary.     (line 261)
+* -W:                                    Instead of Execution.
+                                                              (line  41)
+* -w:                                    Options Summary.     (line 266)
+* -W <1>:                                Options Summary.     (line 281)
+* -w, and -C:                            -w Option.           (line  20)
+* -W, and recursion:                     Options/Recursion.   (line  22)
+* -w, and recursion:                     -w Option.           (line  20)
+* -w, disabling:                         -w Option.           (line  20)
+* .a (archives):                         Archive Suffix Rules.
+                                                              (line   6)
+* .c:                                    Catalogue of Rules.  (line  35)
+* .C:                                    Catalogue of Rules.  (line  39)
+* .cc:                                   Catalogue of Rules.  (line  39)
+* .ch:                                   Catalogue of Rules.  (line 149)
+* .cpp:                                  Catalogue of Rules.  (line  39)
+* .d:                                    Automatic Prerequisites.
+                                                              (line  80)
+* .def:                                  Catalogue of Rules.  (line  71)
+* .dvi:                                  Catalogue of Rules.  (line 149)
+* .f:                                    Catalogue of Rules.  (line  49)
+* .F:                                    Catalogue of Rules.  (line  49)
+* .info:                                 Catalogue of Rules.  (line 156)
+* .l:                                    Catalogue of Rules.  (line 121)
+* .LIBPATTERNS, and link libraries:      Libraries/Search.    (line   6)
+* .ln:                                   Catalogue of Rules.  (line 143)
+* .mod:                                  Catalogue of Rules.  (line  71)
+* .o:                                    Catalogue of Rules.  (line  35)
+* .o <1>:                                Catalogue of Rules.  (line  83)
+* .ONESHELL, use of:                     One Shell.           (line   6)
+* .p:                                    Catalogue of Rules.  (line  45)
+* .PRECIOUS intermediate files:          Chained Rules.       (line  56)
+* .r:                                    Catalogue of Rules.  (line  49)
+* .s:                                    Catalogue of Rules.  (line  76)
+* .S:                                    Catalogue of Rules.  (line  79)
+* .sh:                                   Catalogue of Rules.  (line 178)
+* .SHELLFLAGS, value of:                 Choosing the Shell.  (line   6)
+* .sym:                                  Catalogue of Rules.  (line  71)
+* .tex:                                  Catalogue of Rules.  (line 149)
+* .texi:                                 Catalogue of Rules.  (line 156)
+* .texinfo:                              Catalogue of Rules.  (line 156)
+* .txinfo:                               Catalogue of Rules.  (line 156)
+* .w:                                    Catalogue of Rules.  (line 149)
+* .web:                                  Catalogue of Rules.  (line 149)
+* .y:                                    Catalogue of Rules.  (line 117)
+* :: rules (double-colon):               Double-Colon.        (line   6)
+* ::=:                                   Flavors.             (line  56)
+* ::= <1>:                               Setting.             (line   6)
+* :=:                                    Flavors.             (line  56)
+* := <1>:                                Setting.             (line   6)
+* =:                                     Flavors.             (line  10)
+* = <1>:                                 Setting.             (line   6)
+* =, expansion:                          Reading Makefiles.   (line  33)
+* ? (wildcard character):                Wildcards.           (line   6)
+* ?=:                                    Flavors.             (line 135)
+* ?= <1>:                                Setting.             (line   6)
+* ?=, expansion:                         Reading Makefiles.   (line  33)
+* @ (in recipes):                        Echoing.             (line   6)
+* @, and define:                         Canned Recipes.      (line  49)
+* [...] (wildcard characters):           Wildcards.           (line   6)
+* \ (backslash), for continuation lines: Simple Makefile.     (line  41)
+* \ (backslash), in recipes:             Splitting Recipe Lines.
+                                                              (line   6)
+* \ (backslash), to quote %:             Selective Search.    (line  39)
+* \ (backslash), to quote % <1>:         Static Usage.        (line  37)
+* \ (backslash), to quote % <2>:         Text Functions.      (line  26)
+* __.SYMDEF:                             Archive Symbols.     (line   6)
+* ~ (tilde):                             Wildcards.           (line  11)
+* abspath:                               File Name Functions. (line 120)
+* algorithm for directory search:        Search Algorithm.    (line   6)
+* all (standard target):                 Goals.               (line  73)
+* appending to variables:                Appending.           (line   6)
+* ar:                                    Implicit Variables.  (line  40)
+* archive:                               Archives.            (line   6)
+* archive member targets:                Archive Members.     (line   6)
+* archive symbol directory updating:     Archive Symbols.     (line   6)
+* archive, and -j:                       Archive Pitfalls.    (line   6)
+* archive, and parallel execution:       Archive Pitfalls.    (line   6)
+* archive, suffix rule for:              Archive Suffix Rules.
+                                                              (line   6)
+* Arg list too long:                     Options/Recursion.   (line  58)
+* arguments of functions:                Syntax of Functions. (line   6)
+* as:                                    Catalogue of Rules.  (line  76)
+* as <1>:                                Implicit Variables.  (line  43)
+* assembly, rule to compile:             Catalogue of Rules.  (line  76)
+* automatic generation of prerequisites: Include.             (line  51)
+* automatic generation of prerequisites <1>: Automatic Prerequisites.
+                                                              (line   6)
+* automatic variables:                   Automatic Variables. (line   6)
+* automatic variables in prerequisites:  Automatic Variables. (line  17)
+* backquotes:                            Shell Function.      (line   6)
+* backslash (\), for continuation lines: Simple Makefile.     (line  41)
+* backslash (\), in recipes:             Splitting Recipe Lines.
+                                                              (line   6)
+* backslash (\), to quote %:             Selective Search.    (line  39)
+* backslash (\), to quote % <1>:         Static Usage.        (line  37)
+* backslash (\), to quote % <2>:         Text Functions.      (line  26)
+* backslash (\), to quote newlines:      Splitting Lines.     (line   6)
+* backslashes in pathnames and wildcard expansion: Wildcard Pitfall.
+                                                              (line  31)
+* basename:                              File Name Functions. (line  56)
+* binary packages:                       Install Command Categories.
+                                                              (line  80)
+* broken pipe:                           Parallel Input.      (line  11)
+* bugs, reporting:                       Bugs.                (line   6)
+* built-in special targets:              Special Targets.     (line   6)
+* C++, rule to compile:                  Catalogue of Rules.  (line  39)
+* C, rule to compile:                    Catalogue of Rules.  (line  35)
+* canned recipes:                        Canned Recipes.      (line   6)
+* cc:                                    Catalogue of Rules.  (line  35)
+* cc <1>:                                Implicit Variables.  (line  46)
+* cd (shell command):                    Execution.           (line  12)
+* cd (shell command) <1>:                MAKE Variable.       (line  16)
+* chains of rules:                       Chained Rules.       (line   6)
+* check (standard target):               Goals.               (line 115)
+* clean (standard target):               Goals.               (line  76)
+* clean target:                          Simple Makefile.     (line  85)
+* clean target <1>:                      Cleanup.             (line  11)
+* cleaning up:                           Cleanup.             (line   6)
+* clobber (standard target):             Goals.               (line  87)
+* co:                                    Catalogue of Rules.  (line 163)
+* co <1>:                                Implicit Variables.  (line  66)
+* combining rules by prerequisite:       Combine By Prerequisite.
+                                                              (line   6)
+* command expansion:                     Shell Function.      (line   6)
+* command line variable definitions, and recursion: Options/Recursion.
+                                                              (line  17)
+* command line variables:                Overriding.          (line   6)
+* commands, sequences of:                Canned Recipes.      (line   6)
+* comments, in makefile:                 Makefile Contents.   (line  41)
+* comments, in recipes:                  Recipe Syntax.       (line  29)
+* compatibility:                         Features.            (line   6)
+* compatibility in exporting:            Variables/Recursion. (line 104)
+* compilation, testing:                  Testing.             (line   6)
+* computed variable name:                Computed Names.      (line   6)
+* conditional expansion:                 Conditional Functions.
+                                                              (line   6)
+* conditional variable assignment:       Flavors.             (line 135)
+* conditionals:                          Conditionals.        (line   6)
+* continuation lines:                    Simple Makefile.     (line  41)
+* controlling make:                      Make Control Functions.
+                                                              (line   6)
+* conventions for makefiles:             Makefile Conventions.
+                                                              (line   6)
+* convert guile types:                   Guile Types.         (line   6)
+* ctangle:                               Catalogue of Rules.  (line 149)
+* ctangle <1>:                           Implicit Variables.  (line 103)
+* cweave:                                Catalogue of Rules.  (line 149)
+* cweave <1>:                            Implicit Variables.  (line  97)
+* data base of make rules:               Options Summary.     (line 187)
+* deducing recipes (implicit rules):     make Deduces.        (line   6)
+* default directories for included makefiles: Include.        (line  53)
+* default goal:                          How Make Works.      (line  11)
+* default goal <1>:                      Rules.               (line  11)
+* default makefile name:                 Makefile Names.      (line   6)
+* default rules, last-resort:            Last Resort.         (line   6)
+* define, expansion:                     Reading Makefiles.   (line  33)
+* defining variables verbatim:           Multi-Line.          (line   6)
+* deletion of target files:              Errors.              (line  64)
+* deletion of target files <1>:          Interrupts.          (line   6)
+* directive:                             Makefile Contents.   (line  28)
+* directories, creating installation:    Directory Variables. (line  20)
+* directories, printing them:            -w Option.           (line   6)
+* directories, updating archive symbol:  Archive Symbols.     (line   6)
+* directory part:                        File Name Functions. (line  16)
+* directory search (VPATH):              Directory Search.    (line   6)
+* directory search (VPATH), and implicit rules: Implicit/Search.
+                                                              (line   6)
+* directory search (VPATH), and link libraries: Libraries/Search.
+                                                              (line   6)
+* directory search (VPATH), and recipes: Recipes/Search.      (line   6)
+* directory search algorithm:            Search Algorithm.    (line   6)
+* directory search, traditional (GPATH): Search Algorithm.    (line  42)
+* dist (standard target):                Goals.               (line 107)
+* distclean (standard target):           Goals.               (line  85)
+* dollar sign ($), in function call:     Syntax of Functions. (line   6)
+* dollar sign ($), in rules:             Rule Syntax.         (line  33)
+* dollar sign ($), in variable name:     Computed Names.      (line   6)
+* dollar sign ($), in variable reference: Reference.          (line   6)
+* DOS, choosing a shell in:              Choosing the Shell.  (line  38)
+* double-colon rules:                    Double-Colon.        (line   6)
+* duplicate words, removing:             Text Functions.      (line 155)
+* E2BIG:                                 Options/Recursion.   (line  58)
+* echoing of recipes:                    Echoing.             (line   6)
+* editor:                                Introduction.        (line  22)
+* Emacs (M-x compile):                   Errors.              (line  62)
+* empty recipes:                         Empty Recipes.       (line   6)
+* empty targets:                         Empty Targets.       (line   6)
+* environment:                           Environment.         (line   6)
+* environment, and recursion:            Variables/Recursion. (line   6)
+* environment, SHELL in:                 Choosing the Shell.  (line  12)
+* error, stopping on:                    Make Control Functions.
+                                                              (line  11)
+* errors (in recipes):                   Errors.              (line   6)
+* errors with wildcards:                 Wildcard Pitfall.    (line   6)
+* evaluating makefile syntax:            Eval Function.       (line   6)
+* example of loaded objects:             Loaded Object Example.
+                                                              (line   6)
+* example using Guile:                   Guile Example.       (line   6)
+* execution, in parallel:                Parallel.            (line   6)
+* execution, instead of:                 Instead of Execution.
+                                                              (line   6)
+* execution, of recipes:                 Execution.           (line   6)
+* exit status (errors):                  Errors.              (line   6)
+* exit status of make:                   Running.             (line  18)
+* expansion, secondary:                  Secondary Expansion. (line   6)
+* explicit rule, definition of:          Makefile Contents.   (line  10)
+* explicit rule, expansion:              Reading Makefiles.   (line  92)
+* explicit rules, secondary expansion of: Secondary Expansion.
+                                                              (line 104)
+* exporting variables:                   Variables/Recursion. (line   6)
+* extensions, Guile:                     Guile Integration.   (line   6)
+* extensions, load directive:            load Directive.      (line   6)
+* extensions, loading:                   Loading Objects.     (line   6)
+* f77:                                   Catalogue of Rules.  (line  49)
+* f77 <1>:                               Implicit Variables.  (line  57)
+* FDL, GNU Free Documentation License:   GNU Free Documentation License.
+                                                              (line   6)
+* features of GNU make:                  Features.            (line   6)
+* features, missing:                     Missing.             (line   6)
+* file name functions:                   File Name Functions. (line   6)
+* file name of makefile:                 Makefile Names.      (line   6)
+* file name of makefile, how to specify: Makefile Names.      (line  31)
+* file name prefix, adding:              File Name Functions. (line  78)
+* file name suffix:                      File Name Functions. (line  42)
+* file name suffix, adding:              File Name Functions. (line  67)
+* file name with wildcards:              Wildcards.           (line   6)
+* file name, abspath of:                 File Name Functions. (line 120)
+* file name, basename of:                File Name Functions. (line  56)
+* file name, directory part:             File Name Functions. (line  16)
+* file name, nondirectory part:          File Name Functions. (line  26)
+* file name, realpath of:                File Name Functions. (line 113)
+* file, reading from:                    File Function.       (line   6)
+* file, writing to:                      File Function.       (line   6)
+* files, assuming new:                   Instead of Execution.
+                                                              (line  41)
+* files, assuming old:                   Avoiding Compilation.
+                                                              (line   6)
+* files, avoiding recompilation of:      Avoiding Compilation.
+                                                              (line   6)
+* files, intermediate:                   Chained Rules.       (line  16)
+* filtering out words:                   Text Functions.      (line 133)
+* filtering words:                       Text Functions.      (line 115)
+* finding strings:                       Text Functions.      (line 104)
+* flags:                                 Options Summary.     (line   6)
+* flags for compilers:                   Implicit Variables.  (line   6)
+* flavor of variable:                    Flavor Function.     (line   6)
+* flavors of variables:                  Flavors.             (line   6)
+* FORCE:                                 Force Targets.       (line   6)
+* force targets:                         Force Targets.       (line   6)
+* Fortran, rule to compile:              Catalogue of Rules.  (line  49)
+* functions:                             Functions.           (line   6)
+* functions, for controlling make:       Make Control Functions.
+                                                              (line   6)
+* functions, for file names:             File Name Functions. (line   6)
+* functions, for text:                   Text Functions.      (line   6)
+* functions, syntax of:                  Syntax of Functions. (line   6)
+* functions, user defined:               Call Function.       (line   6)
+* g++:                                   Catalogue of Rules.  (line  39)
+* g++ <1>:                               Implicit Variables.  (line  49)
+* gcc:                                   Catalogue of Rules.  (line  35)
+* generating prerequisites automatically: Include.            (line  51)
+* generating prerequisites automatically <1>: Automatic Prerequisites.
+                                                              (line   6)
+* get:                                   Catalogue of Rules.  (line 172)
+* get <1>:                               Implicit Variables.  (line  69)
+* globbing (wildcards):                  Wildcards.           (line   6)
+* goal:                                  How Make Works.      (line  11)
+* goal, default:                         How Make Works.      (line  11)
+* goal, default <1>:                     Rules.               (line  11)
+* goal, how to specify:                  Goals.               (line   6)
+* Guile:                                 Guile Function.      (line   6)
+* Guile <1>:                             Guile Integration.   (line   6)
+* Guile example:                         Guile Example.       (line   6)
+* guile, conversion of types:            Guile Types.         (line   6)
+* home directory:                        Wildcards.           (line  11)
+* IEEE Standard 1003.2:                  Overview.            (line  13)
+* ifdef, expansion:                      Reading Makefiles.   (line  82)
+* ifeq, expansion:                       Reading Makefiles.   (line  82)
+* ifndef, expansion:                     Reading Makefiles.   (line  82)
+* ifneq, expansion:                      Reading Makefiles.   (line  82)
+* implicit rule:                         Implicit Rules.      (line   6)
+* implicit rule, and directory search:   Implicit/Search.     (line   6)
+* implicit rule, and VPATH:              Implicit/Search.     (line   6)
+* implicit rule, definition of:          Makefile Contents.   (line  16)
+* implicit rule, expansion:              Reading Makefiles.   (line  92)
+* implicit rule, how to use:             Using Implicit.      (line   6)
+* implicit rule, introduction to:        make Deduces.        (line   6)
+* implicit rule, predefined:             Catalogue of Rules.  (line   6)
+* implicit rule, search algorithm:       Implicit Rule Search.
+                                                              (line   6)
+* implicit rules, secondary expansion of: Secondary Expansion.
+                                                              (line 144)
+* included makefiles, default directories: Include.           (line  53)
+* including (MAKEFILES variable):        MAKEFILES Variable.  (line   6)
+* including (MAKEFILE_LIST variable):    Special Variables.   (line   8)
+* including other makefiles:             Include.             (line   6)
+* incompatibilities:                     Missing.             (line   6)
+* Info, rule to format:                  Catalogue of Rules.  (line 156)
+* inheritance, suppressing:              Suppressing Inheritance.
+                                                              (line   6)
+* input during parallel execution:       Parallel Input.      (line   6)
+* install (standard target):             Goals.               (line  93)
+* installation directories, creating:    Directory Variables. (line  20)
+* installations, staged:                 DESTDIR.             (line   6)
+* interface for loaded objects:          Loaded Object API.   (line   6)
+* intermediate files:                    Chained Rules.       (line  16)
+* intermediate files, preserving:        Chained Rules.       (line  46)
+* intermediate targets, explicit:        Special Targets.     (line  48)
+* interrupt:                             Interrupts.          (line   6)
+* job slots:                             Parallel.            (line   6)
+* job slots, and recursion:              Options/Recursion.   (line  25)
+* job slots, sharing:                    Job Slots.           (line   6)
+* jobs, limiting based on load:          Parallel.            (line  35)
+* jobserver:                             Job Slots.           (line  16)
+* jobserver on POSIX:                    POSIX Jobserver.     (line   6)
+* jobserver on Windows:                  Windows Jobserver.   (line   6)
+* joining lists of words:                File Name Functions. (line  89)
+* killing (interruption):                Interrupts.          (line   6)
+* last-resort default rules:             Last Resort.         (line   6)
+* ld:                                    Catalogue of Rules.  (line  83)
+* lex:                                   Catalogue of Rules.  (line 121)
+* lex <1>:                               Implicit Variables.  (line  73)
+* Lex, rule to run:                      Catalogue of Rules.  (line 121)
+* libraries for linking, directory search: Libraries/Search.  (line   6)
+* library archive, suffix rule for:      Archive Suffix Rules.
+                                                              (line   6)
+* limiting jobs based on load:           Parallel.            (line  35)
+* link libraries, and directory search:  Libraries/Search.    (line   6)
+* link libraries, patterns matching:     Libraries/Search.    (line   6)
+* linking, predefined rule for:          Catalogue of Rules.  (line  83)
+* lint:                                  Catalogue of Rules.  (line 143)
+* lint <1>:                              Implicit Variables.  (line  80)
+* lint, rule to run:                     Catalogue of Rules.  (line 143)
+* list of all prerequisites:             Automatic Variables. (line  61)
+* list of changed prerequisites:         Automatic Variables. (line  51)
+* load average:                          Parallel.            (line  35)
+* load directive:                        load Directive.      (line   6)
+* loaded object API:                     Loaded Object API.   (line   6)
+* loaded object example:                 Loaded Object Example.
+                                                              (line   6)
+* loaded object licensing:               Loaded Object API.   (line  31)
+* loaded objects:                        Loading Objects.     (line   6)
+* loaded objects, remaking of:           Remaking Loaded Objects.
+                                                              (line   6)
+* long lines, splitting:                 Splitting Lines.     (line   6)
+* loops in variable expansion:           Flavors.             (line  44)
+* lpr (shell command):                   Wildcard Examples.   (line  21)
+* lpr (shell command) <1>:               Empty Targets.       (line  25)
+* m2c:                                   Catalogue of Rules.  (line  71)
+* m2c <1>:                               Implicit Variables.  (line  60)
+* macro:                                 Using Variables.     (line  10)
+* make depend:                           Automatic Prerequisites.
+                                                              (line  37)
+* make extensions:                       Extending make.      (line   6)
+* make integration:                      Integrating make.    (line   6)
+* make interface to guile:               Guile Interface.     (line   6)
+* make procedures in guile:              Guile Interface.     (line   6)
+* makefile:                              Introduction.        (line   7)
+* makefile name:                         Makefile Names.      (line   6)
+* makefile name, how to specify:         Makefile Names.      (line  31)
+* makefile rule parts:                   Rule Introduction.   (line   6)
+* makefile syntax, evaluating:           Eval Function.       (line   6)
+* makefile, and MAKEFILES variable:      MAKEFILES Variable.  (line   6)
+* makefile, conventions for:             Makefile Conventions.
+                                                              (line   6)
+* makefile, how make processes:          How Make Works.      (line   6)
+* makefile, how to write:                Makefiles.           (line   6)
+* makefile, including:                   Include.             (line   6)
+* makefile, overriding:                  Overriding Makefiles.
+                                                              (line   6)
+* makefile, parsing:                     Reading Makefiles.   (line   6)
+* makefile, remaking of:                 Remaking Makefiles.  (line   6)
+* makefile, simple:                      Simple Makefile.     (line   6)
+* makefiles, and MAKEFILE_LIST variable: Special Variables.   (line   8)
+* makefiles, and special variables:      Special Variables.   (line   6)
+* makeinfo:                              Catalogue of Rules.  (line 156)
+* makeinfo <1>:                          Implicit Variables.  (line  84)
+* match-anything rule:                   Match-Anything Rules.
+                                                              (line   6)
+* match-anything rule, used to override: Overriding Makefiles.
+                                                              (line  12)
+* missing features:                      Missing.             (line   6)
+* mistakes with wildcards:               Wildcard Pitfall.    (line   6)
+* modified variable reference:           Substitution Refs.   (line   6)
+* Modula-2, rule to compile:             Catalogue of Rules.  (line  71)
+* mostlyclean (standard target):         Goals.               (line  79)
+* multi-line variable definition:        Multi-Line.          (line   6)
+* multiple rules for one target:         Multiple Rules.      (line   6)
+* |multiple_rules_for_one_target_(|::):    Double-Colon.        (line   6)
+* multiple targets:                      Multiple Targets.    (line   6)
+* multiple targets, in pattern rule:     Pattern Intro.       (line  53)
+* name of makefile:                      Makefile Names.      (line   6)
+* name of makefile, how to specify:      Makefile Names.      (line  31)
+* nested variable reference:             Computed Names.      (line   6)
+* newline, quoting, in makefile:         Simple Makefile.     (line  41)
+* newline, quoting, in recipes:          Splitting Recipe Lines.
+                                                              (line   6)
+* nondirectory part:                     File Name Functions. (line  26)
+* normal prerequisites:                  Prerequisite Types.  (line   6)
+* obj:                                   Variables Simplify.  (line  20)
+* OBJ:                                   Variables Simplify.  (line  20)
+* objects:                               Variables Simplify.  (line  14)
+* OBJECTS:                               Variables Simplify.  (line  20)
+* objects, loaded:                       Loading Objects.     (line   6)
+* objs:                                  Variables Simplify.  (line  20)
+* OBJS:                                  Variables Simplify.  (line  20)
+* old-fashioned suffix rules:            Suffix Rules.        (line   6)
+* options:                               Options Summary.     (line   6)
+* options, and recursion:                Options/Recursion.   (line   6)
+* options, setting from environment:     Options/Recursion.   (line  81)
+* options, setting in makefiles:         Options/Recursion.   (line  81)
+* order of pattern rules:                Pattern Match.       (line  30)
+* order-only prerequisites:              Prerequisite Types.  (line   6)
+* origin of variable:                    Origin Function.     (line   6)
+* output during parallel execution:      Parallel Output.     (line   6)
+* output during parallel execution <1>:  Options Summary.     (line 171)
+* overriding makefiles:                  Overriding Makefiles.
+                                                              (line   6)
+* overriding variables with arguments:   Overriding.          (line   6)
+* overriding with override:              Override Directive.  (line   6)
+* parallel execution:                    Parallel.            (line   6)
+* parallel execution, and archive update: Archive Pitfalls.   (line   6)
+* parallel execution, input during:      Parallel Input.      (line   6)
+* parallel execution, output during:     Parallel Output.     (line   6)
+* parallel execution, output during <1>: Options Summary.     (line 171)
+* parallel execution, overriding:        Special Targets.     (line 142)
+* parallel output to terminal:           Terminal Output.     (line   6)
+* parts of makefile rule:                Rule Introduction.   (line   6)
+* Pascal, rule to compile:               Catalogue of Rules.  (line  45)
+* pattern rule:                          Pattern Intro.       (line   6)
+* pattern rule, expansion:               Reading Makefiles.   (line  92)
+* pattern rules, order of:               Pattern Match.       (line  30)
+* pattern rules, static (not implicit):  Static Pattern.      (line   6)
+* pattern rules, static, syntax of:      Static Usage.        (line   6)
+* pattern-specific variables:            Pattern-specific.    (line   6)
+* pc:                                    Catalogue of Rules.  (line  45)
+* pc <1>:                                Implicit Variables.  (line  63)
+* phony targets:                         Phony Targets.       (line   6)
+* phony targets and recipe execution:    Instead of Execution.
+                                                              (line  75)
+* pitfalls of wildcards:                 Wildcard Pitfall.    (line   6)
+* plugin_is_GPL_compatible:              Loaded Object API.   (line  31)
+* portability:                           Features.            (line   6)
+* POSIX:                                 Overview.            (line  13)
+* POSIX <1>:                             Options/Recursion.   (line  61)
+* POSIX-conforming mode, setting:        Special Targets.     (line 157)
+* post-installation commands:            Install Command Categories.
+                                                              (line   6)
+* pre-installation commands:             Install Command Categories.
+                                                              (line   6)
+* precious targets:                      Special Targets.     (line  32)
+* predefined rules and variables, printing: Options Summary.  (line 187)
+* prefix, adding:                        File Name Functions. (line  78)
+* prerequisite:                          Rules.               (line   6)
+* prerequisite pattern, implicit:        Pattern Intro.       (line  22)
+* prerequisite pattern, static (not implicit): Static Usage.  (line  30)
+* prerequisite types:                    Prerequisite Types.  (line   6)
+* prerequisite, expansion:               Reading Makefiles.   (line  92)
+* prerequisites:                         Rule Syntax.         (line  47)
+* prerequisites, and automatic variables: Automatic Variables.
+                                                              (line  17)
+* prerequisites, automatic generation:   Include.             (line  51)
+* prerequisites, automatic generation <1>: Automatic Prerequisites.
+                                                              (line   6)
+* prerequisites, introduction to:        Rule Introduction.   (line   8)
+* prerequisites, list of all:            Automatic Variables. (line  61)
+* prerequisites, list of changed:        Automatic Variables. (line  51)
+* prerequisites, normal:                 Prerequisite Types.  (line   6)
+* prerequisites, order-only:             Prerequisite Types.  (line   6)
+* prerequisites, varying (static pattern): Static Pattern.    (line   6)
+* preserving intermediate files:         Chained Rules.       (line  46)
+* preserving with .PRECIOUS:             Special Targets.     (line  32)
+* preserving with .PRECIOUS <1>:         Chained Rules.       (line  56)
+* preserving with .SECONDARY:            Special Targets.     (line  54)
+* print (standard target):               Goals.               (line  98)
+* print target:                          Wildcard Examples.   (line  21)
+* print target <1>:                      Empty Targets.       (line  25)
+* printing directories:                  -w Option.           (line   6)
+* printing messages:                     Make Control Functions.
+                                                              (line  43)
+* printing of recipes:                   Echoing.             (line   6)
+* printing user warnings:                Make Control Functions.
+                                                              (line  35)
+* problems and bugs, reporting:          Bugs.                (line   6)
+* problems with wildcards:               Wildcard Pitfall.    (line   6)
+* processing a makefile:                 How Make Works.      (line   6)
+* question mode:                         Instead of Execution.
+                                                              (line  32)
+* quoting %, in patsubst:                Text Functions.      (line  26)
+* quoting %, in static pattern:          Static Usage.        (line  37)
+* quoting %, in vpath:                   Selective Search.    (line  39)
+* quoting newline, in makefile:          Simple Makefile.     (line  41)
+* quoting newline, in recipes:           Splitting Recipe Lines.
+                                                              (line   6)
+* Ratfor, rule to compile:               Catalogue of Rules.  (line  49)
+* RCS, rule to extract from:             Catalogue of Rules.  (line 163)
+* reading from a file:                   File Function.       (line   6)
+* reading makefiles:                     Reading Makefiles.   (line   6)
+* README:                                Makefile Names.      (line   9)
+* realclean (standard target):           Goals.               (line  86)
+* realpath:                              File Name Functions. (line 113)
+* recipe:                                Simple Makefile.     (line  74)
+* recipe execution, single invocation:   Special Targets.     (line 150)
+* recipe lines, single shell:            One Shell.           (line   6)
+* recipe syntax:                         Recipe Syntax.       (line   6)
+* recipe, execution:                     Execution.           (line   6)
+* recipes:                               Rule Syntax.         (line  25)
+* recipes <1>:                           Recipes.             (line   6)
+* recipes setting shell variables:       Execution.           (line  12)
+* recipes, and directory search:         Recipes/Search.      (line   6)
+* recipes, backslash (\) in:             Splitting Recipe Lines.
+                                                              (line   6)
+* recipes, canned:                       Canned Recipes.      (line   6)
+* recipes, comments in:                  Recipe Syntax.       (line  29)
+* recipes, echoing:                      Echoing.             (line   6)
+* recipes, empty:                        Empty Recipes.       (line   6)
+* recipes, errors in:                    Errors.              (line   6)
+* recipes, execution in parallel:        Parallel.            (line   6)
+* recipes, how to write:                 Recipes.             (line   6)
+* recipes, instead of executing:         Instead of Execution.
+                                                              (line   6)
+* recipes, introduction to:              Rule Introduction.   (line   8)
+* recipes, quoting newlines in:          Splitting Recipe Lines.
+                                                              (line   6)
+* recipes, splitting:                    Splitting Recipe Lines.
+                                                              (line   6)
+* recipes, using variables in:           Variables in Recipes.
+                                                              (line   6)
+* recompilation:                         Introduction.        (line  22)
+* recompilation, avoiding:               Avoiding Compilation.
+                                                              (line   6)
+* recording events with empty targets:   Empty Targets.       (line   6)
+* recursion:                             Recursion.           (line   6)
+* recursion, and -C:                     Options/Recursion.   (line  22)
+* recursion, and -f:                     Options/Recursion.   (line  22)
+* recursion, and -j:                     Options/Recursion.   (line  25)
+* recursion, and -o:                     Options/Recursion.   (line  22)
+* recursion, and -t:                     MAKE Variable.       (line  35)
+* recursion, and -W:                     Options/Recursion.   (line  22)
+* recursion, and -w:                     -w Option.           (line  20)
+* recursion, and command line variable definitions: Options/Recursion.
+                                                              (line  17)
+* recursion, and environment:            Variables/Recursion. (line   6)
+* recursion, and MAKE variable:          MAKE Variable.       (line   6)
+* recursion, and MAKEFILES variable:     MAKEFILES Variable.  (line  15)
+* recursion, and options:                Options/Recursion.   (line   6)
+* recursion, and printing directories:   -w Option.           (line   6)
+* recursion, and variables:              Variables/Recursion. (line   6)
+* recursion, level of:                   Variables/Recursion. (line 114)
+* recursive variable expansion:          Using Variables.     (line   6)
+* recursive variable expansion <1>:      Flavors.             (line   6)
+* recursively expanded variables:        Flavors.             (line   6)
+* reference to variables:                Reference.           (line   6)
+* reference to variables <1>:            Advanced.            (line   6)
+* relinking:                             How Make Works.      (line  46)
+* remaking loaded objects:               Remaking Loaded Objects.
+                                                              (line   6)
+* remaking makefiles:                    Remaking Makefiles.  (line   6)
+* removal of target files:               Errors.              (line  64)
+* removal of target files <1>:           Interrupts.          (line   6)
+* removing duplicate words:              Text Functions.      (line 155)
+* removing targets on failure:           Special Targets.     (line  71)
+* removing, to clean up:                 Cleanup.             (line   6)
+* reporting bugs:                        Bugs.                (line   6)
+* rm:                                    Implicit Variables.  (line 106)
+* rm (shell command):                    Simple Makefile.     (line  85)
+* rm (shell command) <1>:                Wildcard Examples.   (line  12)
+* rm (shell command) <2>:                Phony Targets.       (line  20)
+* rm (shell command) <3>:                Errors.              (line  27)
+* rule prerequisites:                    Rule Syntax.         (line  47)
+* rule syntax:                           Rule Syntax.         (line   6)
+* rule targets:                          Rule Syntax.         (line  18)
+* |rule,_double_colon_(|::):               Double-Colon.        (line   6)
+* rule, explicit, definition of:         Makefile Contents.   (line  10)
+* rule, how to write:                    Rules.               (line   6)
+* rule, implicit:                        Implicit Rules.      (line   6)
+* rule, implicit, and directory search:  Implicit/Search.     (line   6)
+* rule, implicit, and VPATH:             Implicit/Search.     (line   6)
+* rule, implicit, chains of:             Chained Rules.       (line   6)
+* rule, implicit, definition of:         Makefile Contents.   (line  16)
+* rule, implicit, how to use:            Using Implicit.      (line   6)
+* rule, implicit, introduction to:       make Deduces.        (line   6)
+* rule, implicit, predefined:            Catalogue of Rules.  (line   6)
+* rule, introduction to:                 Rule Introduction.   (line   6)
+* rule, multiple for one target:         Multiple Rules.      (line   6)
+* rule, no recipe or prerequisites:      Force Targets.       (line   6)
+* rule, pattern:                         Pattern Intro.       (line   6)
+* rule, static pattern:                  Static Pattern.      (line   6)
+* rule, static pattern versus implicit:  Static versus Implicit.
+                                                              (line   6)
+* rule, with multiple targets:           Multiple Targets.    (line   6)
+* rules, and $:                          Rule Syntax.         (line  33)
+* s. (SCCS file prefix):                 Catalogue of Rules.  (line 172)
+* SCCS, rule to extract from:            Catalogue of Rules.  (line 172)
+* search algorithm, implicit rule:       Implicit Rule Search.
+                                                              (line   6)
+* search path for prerequisites (VPATH): Directory Search.    (line   6)
+* search path for prerequisites (VPATH), and implicit rules: Implicit/Search.
+                                                              (line   6)
+* search path for prerequisites (VPATH), and link libraries: Libraries/Search.
+                                                              (line   6)
+* searching for strings:                 Text Functions.      (line 104)
+* secondary expansion:                   Secondary Expansion. (line   6)
+* secondary expansion and explicit rules: Secondary Expansion.
+                                                              (line 104)
+* secondary expansion and implicit rules: Secondary Expansion.
+                                                              (line 144)
+* secondary expansion and static pattern rules: Secondary Expansion.
+                                                              (line 136)
+* secondary files:                       Chained Rules.       (line  46)
+* secondary targets:                     Special Targets.     (line  54)
+* sed (shell command):                   Automatic Prerequisites.
+                                                              (line  72)
+* selecting a word:                      Text Functions.      (line 159)
+* selecting word lists:                  Text Functions.      (line 168)
+* sequences of commands:                 Canned Recipes.      (line   6)
+* setting options from environment:      Options/Recursion.   (line  81)
+* setting options in makefiles:          Options/Recursion.   (line  81)
+* setting variables:                     Setting.             (line   6)
+* several rules for one target:          Multiple Rules.      (line   6)
+* several targets in a rule:             Multiple Targets.    (line   6)
+* shar (standard target):                Goals.               (line 104)
+* shell command, function for:           Shell Function.      (line   6)
+* shell file name pattern (in include):  Include.             (line  13)
+* shell variables, setting in recipes:   Execution.           (line  12)
+* shell wildcards (in include):          Include.             (line  13)
+* shell, choosing the:                   Choosing the Shell.  (line   6)
+* SHELL, exported value:                 Variables/Recursion. (line  23)
+* SHELL, import from environment:        Environment.         (line  37)
+* shell, in DOS and Windows:             Choosing the Shell.  (line  38)
+* SHELL, MS-DOS specifics:               Choosing the Shell.  (line  44)
+* SHELL, value of:                       Choosing the Shell.  (line   6)
+* signal:                                Interrupts.          (line   6)
+* silent operation:                      Echoing.             (line   6)
+* simple makefile:                       Simple Makefile.     (line   6)
+* simple variable expansion:             Using Variables.     (line   6)
+* simplifying with variables:            Variables Simplify.  (line   6)
+* simply expanded variables:             Flavors.             (line  56)
+* sorting words:                         Text Functions.      (line 147)
+* spaces, in variable values:            Flavors.             (line 107)
+* spaces, stripping:                     Text Functions.      (line  80)
+* special targets:                       Special Targets.     (line   6)
+* special variables:                     Special Variables.   (line   6)
+* specifying makefile name:              Makefile Names.      (line  31)
+* splitting long lines:                  Splitting Lines.     (line   6)
+* splitting recipes:                     Splitting Recipe Lines.
+                                                              (line   6)
+* staged installs:                       DESTDIR.             (line   6)
+* standard input:                        Parallel Input.      (line   6)
+* standards conformance:                 Overview.            (line  13)
+* standards for makefiles:               Makefile Conventions.
+                                                              (line   6)
+* static pattern rule:                   Static Pattern.      (line   6)
+* static pattern rule, syntax of:        Static Usage.        (line   6)
+* static pattern rule, versus implicit:  Static versus Implicit.
+                                                              (line   6)
+* static pattern rules, secondary expansion of: Secondary Expansion.
+                                                              (line 136)
+* stem:                                  Static Usage.        (line  17)
+* stem <1>:                              Pattern Match.       (line   6)
+* stem, shortest:                        Pattern Match.       (line  38)
+* stem, variable for:                    Automatic Variables. (line  77)
+* stopping make:                         Make Control Functions.
+                                                              (line  11)
+* strings, searching for:                Text Functions.      (line 104)
+* stripping whitespace:                  Text Functions.      (line  80)
+* sub-make:                              Variables/Recursion. (line   6)
+* subdirectories, recursion for:         Recursion.           (line   6)
+* substitution variable reference:       Substitution Refs.   (line   6)
+* suffix rule:                           Suffix Rules.        (line   6)
+* suffix rule, for archive:              Archive Suffix Rules.
+                                                              (line   6)
+* suffix, adding:                        File Name Functions. (line  67)
+* suffix, function to find:              File Name Functions. (line  42)
+* suffix, substituting in variables:     Substitution Refs.   (line   6)
+* suppressing inheritance:               Suppressing Inheritance.
+                                                              (line   6)
+* switches:                              Options Summary.     (line   6)
+* symbol directories, updating archive:  Archive Symbols.     (line   6)
+* syntax of recipe:                      Recipe Syntax.       (line   6)
+* syntax of rules:                       Rule Syntax.         (line   6)
+* tab character (in commands):           Rule Syntax.         (line  25)
+* tabs in rules:                         Rule Introduction.   (line  21)
+* TAGS (standard target):                Goals.               (line 112)
+* tangle:                                Catalogue of Rules.  (line 149)
+* tangle <1>:                            Implicit Variables.  (line 100)
+* tar (standard target):                 Goals.               (line 101)
+* target:                                Rules.               (line   6)
+* target pattern, implicit:              Pattern Intro.       (line   9)
+* target pattern, static (not implicit): Static Usage.        (line  17)
+* target, deleting on error:             Errors.              (line  64)
+* target, deleting on interrupt:         Interrupts.          (line   6)
+* target, expansion:                     Reading Makefiles.   (line  92)
+* target, multiple in pattern rule:      Pattern Intro.       (line  53)
+* target, multiple rules for one:        Multiple Rules.      (line   6)
+* target, touching:                      Instead of Execution.
+                                                              (line  24)
+* target-specific variables:             Target-specific.     (line   6)
+* targets:                               Rule Syntax.         (line  18)
+* targets without a file:                Phony Targets.       (line   6)
+* targets, built-in special:             Special Targets.     (line   6)
+* targets, empty:                        Empty Targets.       (line   6)
+* targets, force:                        Force Targets.       (line   6)
+* targets, introduction to:              Rule Introduction.   (line   8)
+* targets, multiple:                     Multiple Targets.    (line   6)
+* targets, phony:                        Phony Targets.       (line   6)
+* terminal rule:                         Match-Anything Rules.
+                                                              (line   6)
+* terminal, output to:                   Terminal Output.     (line   6)
+* test (standard target):                Goals.               (line 116)
+* testing compilation:                   Testing.             (line   6)
+* tex:                                   Catalogue of Rules.  (line 149)
+* tex <1>:                               Implicit Variables.  (line  87)
+* TeX, rule to run:                      Catalogue of Rules.  (line 149)
+* texi2dvi:                              Catalogue of Rules.  (line 156)
+* texi2dvi <1>:                          Implicit Variables.  (line  91)
+* Texinfo, rule to format:               Catalogue of Rules.  (line 156)
+* tilde (~):                             Wildcards.           (line  11)
+* tools, sharing job slots:              Job Slots.           (line   6)
+* touch (shell command):                 Wildcard Examples.   (line  21)
+* touch (shell command) <1>:             Empty Targets.       (line  25)
+* touching files:                        Instead of Execution.
+                                                              (line  24)
+* traditional directory search (GPATH):  Search Algorithm.    (line  42)
+* types of prerequisites:                Prerequisite Types.  (line   6)
+* types, conversion of:                  Guile Types.         (line   6)
+* undefined variables, warning message:  Options Summary.     (line 292)
+* undefining variable:                   Undefine Directive.  (line   6)
+* updating archive symbol directories:   Archive Symbols.     (line   6)
+* updating loaded objects:               Remaking Loaded Objects.
+                                                              (line   6)
+* updating makefiles:                    Remaking Makefiles.  (line   6)
+* user defined functions:                Call Function.       (line   6)
+* value:                                 Using Variables.     (line   6)
+* value, how a variable gets it:         Values.              (line   6)
+* variable:                              Using Variables.     (line   6)
+* variable definition:                   Makefile Contents.   (line  22)
+* variable references in recipes:        Variables in Recipes.
+                                                              (line   6)
+* variables:                             Variables Simplify.  (line   6)
+* variables, $ in name:                  Computed Names.      (line   6)
+* variables, and implicit rule:          Automatic Variables. (line   6)
+* variables, appending to:               Appending.           (line   6)
+* variables, automatic:                  Automatic Variables. (line   6)
+* variables, command line:               Overriding.          (line   6)
+* variables, command line, and recursion: Options/Recursion.  (line  17)
+* variables, computed names:             Computed Names.      (line   6)
+* variables, conditional assignment:     Flavors.             (line 135)
+* variables, defining verbatim:          Multi-Line.          (line   6)
+* variables, environment:                Variables/Recursion. (line   6)
+* variables, environment <1>:            Environment.         (line   6)
+* variables, exporting:                  Variables/Recursion. (line   6)
+* variables, flavor of:                  Flavor Function.     (line   6)
+* variables, flavors:                    Flavors.             (line   6)
+* variables, how they get their values:  Values.              (line   6)
+* variables, how to reference:           Reference.           (line   6)
+* variables, loops in expansion:         Flavors.             (line  44)
+* variables, modified reference:         Substitution Refs.   (line   6)
+* variables, multi-line:                 Multi-Line.          (line   6)
+* variables, nested references:          Computed Names.      (line   6)
+* variables, origin of:                  Origin Function.     (line   6)
+* variables, overriding:                 Override Directive.  (line   6)
+* variables, overriding with arguments:  Overriding.          (line   6)
+* variables, pattern-specific:           Pattern-specific.    (line   6)
+* variables, recursively expanded:       Flavors.             (line   6)
+* variables, setting:                    Setting.             (line   6)
+* variables, simply expanded:            Flavors.             (line  56)
+* variables, spaces in values:           Flavors.             (line 107)
+* variables, substituting suffix in:     Substitution Refs.   (line   6)
+* variables, substitution reference:     Substitution Refs.   (line   6)
+* variables, target-specific:            Target-specific.     (line   6)
+* variables, unexpanded value:           Value Function.      (line   6)
+* variables, warning for undefined:      Options Summary.     (line 292)
+* varying prerequisites:                 Static Pattern.      (line   6)
+* verbatim variable definition:          Multi-Line.          (line   6)
+* vpath:                                 Directory Search.    (line   6)
+* VPATH, and implicit rules:             Implicit/Search.     (line   6)
+* VPATH, and link libraries:             Libraries/Search.    (line   6)
+* warnings, printing:                    Make Control Functions.
+                                                              (line  35)
+* weave:                                 Catalogue of Rules.  (line 149)
+* weave <1>:                             Implicit Variables.  (line  94)
+* Web, rule to run:                      Catalogue of Rules.  (line 149)
+* what if:                               Instead of Execution.
+                                                              (line  41)
+* whitespace, in variable values:        Flavors.             (line 107)
+* whitespace, stripping:                 Text Functions.      (line  80)
+* wildcard:                              Wildcards.           (line   6)
+* wildcard pitfalls:                     Wildcard Pitfall.    (line   6)
+* wildcard, function:                    File Name Functions. (line 106)
+* wildcard, in archive member:           Archive Members.     (line  36)
+* wildcard, in include:                  Include.             (line  13)
+* wildcards and MS-DOS/MS-Windows backslashes: Wildcard Pitfall.
+                                                              (line  31)
+* Windows, choosing a shell in:          Choosing the Shell.  (line  38)
+* word, selecting a:                     Text Functions.      (line 159)
+* words, extracting first:               Text Functions.      (line 185)
+* words, extracting last:                Text Functions.      (line 198)
+* words, filtering:                      Text Functions.      (line 115)
+* words, filtering out:                  Text Functions.      (line 133)
+* words, finding number:                 Text Functions.      (line 180)
+* words, iterating over:                 Foreach Function.    (line   6)
+* words, joining lists:                  File Name Functions. (line  89)
+* words, removing duplicates:            Text Functions.      (line 155)
+* words, selecting lists of:             Text Functions.      (line 168)
+* writing recipes:                       Recipes.             (line   6)
+* writing rules:                         Rules.               (line   6)
+* writing to a file:                     File Function.       (line   6)
+* yacc:                                  Catalogue of Rules.  (line 117)
+* yacc <1>:                              Implicit Variables.  (line  77)
+* yacc <2>:                              Canned Recipes.      (line  18)
+* Yacc, rule to run:                     Catalogue of Rules.  (line 117)
+
+==============================================================================
+File: make.info,  Node: |Name_Index|,  Prev: Concept Index,  Up: Top
+==============================================================================
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        *Name_Index*
+
+Index of Functions, Variables, & Directives
+===========================================
+
+
+MENU
+
+* $%:                                    Automatic Variables. (line  37)
+* $(%D):                                 Automatic Variables. (line 129)
+* $(%F):                                 Automatic Variables. (line 130)
+* $(*D):                                 Automatic Variables. (line 124)
+* $(*F):                                 Automatic Variables. (line 125)
+* $(+D):                                 Automatic Variables. (line 147)
+* $(+F):                                 Automatic Variables. (line 148)
+* $(<D):                                 Automatic Variables. (line 137)
+* $(<F):                                 Automatic Variables. (line 138)
+* $(?D):                                 Automatic Variables. (line 153)
+* $(?F):                                 Automatic Variables. (line 154)
+* $(@D):                                 Automatic Variables. (line 113)
+* $(@F):                                 Automatic Variables. (line 119)
+* $(^D):                                 Automatic Variables. (line 142)
+* $(^F):                                 Automatic Variables. (line 143)
+* $*:                                    Automatic Variables. (line  73)
+* $*, and static pattern:                Static Usage.        (line  82)
+* $+:                                    Automatic Variables. (line  63)
+* $<:                                    Automatic Variables. (line  43)
+* $?:                                    Automatic Variables. (line  48)
+* $@:                                    Automatic Variables. (line  30)
+* $^:                                    Automatic Variables. (line  53)
+* $|:                                    Automatic Variables. (line  69)
+* % (automatic variable):                Automatic Variables. (line  37)
+* %D (automatic variable):               Automatic Variables. (line 129)
+* %F (automatic variable):               Automatic Variables. (line 130)
+* * (automatic variable):                Automatic Variables. (line  73)
+* * (automatic variable), unsupported bizarre usage: Missing. (line  44)
+* *D (automatic variable):               Automatic Variables. (line 124)
+* *F (automatic variable):               Automatic Variables. (line 125)
+* + (automatic variable):                Automatic Variables. (line  63)
+* +D (automatic variable):               Automatic Variables. (line 147)
+* +F (automatic variable):               Automatic Variables. (line 148)
+* -load:                                 load Directive.      (line  65)
+* .DEFAULT:                              Special Targets.     (line  22)
+* .DEFAULT <1>:                          Last Resort.         (line  23)
+* .DEFAULT, and empty recipes:           Empty Recipes.       (line  16)
+* .DEFAULT_GOAL (define default goal):   Special Variables.   (line  34)
+* .DELETE_ON_ERROR:                      Special Targets.     (line  70)
+* .DELETE_ON_ERROR <1>:                  Errors.              (line  64)
+* .EXPORT_ALL_VARIABLES:                 Special Targets.     (line 135)
+* .EXPORT_ALL_VARIABLES <1>:             Variables/Recursion. (line  99)
+* .FEATURES (list of supported features): Special Variables.  (line 121)
+* .IGNORE:                               Special Targets.     (line  77)
+* .IGNORE <1>:                           Errors.              (line  30)
+* .INCLUDE_DIRS (list of include directories): Special Variables.
+                                                              (line 174)
+* .INTERMEDIATE:                         Special Targets.     (line  47)
+* .LIBPATTERNS:                          Libraries/Search.    (line   6)
+* .LOADED:                               load Directive.      (line  62)
+* .LOW_RESOLUTION_TIME:                  Special Targets.     (line  90)
+* .NOTPARALLEL:                          Special Targets.     (line 141)
+* .ONESHELL:                             Special Targets.     (line 149)
+* .ONESHELL <1>:                         One Shell.           (line   6)
+* .PHONY:                                Phony Targets.       (line  22)
+* .PHONY <1>:                            Special Targets.     (line   8)
+* .POSIX:                                Special Targets.     (line 156)
+* .POSIX <1>:                            Options/Recursion.   (line  61)
+* .PRECIOUS:                             Special Targets.     (line  31)
+* .PRECIOUS <1>:                         Interrupts.          (line  22)
+* .RECIPEPREFIX (change the recipe prefix character): Special Variables.
+                                                              (line  99)
+* .SECONDARY:                            Special Targets.     (line  53)
+* .SECONDEXPANSION:                      Secondary Expansion. (line   6)
+* .SECONDEXPANSION <1>:                  Special Targets.     (line  63)
+* .SHELLFLAGS:                           Choosing the Shell.  (line   6)
+* .SHELLFLAGS <1>:                       Choosing the Shell.  (line  87)
+* .SHELLSTATUS:                          Shell Function.      (line  25)
+* .SILENT:                               Special Targets.     (line 121)
+* .SILENT <1>:                           Echoing.             (line  24)
+* .SUFFIXES:                             Special Targets.     (line  16)
+* .SUFFIXES <1>:                         Suffix Rules.        (line  61)
+* .VARIABLES (list of variables):        Special Variables.   (line 112)
+* /usr/gnu/include:                      Include.             (line  53)
+* /usr/include:                          Include.             (line  53)
+* /usr/local/include:                    Include.             (line  53)
+* < (automatic variable):                Automatic Variables. (line  43)
+* <D (automatic variable):               Automatic Variables. (line 137)
+* <F (automatic variable):               Automatic Variables. (line 138)
+* ? (automatic variable):                Automatic Variables. (line  48)
+* ?D (automatic variable):               Automatic Variables. (line 153)
+* ?F (automatic variable):               Automatic Variables. (line 154)
+* @ (automatic variable):                Automatic Variables. (line  30)
+* @D (automatic variable):               Automatic Variables. (line 113)
+* @F (automatic variable):               Automatic Variables. (line 119)
+* ^ (automatic variable):                Automatic Variables. (line  53)
+* ^D (automatic variable):               Automatic Variables. (line 142)
+* ^F (automatic variable):               Automatic Variables. (line 143)
+* | (automatic variable):                Automatic Variables. (line  69)
+* abspath:                               File Name Functions. (line 120)
+* addprefix:                             File Name Functions. (line  78)
+* addsuffix:                             File Name Functions. (line  67)
+* and:                                   Conditional Functions.
+                                                              (line  45)
+* AR:                                    Implicit Variables.  (line  40)
+* ARFLAGS:                               Implicit Variables.  (line 113)
+* AS:                                    Implicit Variables.  (line  43)
+* ASFLAGS:                               Implicit Variables.  (line 116)
+* basename:                              File Name Functions. (line  56)
+* bindir:                                Directory Variables. (line  57)
+* call:                                  Call Function.       (line   6)
+* CC:                                    Implicit Variables.  (line  46)
+* CFLAGS:                                Implicit Variables.  (line 120)
+* CO:                                    Implicit Variables.  (line  66)
+* COFLAGS:                               Implicit Variables.  (line 126)
+* COMSPEC:                               Choosing the Shell.  (line  41)
+* CPP:                                   Implicit Variables.  (line  52)
+* CPPFLAGS:                              Implicit Variables.  (line 129)
+* CTANGLE:                               Implicit Variables.  (line 103)
+* CURDIR:                                Recursion.           (line  28)
+* CWEAVE:                                Implicit Variables.  (line  97)
+* CXX:                                   Implicit Variables.  (line  49)
+* CXXFLAGS:                              Implicit Variables.  (line 123)
+* define:                                Multi-Line.          (line   6)
+* DESTDIR:                               DESTDIR.             (line   6)
+* dir:                                   File Name Functions. (line  16)
+* else:                                  Conditional Syntax.  (line   6)
+* endef:                                 Multi-Line.          (line   6)
+* endif:                                 Conditional Syntax.  (line   6)
+* error:                                 Make Control Functions.
+                                                              (line  11)
+* eval:                                  Eval Function.       (line   6)
+* exec_prefix:                           Directory Variables. (line  39)
+* export:                                Variables/Recursion. (line  40)
+* FC:                                    Implicit Variables.  (line  56)
+* FFLAGS:                                Implicit Variables.  (line 133)
+* file:                                  File Function.       (line   6)
+* filter:                                Text Functions.      (line 115)
+* filter-out:                            Text Functions.      (line 133)
+* findstring:                            Text Functions.      (line 104)
+* firstword:                             Text Functions.      (line 185)
+* flavor:                                Flavor Function.     (line   6)
+* foreach:                               Foreach Function.    (line   6)
+* GET:                                   Implicit Variables.  (line  69)
+* GFLAGS:                                Implicit Variables.  (line 136)
+* gmk-eval:                              Guile Interface.     (line  18)
+* gmk-expand:                            Guile Interface.     (line  12)
+* gmk_add_function:                      Loaded Object API.   (line  53)
+* gmk_alloc:                             Loaded Object API.   (line 149)
+* gmk_eval:                              Loaded Object API.   (line 123)
+* gmk_expand:                            Loaded Object API.   (line 117)
+* gmk_free:                              Loaded Object API.   (line 154)
+* gmk_func_ptr:                          Loaded Object API.   (line  95)
+* GNUmakefile:                           Makefile Names.      (line   7)
+* GPATH:                                 Search Algorithm.    (line  48)
+* guile:                                 Guile Function.      (line   6)
+* if:                                    Conditional Functions.
+                                                              (line   6)
+* if <1>:                                Conditional Functions.
+                                                              (line  12)
+* ifdef:                                 Conditional Syntax.  (line   6)
+* ifeq:                                  Conditional Syntax.  (line   6)
+* ifndef:                                Conditional Syntax.  (line   6)
+* ifneq:                                 Conditional Syntax.  (line   6)
+* include:                               Include.             (line   6)
+* info:                                  Make Control Functions.
+                                                              (line  43)
+* join:                                  File Name Functions. (line  89)
+* lastword:                              Text Functions.      (line 198)
+* LDFLAGS:                               Implicit Variables.  (line 139)
+* LDLIBS:                                Implicit Variables.  (line 144)
+* LEX:                                   Implicit Variables.  (line  72)
+* LFLAGS:                                Implicit Variables.  (line 150)
+* libexecdir:                            Directory Variables. (line  70)
+* LINT:                                  Implicit Variables.  (line  80)
+* LINTFLAGS:                             Implicit Variables.  (line 162)
+* load:                                  load Directive.      (line   9)
+* LOADLIBES:                             Implicit Variables.  (line 144)
+* M2C:                                   Implicit Variables.  (line  60)
+* MAKE:                                  MAKE Variable.       (line   6)
+* MAKE <1>:                              Flavors.             (line  88)
+* MAKECMDGOALS:                          Goals.               (line  30)
+* Makefile:                              Makefile Names.      (line   7)
+* makefile:                              Makefile Names.      (line   7)
+* MAKEFILES:                             MAKEFILES Variable.  (line   6)
+* MAKEFILES <1>:                         Variables/Recursion. (line 126)
+* MAKEFILE_LIST (list of parsed makefiles): Special Variables.
+                                                              (line   8)
+* MAKEFLAGS:                             Options/Recursion.   (line   6)
+* MAKEINFO:                              Implicit Variables.  (line  83)
+* MAKELEVEL:                             Variables/Recursion. (line 114)
+* MAKELEVEL <1>:                         Flavors.             (line  88)
+* MAKEOVERRIDES:                         Options/Recursion.   (line  50)
+* MAKESHELL (MS-DOS alternative to SHELL): Choosing the Shell.
+                                                              (line  27)
+* MAKE_HOST:                             Quick Reference.     (line 348)
+* MAKE_RESTARTS (number of times make has restarted): Special Variables.
+                                                              (line  73)
+* MAKE_TERMERR (whether stderr is a terminal): Special Variables.
+                                                              (line  80)
+* MAKE_TERMOUT (whether stdout is a terminal): Special Variables.
+                                                              (line  80)
+* MAKE_VERSION:                          Quick Reference.     (line 343)
+* MFLAGS:                                Options/Recursion.   (line  66)
+* notdir:                                File Name Functions. (line  26)
+* or:                                    Conditional Functions.
+                                                              (line  37)
+* origin:                                Origin Function.     (line   6)
+* OUTPUT_OPTION:                         Catalogue of Rules.  (line 200)
+* override:                              Override Directive.  (line   6)
+* patsubst:                              Substitution Refs.   (line  28)
+* patsubst <1>:                          Text Functions.      (line  18)
+* PC:                                    Implicit Variables.  (line  63)
+* PFLAGS:                                Implicit Variables.  (line 156)
+* prefix:                                Directory Variables. (line  29)
+* private:                               Suppressing Inheritance.
+                                                              (line   6)
+* realpath:                              File Name Functions. (line 113)
+* RFLAGS:                                Implicit Variables.  (line 159)
+* RM:                                    Implicit Variables.  (line 106)
+* sbindir:                               Directory Variables. (line  63)
+* SHELL:                                 Choosing the Shell.  (line   6)
+* SHELL <1>:                             Choosing the Shell.  (line  88)
+* shell:                                 Shell Function.      (line   6)
+* SHELL (recipe execution):              Execution.           (line   6)
+* sort:                                  Text Functions.      (line 147)
+* strip:                                 Text Functions.      (line  80)
+* subst:                                 Multiple Targets.    (line  28)
+* subst <1>:                             Text Functions.      (line   9)
+* suffix:                                File Name Functions. (line  42)
+* SUFFIXES:                              Suffix Rules.        (line  81)
+* TANGLE:                                Implicit Variables.  (line 100)
+* TEX:                                   Implicit Variables.  (line  87)
+* TEXI2DVI:                              Implicit Variables.  (line  90)
+* undefine:                              Undefine Directive.  (line   6)
+* unexport:                              Variables/Recursion. (line  45)
+* value:                                 Value Function.      (line   6)
+* VPATH:                                 Directory Search.    (line   6)
+* VPATH <1>:                             General Search.      (line   6)
+* vpath:                                 Directory Search.    (line   6)
+* vpath <1>:                             Selective Search.    (line   6)
+* warning:                               Make Control Functions.
+                                                              (line  35)
+* WEAVE:                                 Implicit Variables.  (line  94)
+* wildcard:                              Wildcard Function.   (line   6)
+* wildcard <1>:                          File Name Functions. (line 106)
+* word:                                  Text Functions.      (line 159)
+* wordlist:                              Text Functions.      (line 168)
+* words:                                 Text Functions.      (line 180)
+* YACC:                                  Implicit Variables.  (line  76)
+* YFLAGS:                                Implicit Variables.  (line 153)
+
+vim:tw=78:ts=8:ft=help:norl:
+vim:ft=help bt=nowrite bufhidden=delete readonly nomodifiable nobuflisted:
