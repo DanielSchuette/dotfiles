@@ -95,9 +95,9 @@ alias src="source ~/.bashrc && echo 'sourced .bashrc'"
 alias xup="xrdb ~/dotfiles/.Xresources"
 
 # always use vim-x11 for system clipboard access
-alias v="vimx"
-alias vi="vimx"
-alias vim="vimx"
+alias v="vimx -p"
+alias vi="vimx -p"
+alias vim="vimx -p"
 
 # create for file browsing and viewing
 alias c="clear"
