@@ -610,6 +610,14 @@ augroup javascript_lang
     autocmd FileType javascript inoremap <buffer> $f // --- PH<esc>FP2xi
 augroup END
 
+" C
+augroup C_lang
+    autocmd!
+    autocmd Syntax * syn match MyToDo /\v<(TODO|FIXME|XXX|NOTE|OPTIMIZE)/
+        \ containedin=.*Comment,vimCommentTitle
+augroup END
+highlight def link MyToDo Todo
+
 "**********************"
 "** Helper Functions **"
 "**********************"
