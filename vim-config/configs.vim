@@ -557,7 +557,8 @@ highlight Normal ctermbg=None
 highlight nonText ctermbg=None
 highlight clear LineNr
 highlight clear SignColumn
-hi Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
+highlight Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
+highlight CursorLineNr cterm=None
 
 " toggle a color column to visualize a line width of 80 chars with <leader>cc
 function! ToggleColorColumn()
