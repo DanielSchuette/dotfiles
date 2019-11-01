@@ -322,9 +322,12 @@ function! ToggleYCMDiagnostics()
     endif
 endfunction
 
-let g:ycm_max_diagnostics_to_display = 250
+let g:ycm_max_diagnostics_to_display = 50
 let g:ycm_show_diagnostics_ui = 0
 nnoremap <leader>yy :<C-U>call ToggleYCMDiagnostics()<CR>:<C-U>YcmRestartServer<CR>
+let g:ycm_filetype_specific_completion_to_disable = {}
+"\   'typescript': 0
+"\}
 
 " MRU Configs
 " -----------
@@ -441,7 +444,9 @@ let g:completor_python_binary = '/usr/bin/python3'
 " Usually, tools only need to be installed to work without
 " additional settings in this file. Some language configs are set
 " manually, anyways.
+" NOTE(daniel): tslint is sometimes slow
 let g:ale_linters = {
+\   'typescript': ['tslint'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
 \   'python': ['flake8'],
 \   'go': ['go', 'golint', 'errcheck'],
@@ -610,8 +615,8 @@ augroup javascript_lang
     autocmd FileType javascript inoremap <buffer> $f // --- PH<esc>FP2xi
 augroup END
 
-" C
-augroup C_lang
+" Additional syntax highlighting
+augroup adv_syntax_hi
     autocmd!
     autocmd Syntax * syn match MyToDo /\v<(TODO|FIXME|XXX|NOTE|OPTIMIZE)/
         \ containedin=.*Comment,vimCommentTitle
