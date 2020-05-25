@@ -108,14 +108,13 @@ alias bird="thunderbird &"
 
 # useful for faster navigation and file manipulation
 alias p="pwd"
+
 alias h="cd ~"
 alias co="cd ~/code"
-alias py="cd ~/code/python_src"
-alias go_src="cd ~/code/go_src"
-alias rs="cd ~/code/rust_src"
 alias dc="cd ~/Documents" # can't use keyword `do' here!
 alias dw="cd ~/Downloads"
 alias dotfiles="cd ~/dotfiles" # `dot' shadows graphviz
+
 alias bashrc="v ~/dotfiles/.bashrc"
 alias vimrc="v ~/dotfiles/vim-config/configs.vim"
 alias tmux_conf="v ~/dotfiles/.tmux.conf"
@@ -125,6 +124,9 @@ alias ls="exa --git"
 alias l="exa -lahF --git"
 alias t="tokei"
 alias b="bat"
+
+# easy access to ipython
+alias py="ipython"
 
 # copy to system clipboard by default
 alias xclip="xclip -selection clipboard"
@@ -138,6 +140,9 @@ alias monodevelop="flatpak run com.xamarin.MonoDevelop"
 # open rider more easily
 alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
 export TERM="tmux-256color"
+
+# open ipython in vim mode automatically
+alias ipython="ipython --TerminalInteractiveShell.editing_mode=vi"
 
 # Suppress annoying GTK warnings that mess up gnome-term.
 # Solution adapted from: http://askubuntu.com/questions/505594.

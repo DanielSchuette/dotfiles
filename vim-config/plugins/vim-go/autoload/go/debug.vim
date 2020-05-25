@@ -12,7 +12,6 @@ if !exists('s:state')
       \ 'localVars': {},
       \ 'functionArgs': {},
       \ 'message': [],
-      \ 'is_test': 0,
       \}
 
   if go#util#HasDebug('debugger-state')
@@ -24,7 +23,7 @@ if !exists('s:start_args')
   let s:start_args = []
 endif
 
-function! s:groutineID() abort
+function! s:goroutineID() abort
   return s:state['currentThread'].goroutineID
 endfunction
 
@@ -83,7 +82,7 @@ endfunction
 
 function! s:call_jsonrpc(method, ...) abort
   if go#util#HasDebug('debugger-commands')
-    echom 'sending to dlv ' . a:method
+    call go#util#EchoInfo('sending to dlv ' . a:method)
   endif
 
   let l:args = a:000
@@ -161,7 +160,7 @@ endfunction
 
 " Populate the stacktrace window.
 function! s:show_stacktrace(res) abort
-  if !has_key(a:res, 'result')
+  if type(a:res) isnot type({}) || !has_key(a:res, 'result') || empty(a:res.result)
     return
   endif
 
@@ -280,10 +279,11 @@ function! go#debug#Stop() abort
   silent! exe bufwinnr(bufnr('__GODEBUG_STACKTRACE__')) 'wincmd c'
   silent! exe bufwinnr(bufnr('__GODEBUG_VARIABLES__')) 'wincmd c'
   silent! exe bufwinnr(bufnr('__GODEBUG_OUTPUT__')) 'wincmd c'
+  silent! exe bufwinnr(bufnr('__GODEBUG_GOROUTINES__')) 'wincmd c'
 
   if has('balloon_eval')
-    set noballooneval
-    set balloonexpr=
+    let &ballooneval=s:ballooneval
+    let &balloonexpr=s:balloonexpr
   endif
 
   augroup vim-go-debug
@@ -326,10 +326,10 @@ endfunction
 
 function! s:expand_var() abort
   " Get name from struct line.
-  let name = matchstr(getline('.'), '^[^:]\+\ze: [a-zA-Z0-9\.·]\+{\.\.\.}$')
+  let name = matchstr(getline('.'), '^[^:]\+\ze: \*\?[a-zA-Z0-9-_/\.]\+\({\.\.\.}\)\?$')
   " Anonymous struct
   if name == ''
-    let name = matchstr(getline('.'), '^[^:]\+\ze: struct {.\{-}}$')
+    let name = matchstr(getline('.'), '^[^:]\+\ze: \*\?struct {.\{-}}$')
   endif
 
   if name != ''
@@ -419,23 +419,6 @@ function! s:start_cb() abort
   endif
 
   let debugwindows = go#config#DebugWindows()
-  if has_key(debugwindows, "stack") && debugwindows['stack'] != ''
-    exe 'silent ' . debugwindows['stack']
-    silent file `='__GODEBUG_STACKTRACE__'`
-    setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
-    setlocal filetype=godebugstacktrace
-    nmap <buffer> <cr> :<c-u>call <SID>goto_file()<cr>
-    nmap <buffer> q <Plug>(go-debug-stop)
-  endif
-
-  if has_key(debugwindows, "out") && debugwindows['out'] != ''
-    exe 'silent ' . debugwindows['out']
-    silent file `='__GODEBUG_OUTPUT__'`
-    setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
-    setlocal filetype=godebugoutput
-    nmap <buffer> q <Plug>(go-debug-stop)
-  endif
-
   if has_key(debugwindows, "vars") && debugwindows['vars'] != ''
     exe 'silent ' . debugwindows['vars']
     silent file `='__GODEBUG_VARIABLES__'`
@@ -445,6 +428,33 @@ function! s:start_cb() abort
     nmap <buffer> <silent> <cr> :<c-u>call <SID>expand_var()<cr>
     nmap <buffer> q <Plug>(go-debug-stop)
   endif
+
+  if has_key(debugwindows, "stack") && debugwindows['stack'] != ''
+    exe 'silent ' . debugwindows['stack']
+    silent file `='__GODEBUG_STACKTRACE__'`
+    setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
+    setlocal filetype=godebugstacktrace
+    nmap <buffer> <cr> :<c-u>call <SID>goto_file()<cr>
+    nmap <buffer> q <Plug>(go-debug-stop)
+  endif
+
+  if has_key(debugwindows, "goroutines") && debugwindows['goroutines'] != ''
+    exe 'silent ' . debugwindows['goroutines']
+    silent file `='__GODEBUG_GOROUTINES__'`
+    setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
+    setlocal filetype=godebugvariables
+    call append(0, ["# Goroutines"])
+    nmap <buffer> <silent> <cr> :<c-u>call go#debug#Goroutine()<cr>
+  endif
+
+  if has_key(debugwindows, "out") && debugwindows['out'] != ''
+    exe 'silent ' . debugwindows['out']
+    silent file `='__GODEBUG_OUTPUT__'`
+    setlocal buftype=nofile bufhidden=wipe nomodified nobuflisted noswapfile nowrap nonumber nocursorline
+    setlocal filetype=godebugoutput
+    nmap <buffer> q <Plug>(go-debug-stop)
+  endif
+  call win_gotoid(l:winid)
 
   silent! delcommand GoDebugStart
   silent! delcommand GoDebugTest
@@ -460,17 +470,18 @@ function! s:start_cb() abort
   nnoremap <silent> <Plug>(go-debug-breakpoint) :<C-u>call go#debug#Breakpoint()<CR>
   nnoremap <silent> <Plug>(go-debug-next)       :<C-u>call go#debug#Stack('next')<CR>
   nnoremap <silent> <Plug>(go-debug-step)       :<C-u>call go#debug#Stack('step')<CR>
-  nnoremap <silent> <Plug>(go-debug-stepout)    :<C-u>call go#debug#Stack('stepout')<CR>
+  nnoremap <silent> <Plug>(go-debug-stepout)    :<C-u>call go#debug#Stack('stepOut')<CR>
   nnoremap <silent> <Plug>(go-debug-continue)   :<C-u>call go#debug#Stack('continue')<CR>
   nnoremap <silent> <Plug>(go-debug-stop)       :<C-u>call go#debug#Stop()<CR>
   nnoremap <silent> <Plug>(go-debug-print)      :<C-u>call go#debug#Print(expand('<cword>'))<CR>
 
   if has('balloon_eval')
+    let s:balloonexpr=&balloonexpr
+    let s:ballooneval=&ballooneval
+
     set balloonexpr=go#debug#BalloonExpr()
     set ballooneval
   endif
-
-  call win_gotoid(l:winid)
 
   augroup vim-go-debug
     autocmd! * <buffer>
@@ -485,7 +496,7 @@ endfunction
 
 function! s:err_cb(ch, msg) abort
   if get(s:state, 'ready', 0) != 0
-    call call('s:logger', ['ERR: ', a:ch, a:msg])
+    call s:logger('ERR: ', a:ch, a:msg)
     return
   endif
 
@@ -494,7 +505,7 @@ endfunction
 
 function! s:out_cb(ch, msg) abort
   if get(s:state, 'ready', 0) != 0
-    call call('s:logger', ['OUT: ', a:ch, a:msg])
+    call s:logger('OUT: ', a:ch, a:msg)
     return
   endif
 
@@ -504,23 +515,7 @@ function! s:out_cb(ch, msg) abort
     if has('nvim')
       let s:state['data'] = []
       let l:state = {'databuf': ''}
-      function! s:on_data(ch, data, event) dict abort closure
-        let l:data = self.databuf
-        for msg in a:data
-          let l:data .= l:msg
-        endfor
 
-        try
-          let l:res = json_decode(l:data)
-          let s:state['data'] = add(s:state['data'], l:res)
-          let self.databuf = ''
-        catch
-          " there isn't a complete message in databuf: buffer l:data and try
-          " again when more data comes in.
-          let self.databuf = l:data
-        finally
-        endtry
-      endfunction
       " explicitly bind callback to state so that within it, self will
       " always refer to state. See :help Partial for more information.
       let l:state.on_data = function('s:on_data', [], l:state)
@@ -557,6 +552,24 @@ function! s:out_cb(ch, msg) abort
   endif
 endfunction
 
+function! s:on_data(ch, data, event) dict abort
+  let l:data = self.databuf
+  for l:msg in a:data
+    let l:data .= l:msg
+  endfor
+
+  try
+    let l:res = json_decode(l:data)
+    let s:state['data'] = add(s:state['data'], l:res)
+    let self.databuf = ''
+  catch
+    " there isn't a complete message in databuf: buffer l:data and try
+    " again when more data comes in.
+    let self.databuf = l:data
+  finally
+  endtry
+endfunction
+
 " Start the debug mode. The first argument is the package name to compile and
 " debug, anything else will be passed to the running program.
 function! go#debug#Start(is_test, ...) abort
@@ -572,7 +585,7 @@ function! go#debug#Start(is_test, ...) abort
     return s:state['job']
   endif
 
-  let s:start_args = a:000
+  let s:start_args = [a:is_test] + a:000
 
   if go#util#HasDebug('debugger-state')
     call go#config#SetDebugDiag(s:state)
@@ -584,50 +597,54 @@ function! go#debug#Start(is_test, ...) abort
   endif
 
   try
-    if len(a:000) > 0
-      let l:pkgname = a:1
-      if l:pkgname[0] == '.'
-        let l:pkgname = go#package#FromPath(l:pkgname)
-      endif
-    else
-      let l:pkgname = go#package#FromPath(getcwd())
-    endif
-
-    if l:pkgname is -1
-      call go#util#EchoError('could not determine package name')
-      return
-    endif
-
-    " cd in to test directory; this is also what running "go test" does.
-    if a:is_test
-      " TODO(bc): Either remove this if it's ok to do so or else record it and
-      " reset cwd after the job completes.
-      lcd %:p:h
-    endif
-
-    let s:state.is_test = a:is_test
-
-    let l:args = []
-    if len(a:000) > 1
-      let l:args = ['--'] + a:000[1:]
-    endif
-
     let l:cmd = [
           \ dlv,
           \ (a:is_test ? 'test' : 'debug'),
-          \ l:pkgname,
+     \]
+
+    " append the package when it's given.
+    if len(a:000) > 0
+      let l:pkgname = a:1
+      if l:pkgname[0] == '.'
+        let l:pkgabspath = fnamemodify(l:pkgname, ':p')
+
+        let l:cd = exists('*haslocaldir') && haslocaldir() ? 'lcd' : 'cd'
+        let l:dir = getcwd()
+        execute l:cd fnameescape(expand('%:p:h'))
+
+        try
+          let l:pkgname = go#package#FromPath(l:pkgabspath)
+          if type(l:pkgname) == type(0)
+            call go#util#EchoError('could not determine package name')
+            return
+          endif
+        finally
+          execute l:cd fnameescape(l:dir)
+        endtry
+      endif
+
+      let l:cmd += [l:pkgname]
+    endif
+
+    let l:cmd += [
           \ '--output', tempname(),
           \ '--headless',
           \ '--api-version', '2',
-          \ '--log', '--log-output', 'debugger,rpc',
           \ '--listen', go#config#DebugAddress(),
     \]
+    let l:debugLogOutput = go#config#DebugLogOutput()
+    if l:debugLogOutput != ''
+      let cmd += ['--log', '--log-output', l:debugLogOutput]
+    endif
 
-    let buildtags = go#config#BuildTags()
+    let l:buildtags = go#config#BuildTags()
     if buildtags isnot ''
       let l:cmd += ['--build-flags', '--tags=' . buildtags]
     endif
-    let l:cmd += l:args
+
+    if len(a:000) > 1
+      let l:cmd += ['--'] + a:000[1:]
+    endif
 
     let s:state['message'] = []
     let l:opts = {
@@ -763,6 +780,92 @@ function! go#debug#Print(arg) abort
   endtry
 endfunction
 
+function! s:update_goroutines() abort
+  try
+    let l:res = s:call_jsonrpc('RPCServer.State')
+    let l:currentGoroutineID = 0
+    try
+      if type(l:res) is type({}) && has_key(l:res, 'result') && !empty(l:res['result'])
+        let l:currentGoroutineID = l:res["result"]["State"]["currentGoroutine"]["id"]
+      endif
+    catch
+      call go#util#EchoWarning("current goroutine not found...")
+    endtry
+
+    let l:res = s:call_jsonrpc('RPCServer.ListGoroutines')
+    call s:show_goroutines(l:currentGoroutineID, l:res)
+  catch
+    call go#util#EchoError(v:exception)
+  endtry
+ endfunction
+
+function! s:show_goroutines(currentGoroutineID, res) abort
+  let l:goroutines_winid = bufwinid('__GODEBUG_GOROUTINES__')
+  if l:goroutines_winid == -1
+    return
+  endif
+
+  let l:winid = win_getid()
+  call win_gotoid(l:goroutines_winid)
+
+  try
+    setlocal modifiable
+    silent %delete _
+
+    let v = ['# Goroutines']
+
+    if type(a:res) isnot type({}) || !has_key(a:res, 'result') || empty(a:res['result'])
+      call setline(1, v)
+      return
+    endif
+
+    let l:goroutines = a:res["result"]["Goroutines"]
+    if len(l:goroutines) == 0
+      call go#util#EchoWarning("No Goroutines Running Now...")
+      call setline(1, v)
+      return
+    endif
+
+    for l:idx in range(len(l:goroutines))
+      let l:goroutine = l:goroutines[l:idx]
+      let l:goroutineType = ""
+      let l:loc = 0
+      if l:goroutine.startLoc.file != ""
+          let l:loc = l:goroutine.startLoc
+          let l:goroutineType = "Start"
+      endif
+      if l:goroutine.goStatementLoc.file != ""
+          let l:loc = l:goroutine.goStatementLoc
+          let l:goroutineType = "Go"
+      endif
+      if l:goroutine.currentLoc.file != ""
+          let l:loc = l:goroutine.currentLoc
+          let l:goroutineType = "Runtime"
+      endif
+      if l:goroutine.userCurrentLoc.file != ""
+          let l:loc=l:goroutine.userCurrentLoc
+          let l:goroutineType = "User"
+      endif
+
+      " The current goroutine can be changed by pressing enter on one of the
+      " lines listing a non-active goroutine. If the format of either of these
+      " lines is modified, then make sure that go#debug#Goroutine is also
+      " changed if needed.
+      if l:goroutine.id == a:currentGoroutineID
+        let l:g = printf("* Goroutine %s - %s: %s:%s %s (thread: %s)", l:goroutine.id, l:goroutineType, l:loc.file, l:loc.line, l:loc.function.name, l:goroutine.threadID)
+      else
+        let l:g = printf("  Goroutine %s - %s: %s:%s %s (thread: %s)", l:goroutine.id, l:goroutineType, l:loc.file, l:loc.line, l:loc.function.name, l:goroutine.threadID)
+      endif
+      let v += [l:g]
+    endfor
+
+    call setline(1, v)
+  finally
+    setlocal nomodifiable
+    call win_gotoid(l:winid)
+  endtry
+endfunction
+
 function! s:update_variables() abort
   " FollowPointers requests pointers to be automatically dereferenced.
   " MaxVariableRecurse is how far to recurse when evaluating nested types.
@@ -770,20 +873,27 @@ function! s:update_variables() abort
   " MaxArrayValues is the maximum number of elements read from an array, a slice or a map.
   " MaxStructFields is the maximum number of fields read from a struct, -1 will read all fields.
   let l:cfg = {
-        \ 'scope': {'GoroutineID': s:groutineID()},
+        \ 'scope': {'GoroutineID': s:goroutineID()},
         \ 'cfg':   {'MaxStringLen': 20, 'MaxArrayValues': 20}
         \ }
 
   try
     let res = s:call_jsonrpc('RPCServer.ListLocalVars', l:cfg)
-    let s:state['localVars'] = res.result['Variables']
+
+    let s:state['localVars'] = {}
+    if type(l:res) is type({}) && has_key(l:res, 'result') && !empty(l:res.result)
+      let s:state['localVars'] = l:res.result['Variables']
+    endif
   catch
     call go#util#EchoError(v:exception)
   endtry
 
   try
     let res = s:call_jsonrpc('RPCServer.ListFunctionArgs', l:cfg)
-    let s:state['functionArgs'] = res.result['Args']
+    let s:state['functionArgs'] = {}
+    if type(l:res) is type({}) && has_key(l:res, 'result') && !empty(l:res.result)
+      let s:state['functionArgs'] = res.result['Args']
+    endif
   catch
     call go#util#EchoError(v:exception)
   endtry
@@ -808,7 +918,7 @@ endfunction
 
 function! s:update_stacktrace() abort
   try
-    let l:res = s:call_jsonrpc('RPCServer.Stacktrace', {'id': s:groutineID(), 'depth': 5})
+    let l:res = s:call_jsonrpc('RPCServer.Stacktrace', {'id': s:goroutineID(), 'depth': 5})
     call s:show_stacktrace(l:res)
   catch
     call go#util#EchoError(v:exception)
@@ -818,10 +928,12 @@ endfunction
 function! s:stack_cb(res) abort
   let s:stack_name = ''
 
-  if empty(a:res) || !has_key(a:res, 'result')
+  if type(a:res) isnot type({}) || !has_key(a:res, 'result') || empty(a:res.result)
     return
   endif
+
   call s:update_breakpoint(a:res)
+  call s:update_goroutines()
   call s:update_stacktrace()
   call s:update_variables()
 endfunction
@@ -853,8 +965,20 @@ function! go#debug#Stack(name) abort
     endif
     let s:stack_name = l:name
     try
-      let res =  s:call_jsonrpc('RPCServer.Command', {'name': l:name})
-      call s:stack_cb(res)
+      let l:res = s:call_jsonrpc('RPCServer.Command', {'name': l:name})
+
+      if l:name is# 'next'
+          let l:res2 = l:res
+          let l:w = 0
+          while l:w < 1
+            if l:res2.result.State.NextInProgress == v:true
+              let l:res2 = s:call_jsonrpc('RPCServer.Command', {'name': 'continue'})
+            else
+              break
+            endif
+          endwhile
+      endif
+      call s:stack_cb(l:res)
     catch
       call go#util#EchoError(v:exception)
       call s:clearState()
@@ -889,6 +1013,23 @@ endfunction
 " Report if debugger mode is active.
 function! s:isActive()
   return len(s:state['message']) > 0
+endfunction
+
+" Change Goroutine
+function! go#debug#Goroutine() abort
+  let l:goroutineID = substitute(getline('.'), '^  Goroutine \(.\{-1,\}\) - .*', '\1', 'g')
+
+  if l:goroutineID <= 0
+    return
+  endif
+
+  try
+    let l:res = s:call_jsonrpc('RPCServer.Command', {'Name': 'switchGoroutine', 'GoroutineID': str2nr(l:goroutineID)})
+    call s:stack_cb(l:res)
+    call go#util#EchoInfo("Switched goroutine to: " . l:goroutineID)
+  catch
+    call go#util#EchoError(v:exception)
+  endtry
 endfunction
 
 " Toggle breakpoint. Returns 0 on success and 1 on failure.
@@ -975,7 +1116,7 @@ function! s:list_breakpoints()
   return l:signs
 endfunction
 
-sign define godebugbreakpoint text=> texthl=GoDebugBreakpoint
+exe 'sign define godebugbreakpoint text='.go#config#DebugBreakpointSignText().' texthl=GoDebugBreakpoint'
 sign define godebugcurline    text== texthl=GoDebugCurrent    linehl=GoDebugCurrent
 
 " restore Vi compatibility settings

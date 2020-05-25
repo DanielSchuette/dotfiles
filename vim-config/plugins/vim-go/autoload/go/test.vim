@@ -6,7 +6,10 @@ set cpo&vim
 " compile the tests instead of running them (useful to catch errors in the
 " test files). Any other argument is appended to the final `go test` command.
 function! go#test#Test(bang, compile, ...) abort
-  let args = ["test", '-tags', go#config#BuildTags()]
+  let args = ["test"]
+  if len(go#config#BuildTags()) > 0
+    call extend(args, ["-tags", go#config#BuildTags()])
+  endif
 
   " don't run the test, only compile it. Useful to capture and fix errors.
   if a:compile
@@ -30,8 +33,9 @@ function! go#test#Test(bang, compile, ...) abort
     call add(args, printf("-timeout=%s", timeout))
   endif
 
-  if has('nvim') && go#config#TermEnabled()
-    call go#term#new(a:bang, ["go"] + args)
+  if go#config#TermEnabled()
+    call go#term#new(a:bang, ["go"] + args, s:errorformat())
+    return
   endif
 
   if go#util#has_job()
@@ -64,7 +68,7 @@ function! go#test#Test(bang, compile, ...) abort
 
   let l:cmd = ['go'] + l:args
 
-  let [l:out, l:err] = go#tool#ExecuteInDir(l:cmd)
+  let [l:out, l:err] = go#util#ExecInDir(l:cmd)
   " TODO(bc): When the output is JSON, the JSON should be run through a
   " filter to produce lines that are more easily described by errorformat.
 
@@ -75,14 +79,17 @@ function! go#test#Test(bang, compile, ...) abort
   execute cd fnameescape(expand("%:p:h"))
 
   if l:err != 0
-    call go#list#ParseFormat(l:listtype, s:errorformat(), split(out, '\n'), l:cmd)
+    let l:winid = win_getid(winnr())
+    call go#list#ParseFormat(l:listtype, s:errorformat(), split(out, '\n'), l:cmd, 0)
     let errors = go#list#Get(l:listtype)
     call go#list#Window(l:listtype, len(errors))
-    if !empty(errors) && !a:bang
-      call go#list#JumpToFirst(l:listtype)
-    elseif empty(errors)
+    if empty(errors)
       " failed to parse errors, output the original content
       call go#util#EchoError(out)
+    elseif a:bang
+      call win_gotoid(l:winid)
+    else
+      call go#list#JumpToFirst(l:listtype)
     endif
   else
     call go#list#Clean(l:listtype)
@@ -163,9 +170,17 @@ function! s:errorformat() abort
   let format .= ",%-G" . indent . "%#--- PASS: %.%#"
 
   " Match failure lines.
-  "
+
+  " Example failures start with '--- FAIL: ', followed by the example name
+  " followed by a space , followed by the duration of the example in
+  " parantheses. They aren't nested, though, so don't check for indentation.
+  " The errors from them also aren't indented and don't report file location
+  " or line numbers, so those won't show up. This will at least let the user
+  " know which example failed, though.
+  let format .= ',%G--- FAIL: %\\%(Example%\\)%\\@=%m (%.%#)'
+
   " Test failures start with '--- FAIL: ', followed by the test name followed
-  " by a space the duration of the test in parentheses
+  " by a space, followed by the duration of the test in parentheses.
   "
   " e.g.:
   "   '--- FAIL: TestSomething (0.00s)'
@@ -202,6 +217,14 @@ function! s:errorformat() abort
   " get concatenated in the quickfix list, which is not what users typically
   " want when writing a newline into their test output.
   let format .= ",%G" . indent . "%#%\\t%\\{2}%m"
+  " }}}1
+
+  " Go 1.14 test verbose output {{{1
+  " Match test output lines similarly to Go 1.11 test output lines, but they
+  " have the test name followed by a colon before the filename when run with
+  " the -v flag.
+  let format .= ",%A" . indent . "%\\+%[%^:]%\\+: %f:%l: %m"
+  let format .= ",%A" . indent . "%\\+%[%^:]%\\+: %f:%l: "
   " }}}1
 
   " Go 1.11 test output {{{1
@@ -241,7 +264,7 @@ function! s:errorformat() abort
   " e.g.:
   "   '\t/usr/local/go/src/time.go:1313 +0x5d'
 
-  " panicaddress, and readyaddress are identical except for
+  " panicaddress and readyaddress are identical except for
   " panicaddress sets the filename and line number.
   let panicaddress = "%\\t%f:%l +0x%[0-9A-Fa-f]%\\+"
   let readyaddress = "%\\t%\\f%\\+:%\\d%\\+ +0x%[0-9A-Fa-f]%\\+"
@@ -263,6 +286,11 @@ function! s:errorformat() abort
   " message will only be shown as the error message in the first address of
   " the running goroutine's stack.
   let format .= ",%Z" . panicaddress
+
+  " Match and ignore errors from runtime.goparkunlock(). These started
+  " appearing in stack traces from Go 1.12 test timeouts.
+  let format .= ",%-Gruntime.goparkunlock(%.%#"
+  let format .= ",%-G%\\t" . goroot . "%\\f%\\+:%\\d%\\+"
 
   " Match and ignore panic address without being part of a multi-line message.
   " This is to catch those lines that come after the top most non-standard
@@ -290,8 +318,8 @@ function! s:errorformat() abort
   " It would be nice if this weren't necessary, but panic lines from tests are
   " prefixed with a single leading tab, making them very similar to 2nd and
   " later lines of a multi-line compiler error. Swallow it so that it doesn't
-  " cause a quickfix entry since the next entry can add a quickfix entry for
-  " 2nd and later lines of a multi-line compiler error.
+  " cause a quickfix entry since the next %G entry can add a quickfix entry
+  " for 2nd and later lines of a multi-line compiler error.
   let format .= ",%-C%\\tpanic: %.%#"
   let format .= ",%G%\\t%m"
 

@@ -40,11 +40,10 @@ set expandtab " spaces instead of tabs
 set smarttab
 set shiftwidth=4 " one tab is 4 spaces
 set tabstop=4
-set linebreak
-set textwidth=500 " line break on 500 chars
+set wrap        " soft wrap 1
+set linebreak   " soft wrap 2
 set autoindent
 set smartindent
-set wrap " wrap lines
 set laststatus=2 " always show status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 set noshowmode " because lightline shows the mode
