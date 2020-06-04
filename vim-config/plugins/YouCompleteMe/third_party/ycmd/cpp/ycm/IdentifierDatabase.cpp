@@ -33,14 +33,12 @@ IdentifierDatabase::IdentifierDatabase()
 
 
 void IdentifierDatabase::AddIdentifiers(
-  const FiletypeIdentifierMap &filetype_identifier_map ) {
+  FiletypeIdentifierMap&& filetype_identifier_map ) {
   std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
 
-  for ( const FiletypeIdentifierMap::value_type & filetype_and_map :
-            filetype_identifier_map ) {
-    for ( const FilepathToIdentifiers::value_type & filepath_and_identifiers :
-             filetype_and_map.second ) {
-      AddIdentifiersNoLock( filepath_and_identifiers.second,
+  for ( auto&& filetype_and_map : filetype_identifier_map ) {
+    for ( auto&& filepath_and_identifiers : filetype_and_map.second ) {
+      AddIdentifiersNoLock( std::move( filepath_and_identifiers.second ),
                             filetype_and_map.first,
                             filepath_and_identifiers.first );
     }
@@ -49,11 +47,11 @@ void IdentifierDatabase::AddIdentifiers(
 
 
 void IdentifierDatabase::AddIdentifiers(
-  const std::vector< std::string > &new_candidates,
+  std::vector< std::string >&& new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
   std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
-  AddIdentifiersNoLock( new_candidates, filetype, filepath );
+  AddIdentifiersNoLock( std::move( new_candidates ), filetype, filepath );
 }
 
 
@@ -65,10 +63,9 @@ void IdentifierDatabase::ClearCandidatesStoredForFile(
 }
 
 
-void IdentifierDatabase::ResultsForQueryAndType(
-  const std::string &query,
+std::vector< Result > IdentifierDatabase::ResultsForQueryAndType(
+  std::string&& query,
   const std::string &filetype,
-  std::vector< Result > &results,
   const size_t max_results ) const {
   FiletypeCandidateMap::const_iterator it;
   {
@@ -76,18 +73,18 @@ void IdentifierDatabase::ResultsForQueryAndType(
     it = filetype_candidate_map_.find( filetype );
 
     if ( it == filetype_candidate_map_.end() ) {
-      return;
+      return {};
     }
   }
-  Word query_object( query );
+  Word query_object( std::move( query ) );
 
   std::unordered_set< const Candidate * > seen_candidates;
   seen_candidates.reserve( candidate_repository_.NumStoredCandidates() );
+  std::vector< Result > results;
 
   {
     std::lock_guard< std::mutex > locker( filetype_candidate_map_mutex_ );
-    for ( const FilepathToCandidates::value_type & path_and_candidates :
-              *it->second ) {
+    for ( const auto& path_and_candidates : *it->second ) {
       for ( const Candidate * candidate : *path_and_candidates.second ) {
         if ( ContainsKey( seen_candidates, candidate ) ) {
           continue;
@@ -109,6 +106,7 @@ void IdentifierDatabase::ResultsForQueryAndType(
   }
 
   PartialSort( results, max_results );
+  return results;
 }
 
 
@@ -138,14 +136,15 @@ std::set< const Candidate * > &IdentifierDatabase::GetCandidateSet(
 // WARNING: You need to hold the filetype_candidate_map_mutex_ before calling
 // this function and while using the returned set.
 void IdentifierDatabase::AddIdentifiersNoLock(
-  const std::vector< std::string > &new_candidates,
+  std::vector< std::string >&& new_candidates,
   const std::string &filetype,
   const std::string &filepath ) {
   std::set< const Candidate *> &candidates =
     GetCandidateSet( filetype, filepath );
 
   std::vector< const Candidate * > repository_candidates =
-    candidate_repository_.GetCandidatesForStrings( new_candidates );
+    candidate_repository_.GetCandidatesForStrings(
+      std::move( new_candidates ) );
 
   candidates.insert( repository_candidates.begin(),
                      repository_candidates.end() );

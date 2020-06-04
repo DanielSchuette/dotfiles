@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# coding: utf8
-#
-# Copyright (C) 2018 ycmd contributors
+#!/usr/bin/env python3
+# Copyright (C) 2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -18,40 +16,55 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-
-import os
-import re
 import pprint
 import sys
 from collections import defaultdict, OrderedDict
+from os import path as p
+from io import StringIO
 
 
-DIR_OF_THIS_SCRIPT = os.path.dirname( os.path.abspath( __file__ ) )
-DIR_OF_THIRD_PARTY = os.path.join( DIR_OF_THIS_SCRIPT, 'third_party' )
+DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
+DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
 
-sys.path.insert( 1, os.path.abspath( os.path.join( DIR_OF_THIRD_PARTY,
-                                                   'requests' ) ) )
+sys.path[ 0:0 ] = [ p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ),
+                    p.join( DIR_OF_THIRD_PARTY, 'cregex', 'regex_3' ),
+                    p.join( DIR_OF_THIRD_PARTY,
+                            'requests_deps',
+                            'urllib3',
+                            'src' ),
+                    p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'chardet' ),
+                    p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'certifi' ),
+                    p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ) ]
 
+import regex as re
 import requests
 
-DIR_OF_CPP_SOURCES = os.path.join( DIR_OF_THIS_SCRIPT, 'cpp', 'ycm' )
+DIR_OF_CPP_SOURCES = p.join( DIR_OF_THIS_SCRIPT, 'cpp', 'ycm' )
 UNICODE_TABLE_TEMPLATE = (
   """// This file was automatically generated with the update_unicode.py script
 // using version {unicode_version} of the Unicode Character Database.
-static const std::array< const RawCodePoint, {size} > code_points = {{ {{
+#include <array>
+struct RawCodePointArray {{
+std::array< char[{original_size}], {size} > original;
+std::array< char[{normal_size}], {size} > normal;
+std::array< char[{folded_case_size}], {size} > folded_case;
+std::array< char[{swapped_case_size}], {size} > swapped_case;
+std::array< bool, {size} > is_letter;
+std::array< bool, {size} > is_punctuation;
+std::array< bool, {size} > is_uppercase;
+std::array< uint8_t, {size} > break_property;
+std::array< uint8_t, {size} > combining_class;
+}};
+static const RawCodePointArray code_points = {{
 {code_points}
-}} }};""" )
+}};""" )
 UNICODE_VERSION_REGEX = re.compile( r'Version (?P<version>\d+(?:\.\d+){2})' )
 GRAPHEME_BREAK_PROPERTY_REGEX = re.compile(
   r'^(?P<value>[A-F0-9.]+)\s+; (?P<property>\w+) # .*$' )
 GRAPHEME_BREAK_PROPERTY_TOTAL = re.compile(
   r'# Total code points: (?P<total>\d+)' )
 # See
-# https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Break_Property_Values
+# https://www.unicode.org/reports/tr29/tr29-37.html#Grapheme_Cluster_Break_Property_Values
 GRAPHEME_BREAK_PROPERTY_MAP = {
   # "Other" is the term used in the Unicode data while "Any" is used in the
   # docs.
@@ -173,7 +186,7 @@ def GetUnicodeVersion():
   raise RuntimeError( 'Cannot find the version of the Unicode Standard.' )
 
 
-# See https://www.unicode.org/reports/tr44/tr44-20.html#UnicodeData.txt
+# See https://www.unicode.org/reports/tr44/tr44-26.html#UnicodeData.txt
 def GetUnicodeData():
   data = Download(
     'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt' )
@@ -217,7 +230,7 @@ def GetUnicodeData():
 
 
 # See
-# https://www.unicode.org/reports/tr44/tr44-20.html#GraphemeBreakProperty.txt
+# https://www.unicode.org/reports/tr44/tr44-26.html#GraphemeBreakProperty.txt
 def GetGraphemeBreakProperty():
   data = Download( 'https://www.unicode.org/'
     'Public/UCD/latest/ucd/auxiliary/GraphemeBreakProperty.txt' )
@@ -257,7 +270,7 @@ def GetGraphemeBreakProperty():
   return break_data
 
 
-# See https://www.unicode.org/reports/tr44/tr44-20.html#SpecialCasing.txt
+# See https://www.unicode.org/reports/tr44/tr44-26.html#SpecialCasing.txt
 def GetSpecialFolding():
   data = Download(
     'https://www.unicode.org/Public/UCD/latest/ucd/SpecialCasing.txt' )
@@ -283,7 +296,7 @@ def GetSpecialFolding():
   return folding_data
 
 
-# See https://www.unicode.org/reports/tr44/tr44-20.html#CaseFolding.txt
+# See https://www.unicode.org/reports/tr44/tr44-26.html#CaseFolding.txt
 def GetCaseFolding():
   data = Download(
     'https://www.unicode.org/Public/UCD/latest/ucd/CaseFolding.txt' )
@@ -344,7 +357,7 @@ def GetEmojiData():
 
 
 # Decompose a hangul syllable using the algorithm described in
-# https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G61399
+# https://www.unicode.org/versions/Unicode13.0.0/ch03.pdf#G61399
 def DecomposeHangul( code_point ):
   index = int( code_point, 16 ) - HANGUL_BASE
   if index < 0 or index >= HANGUL_LVT_COUNT:
@@ -361,7 +374,7 @@ def DecomposeHangul( code_point ):
 
 # Recursively decompose a Unicode code point into a list of code points
 # according to canonical decomposition.
-# See https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G733
+# See https://www.unicode.org/versions/Unicode13.0.0/ch03.pdf#G733
 def Decompose( code_point, unicode_data ):
   code_points = DecomposeHangul( code_point )
   if code_points:
@@ -450,8 +463,8 @@ def GetCodePoints():
                             '{} property'.format( break_property ) )
     break_property = GRAPHEME_BREAK_PROPERTY_MAP[ break_property ]
     combining_class = int( value[ 'ccc' ] )
-    # See https://unicode.org/reports/tr44/#General_Category_Values for the
-    # list of categories.
+    # See https://unicode.org/reports/tr44/tr44-26.html#General_Category_Values
+    # for the list of categories.
     if ( code_point != normal_code_point or
          code_point != folded_code_point or
          code_point != swapped_code_point or
@@ -486,31 +499,131 @@ def CppBool( statement ):
   return '0'
 
 
+# If a codepoint is written in hex (\x61) instead of a literal (a)
+# then the backslash needs to be escaped in order for the correct
+# string end up in the generated C++ file.
+# To calculate the actual length for these, we can't count bytes.
+# Instead, we split on '\\x', leaving only the an array of hex values.
+# \\x61 would end up as [ '', '61' ]
+def CppLength( utf8_code_point ):
+  nb_utf8_hex = len( utf8_code_point.split( '\\x' )[ 1: ] )
+  if nb_utf8_hex > 0:
+    # +1 for NULL terminator
+    return nb_utf8_hex + 1
+  return len( bytearray( utf8_code_point, encoding = 'utf8' ) ) + 1
+
+
 def GenerateUnicodeTable( header_path, code_points ):
   unicode_version = GetUnicodeVersion()
   size = len( code_points )
-  code_points = '\n'.join( [
-    ( '{' + CppChar( code_point[ 'original' ] ) + ',' +
-            CppChar( code_point[ 'normal' ] ) + ',' +
-            CppChar( code_point[ 'folded_case' ] ) + ',' +
-            CppChar( code_point[ 'swapped_case' ] ) + ',' +
-            CppBool( code_point[ 'is_letter' ] ) + ',' +
-            CppBool( code_point[ 'is_punctuation' ] ) + ',' +
-            CppBool( code_point[ 'is_uppercase' ] ) + ',' +
-            str( code_point[ 'break_property' ] ) + ',' +
-            str( code_point[ 'combining_class' ] ) + '},' )
-    for code_point in code_points ] )
-  contents = UNICODE_TABLE_TEMPLATE.format( unicode_version = unicode_version,
-                                            size = size,
-                                            code_points = code_points )
+  table = {
+    'original': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
+    'normal': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
+    'folded_case': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
+    'swapped_case': { 'output': StringIO(), 'size': 0, 'converter': CppChar },
+    'is_letter': { 'output': StringIO(), 'converter': CppBool },
+    'is_punctuation': { 'output': StringIO(), 'converter': CppBool },
+    'is_uppercase': { 'output': StringIO(), 'converter': CppBool },
+    'break_property': { 'output': StringIO(), 'converter': str },
+    'combining_class': { 'output': StringIO(), 'converter': str },
+  }
+
+  for d in table.values():
+    d[ 'output' ].write( '{{' )
+
+  for code_point in code_points:
+    for t, d in table.items():
+      cp = code_point[ t ]
+      d[ 'output' ].write( d[ 'converter' ]( cp ) )
+      d[ 'output' ].write( ',' )
+      if d[ 'converter' ] == CppChar:
+        d[ 'size' ] = max( CppLength( cp ), d[ 'size' ] )
+
+  for t, d in table.items():
+    if t == 'combining_class':
+      d[ 'output' ] = d[ 'output' ].getvalue().rstrip( ',' ) + '}}'
+    else:
+      d[ 'output' ] = d[ 'output' ].getvalue().rstrip( ',' ) + '}},'
+
+  code_points = '\n'.join( [ table[ 'original' ][ 'output' ],
+                             table[ 'normal' ][ 'output' ],
+                             table[ 'folded_case' ][ 'output' ],
+                             table[ 'swapped_case' ][ 'output' ],
+                             table[ 'is_letter' ][ 'output' ],
+                             table[ 'is_punctuation' ][ 'output' ],
+                             table[ 'is_uppercase' ][ 'output' ],
+                             table[ 'break_property' ][ 'output' ],
+                             table[ 'combining_class' ][ 'output' ] ] )
+
+  contents = UNICODE_TABLE_TEMPLATE.format(
+    unicode_version = unicode_version,
+    size = size,
+    original_size = table[ 'original' ][ 'size' ],
+    normal_size = table[ 'normal' ][ 'size' ],
+    folded_case_size = table[ 'folded_case' ][ 'size' ],
+    swapped_case_size = table[ 'swapped_case' ][ 'size' ],
+    code_points = code_points )
+
   with open( header_path, 'w', newline = '\n', encoding='utf8' ) as header_file:
     header_file.write( contents )
 
 
+def GenerateNormalizationTestCases( output_file ):
+  test_contents = Download(
+      'https://unicode.org/Public/UCD/latest/ucd/NormalizationTest.txt' )
+  hex_codepoint = '(?:[A-F0-9]{4,} ?)+'
+  pattern = f'(?:{hex_codepoint};){{5}}'
+  pattern = re.compile( pattern )
+
+  res = []
+  for line in test_contents:
+    m = pattern.match( line )
+    if m:
+      captures = m[ 0 ].split( ';' )
+      res.append(
+        '{"' +
+        JoinUnicodeToUtf8( captures[ 0 ].split() ) + '","' +
+        JoinUnicodeToUtf8( captures[ 1 ].split() ) + '","' +
+        JoinUnicodeToUtf8( captures[ 2 ].split() ) + '","' +
+        JoinUnicodeToUtf8( captures[ 3 ].split() ) + '","' +
+        JoinUnicodeToUtf8( captures[ 4 ].split() ) + '"},\n' )
+
+  res[ -1 ] = res[ -1 ].rstrip( ',\n' )
+  with open( output_file, 'w' ) as f:
+    f.writelines( res )
+
+
+def GenerateGraphemeBreakTestCases( output_file ):
+  test_contents = Download( 'https://www.unicode.org/'
+      'Public/UCD/latest/ucd/auxiliary/GraphemeBreakTest.txt' )
+
+  res = []
+  for line in test_contents:
+    if line.startswith( '÷' ):
+      data = line.split( '#' )[ 0 ].rstrip().strip( '÷' ).strip()
+      all_data = data.replace( ' × ', ' ÷ ' ).replace( '÷ ', '' )
+      all_data = JoinUnicodeToUtf8( all_data.split() )
+      split_data = data.replace( '× ', '' ).split( ' ÷ ' )
+      for i, e in enumerate( split_data ):
+        split_data[ i ] = JoinUnicodeToUtf8( e.split() )
+
+      res.append( '{"' + all_data + '",{' + ''.join( [ '"' + x + '",'
+                  for x in split_data ] ).rstrip( ',' ) + '}},\n' )
+
+  res[ -1 ] = res[ -1 ].rstrip( ',\n' )
+  with open( output_file, 'w' ) as f:
+    f.writelines( res )
+
+
 def Main():
   code_points = GetCodePoints()
-  table_path = os.path.join( DIR_OF_CPP_SOURCES, 'UnicodeTable.inc' )
+  table_path = p.join( DIR_OF_CPP_SOURCES, 'UnicodeTable.inc' )
   GenerateUnicodeTable( table_path, code_points )
+  cpp_tests_path = p.join( DIR_OF_CPP_SOURCES, 'tests' )
+  normalization_cases_path = p.join( cpp_tests_path, 'NormalizationCases.inc' )
+  GenerateNormalizationTestCases( normalization_cases_path )
+  grapheme_break_cases_path = p.join( cpp_tests_path, 'GraphemeBreakCases.inc' )
+  GenerateGraphemeBreakTestCases( grapheme_break_cases_path )
 
 
 if __name__ == '__main__':

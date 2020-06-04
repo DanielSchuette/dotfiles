@@ -65,7 +65,7 @@ TEST_P( CodePointTest, PropertiesAreCorrect ) {
 
 
 // Tests mostly based on the table
-// http://www.unicode.org/reports/tr29/#Grapheme_Cluster_Break_Property_Values
+// http://www.unicode.org/reports/tr29/tr29-37.html#Grapheme_Cluster_Break_Property_Values
 const TextCodePointPair tests[] = {
   { "\r", { "\r", "\r", "\r", false, false, false, BreakProperty::CR } },
 
@@ -77,9 +77,6 @@ const TextCodePointPair tests[] = {
                       false, false, false, BreakProperty::CONTROL } },
   // Paragraph separator
   { "\xe2\x80\xa9", { "\xe2\x80\xa9", "\xe2\x80\xa9", "\xe2\x80\xa9",
-                      false, false, false, BreakProperty::CONTROL } },
-  // Surrogate character
-  { "\xed\xa8\x92", { "\xed\xa8\x92", "\xed\xa8\x92", "\xed\xa8\x92",
                       false, false, false, BreakProperty::CONTROL } },
   // Zero-width space
   { "​", { "​", "​", "​", false, false, false,

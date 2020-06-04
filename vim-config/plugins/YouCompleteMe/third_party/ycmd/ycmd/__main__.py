@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Google Inc.
+# Copyright (C) 2013-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,21 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-# Other imports from `future` must be placed after SetUpPythonPath.
-
 import sys
 import os
 
-sys.path.insert( 0, os.path.dirname( os.path.abspath( __file__ ) ) )
-from server_utils import SetUpPythonPath, CompatibleWithCurrentCore
-SetUpPythonPath()
+if sys.version_info[ 0 ] < 3:
+  sys.exit( 8 )
 
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
+sys.path.insert( 0, os.path.dirname( os.path.abspath( __file__ ) ) )
+from server_utils import SetUpPythonPath
+SetUpPythonPath()
 
 import atexit
 import sys
@@ -42,7 +36,10 @@ import base64
 
 from ycmd import extra_conf_store, user_options_store, utils
 from ycmd.hmac_plugin import HmacPlugin
-from ycmd.utils import ToBytes, ReadFile, OpenForStdHandle
+from ycmd.utils import ( ImportAndCheckCore,
+                         OpenForStdHandle,
+                         ReadFile,
+                         ToBytes )
 from ycmd.wsgi_server import StoppableWSGIServer
 
 
@@ -160,7 +157,7 @@ def Main():
   YcmCoreSanityCheck()
   extra_conf_store.CallGlobalExtraConfYcmCorePreloadIfExists()
 
-  code = CompatibleWithCurrentCore()
+  code = ImportAndCheckCore()
   if code:
     sys.exit( code )
 

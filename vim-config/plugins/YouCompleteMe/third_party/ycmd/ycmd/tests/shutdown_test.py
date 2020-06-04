@@ -1,4 +1,4 @@
-# Copyright (C) 2016 ycmd contributors
+# Copyright (C) 2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,17 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from hamcrest import assert_that, equal_to
 from threading import Event
 import time
 import requests
+import pytest
 
 from ycmd.tests.client_test import Client_test
 from ycmd.utils import StartThread
@@ -53,6 +47,7 @@ class Shutdown_test( Client_test ):
     self.AssertLogfilesAreRemoved()
 
 
+  @pytest.mark.valgrind_skip
   @Client_test.CaptureLogfiles
   def FromHandlerWithSubservers_test( self ):
     self.Start()
@@ -83,6 +78,7 @@ class Shutdown_test( Client_test ):
     self.AssertLogfilesAreRemoved()
 
 
+  @pytest.mark.valgrind_skip
   @Client_test.CaptureLogfiles
   def FromWatchdogWithSubservers_test( self ):
     all_servers_are_running = Event()

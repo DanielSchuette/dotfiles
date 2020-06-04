@@ -1,5 +1,3 @@
-# coding: utf-8
-#
 # Copyright (C) 2015-2018 YouCompleteMe contributors
 #
 # This file is part of YouCompleteMe.
@@ -16,25 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
-
-# Intentionally not importing unicode_literals!
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.tests import PathToTestFile
 from ycm.tests.test_utils import ( CurrentWorkingDirectory, ExtendedMock,
                                    MockVimBuffers, MockVimModule, Version,
-                                   VimBuffer, VimError )
+                                   VimBuffer, VimError, WindowsAndMacOnly )
 MockVimModule()
 
 from ycm import vimsupport
-from nose.tools import eq_
-from hamcrest import ( assert_that, calling, contains, empty, equal_to,
-                       has_entry, raises )
-from mock import MagicMock, call, patch
+from hamcrest import ( assert_that, calling, contains_exactly, empty, equal_to,
+                       has_entry, is_not, raises )
+from unittest.mock import MagicMock, call, patch
 from ycmd.utils import ToBytes
 import os
 import json
@@ -165,7 +154,12 @@ def OpenLocationList_test( vim_command, fitting_height, variable_exists ):
   vimsupport.OpenLocationList( focus = False, autoclose = True )
   vim_command.assert_has_exact_calls( [
     call( 'lopen' ),
-    call( 'au WinLeave <buffer> q' ),
+    call( 'augroup ycmlocation' ),
+    call( 'autocmd! * <buffer>' ),
+    call( 'autocmd WinLeave <buffer> '
+          'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
+          '| autocmd! ycmlocation' ),
+    call( 'augroup END' ),
     call( 'doautocmd User YcmLocationOpened' ),
     call( 'silent! wincmd p' )
   ] )
@@ -198,9 +192,9 @@ def SetFittingHeightForCurrentWindow_LineWrapOff_test( vim_command, *args ):
 
 
 def AssertBuffersAreEqualAsBytes( result_buffer, expected_buffer ):
-  eq_( len( result_buffer ), len( expected_buffer ) )
+  assert_that( len( result_buffer ), equal_to( len( expected_buffer ) ) )
   for result_line, expected_line in zip( result_buffer, expected_buffer ):
-    eq_( ToBytes( result_line ), ToBytes( expected_line ) )
+    assert_that( ToBytes( result_line ), equal_to( ToBytes( expected_line ) ) )
 
 
 @patch( 'vim.current.window.cursor', ( 1, 1 ) )
@@ -614,7 +608,7 @@ def ReplaceChunk_CursorPosition_test():
 
   AssertBuffersAreEqualAsBytes( [ 'xyz', 'foobar' ], result_buffer )
   # Cursor line is 0-based.
-  assert_that( vimsupport.CurrentLineAndColumn(), contains( 1, 6 ) )
+  assert_that( vimsupport.CurrentLineAndColumn(), contains_exactly( 1, 6 ) )
 
 
 def _BuildLocations( start_line, start_column, end_line, end_column ):
@@ -765,10 +759,10 @@ def ReplaceChunks_SingleFile_Open_test( vim_command,
     vimsupport.ReplaceChunks( chunks )
 
   # Ensure that we applied the replacement correctly
-  eq_( result_buffer.GetLines(), [
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
-  ] )
+  ) )
 
   # GetBufferNumberForFilename is called twice:
   #  - once to the check if we would require opening the file (so that we can
@@ -857,10 +851,10 @@ def ReplaceChunks_SingleFile_NotOpen_test( vim_command,
   ] )
 
   # Ensure that we applied the replacement correctly
-  eq_( result_buffer.GetLines(), [
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
-  ] )
+  ) )
 
   # GetBufferNumberForFilename is called 3 times. The return values are set in
   # the @patch call above:
@@ -969,10 +963,10 @@ def ReplaceChunks_SingleFile_NotOpen_Silent_test(
   confirm.assert_not_called()
 
   # Ensure that we applied the replacement correctly
-  eq_( result_buffer.GetLines(), [
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'replacementline2',
     'line3',
-  ] )
+  ) )
 
   # GetBufferNumberForFilename is called 2 times. The return values are set in
   # the @patch call above:
@@ -1066,11 +1060,11 @@ def ReplaceChunks_User_Declines_To_Open_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  eq_( result_buffer.GetLines(), [
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'line1',
     'line2',
     'line3',
-  ] )
+  ) )
 
   # GetBufferNumberForFilename is called once. The return values are set in
   # the @patch call above:
@@ -1153,11 +1147,11 @@ def ReplaceChunks_User_Aborts_Opening_File_test(
   ] )
 
   # Ensure that buffer is not changed
-  eq_( result_buffer.GetLines(), [
+  assert_that( result_buffer.GetLines(), contains_exactly(
     'line1',
     'line2',
     'line3',
-  ] )
+  ) )
 
   # We tried to open this file
   open_filename.assert_called_with( single_buffer_name, {
@@ -1259,14 +1253,14 @@ def ReplaceChunks_MultiFile_Open_test( vim_command,
   ] )
 
   # Ensure that buffers are updated
-  eq_( second_file.GetLines(), [
+  assert_that( second_file.GetLines(), contains_exactly(
     'another line1',
     'second_file_replacement ACME line2',
-  ] )
-  eq_( first_file.GetLines(), [
+  ) )
+  assert_that( first_file.GetLines(), contains_exactly(
     'first_file_replacement line2',
     'line3',
-  ] )
+  ) )
 
   # We open '2_second_file' as expected.
   open_filename.assert_called_with( second_buffer_name, {
@@ -1369,6 +1363,24 @@ def AddDiagnosticSyntaxMatch_UnicodeAtEndOfLine_test():
     )
 
 
+def AddDiagnosticSyntaxMatch_NonPositivePosition_test():
+  current_buffer = VimBuffer(
+    'some_file',
+    contents = [ 'Some contents' ]
+  )
+
+  with patch( 'vim.current.buffer', current_buffer ):
+    assert_that(
+      vimsupport.GetDiagnosticMatchPattern( 0, 0, 0, 0 ),
+      equal_to( '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+    )
+
+    assert_that(
+      vimsupport.GetDiagnosticMatchPattern( -1, -2, -3, -4 ),
+      equal_to( '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
+    )
+
+
 @patch( 'vim.command', new_callable=ExtendedMock )
 @patch( 'vim.current', new_callable=ExtendedMock )
 def WriteToPreviewWindow_test( vim_current, vim_command ):
@@ -1452,9 +1464,11 @@ def BufferIsVisibleForFilename_test():
   hidden_buffer = VimBuffer( 'hidden_filename', number = 2 )
 
   with MockVimBuffers( [ visible_buffer, hidden_buffer ], [ visible_buffer ] ):
-    eq_( vimsupport.BufferIsVisibleForFilename( 'visible_filename' ), True )
-    eq_( vimsupport.BufferIsVisibleForFilename( 'hidden_filename' ), False )
-    eq_( vimsupport.BufferIsVisibleForFilename( 'another_filename' ), False )
+    assert_that( vimsupport.BufferIsVisibleForFilename( 'visible_filename' ) )
+    assert_that(
+        not vimsupport.BufferIsVisibleForFilename( 'hidden_filename' ) )
+    assert_that(
+        not vimsupport.BufferIsVisibleForFilename( 'another_filename' ) )
 
 
 def CloseBuffersForFilename_test():
@@ -1524,7 +1538,7 @@ def GetBufferFilepath_NoBufferName_UnicodeWorkingDirectory_test():
 @patch( 'vim.current.line', ToBytes( 'ДДaa' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 4 ] )
 def TextBeforeCursor_EncodedUnicode_test( *args ):
-  eq_( vimsupport.TextBeforeCursor(), u'ДД' )
+  assert_that( vimsupport.TextBeforeCursor(), equal_to( u'ДД' ) )
 
 
 # NOTE: Vim returns byte offsets for columns, not actual character columns. This
@@ -1532,56 +1546,61 @@ def TextBeforeCursor_EncodedUnicode_test( *args ):
 @patch( 'vim.current.line', ToBytes( 'aaДД' ) )
 @patch( 'ycm.vimsupport.CurrentColumn', side_effect = [ 2 ] )
 def TextAfterCursor_EncodedUnicode_test( *args ):
-  eq_( vimsupport.TextAfterCursor(), u'ДД' )
+  assert_that( vimsupport.TextAfterCursor(), equal_to( u'ДД' ) )
 
 
 @patch( 'vim.current.line', ToBytes( 'fДa' ) )
 def CurrentLineContents_EncodedUnicode_test( *args ):
-  eq_( vimsupport.CurrentLineContents(), u'fДa' )
+  assert_that( vimsupport.CurrentLineContents(), equal_to( u'fДa' ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_IntAsUnicode_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( '123' ), 123 )
+  assert_that( vimsupport.VimExpressionToPythonType( '123' ), equal_to( 123 ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_IntAsBytes_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( ToBytes( '123' ) ), 123 )
+  assert_that( vimsupport.VimExpressionToPythonType( ToBytes( '123' ) ),
+               equal_to( 123 ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_StringAsUnicode_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( 'foo' ), 'foo' )
+  assert_that( vimsupport.VimExpressionToPythonType( 'foo' ),
+               equal_to( 'foo' ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_StringAsBytes_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( ToBytes( 'foo' ) ), 'foo' )
+  assert_that( vimsupport.VimExpressionToPythonType( ToBytes( 'foo' ) ),
+               equal_to( 'foo' ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_ListPassthrough_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( [ 1, 2 ] ), [ 1, 2 ] )
+  assert_that( vimsupport.VimExpressionToPythonType( [ 1, 2 ] ),
+               equal_to( [ 1, 2 ] ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_ObjectPassthrough_test( *args ):
-  eq_( vimsupport.VimExpressionToPythonType( { 1: 2 } ), { 1: 2 } )
+  assert_that( vimsupport.VimExpressionToPythonType( { 1: 2 } ),
+               equal_to( { 1: 2 } ) )
 
 
 @patch( 'vim.eval', side_effect = lambda x: x )
 def VimExpressionToPythonType_GeneratorPassthrough_test( *args ):
   gen = ( x**2 for x in [ 1, 2, 3 ] )
-  eq_( vimsupport.VimExpressionToPythonType( gen ), gen )
+  assert_that( vimsupport.VimExpressionToPythonType( gen ), equal_to( gen ) )
 
 
 @patch( 'vim.eval',
         new_callable = ExtendedMock,
         side_effect = [ None, 2, None ] )
 def SelectFromList_LastItem_test( vim_eval ):
-  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
-       1 )
+  assert_that( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+               equal_to( 1 ) )
 
   vim_eval.assert_has_exact_calls( [
     call( 'inputsave()' ),
@@ -1594,8 +1613,8 @@ def SelectFromList_LastItem_test( vim_eval ):
         new_callable = ExtendedMock,
         side_effect = [ None, 1, None ] )
 def SelectFromList_FirstItem_test( vim_eval ):
-  eq_( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
-       0 )
+  assert_that( vimsupport.SelectFromList( 'test', [ 'a', 'b' ] ),
+               equal_to( 0 ) )
 
   vim_eval.assert_has_exact_calls( [
     call( 'inputsave()' ),
@@ -1628,10 +1647,10 @@ def SelectFromList_Negative_test( vim_eval ):
 def Filetypes_IntegerFiletype_test():
   current_buffer = VimBuffer( 'buffer', number = 1, filetype = '42' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    assert_that( vimsupport.CurrentFiletypes(), contains( '42' ) )
-    assert_that( vimsupport.GetBufferFiletypes( 1 ), contains( '42' ) )
+    assert_that( vimsupport.CurrentFiletypes(), contains_exactly( '42' ) )
+    assert_that( vimsupport.GetBufferFiletypes( 1 ), contains_exactly( '42' ) )
     assert_that( vimsupport.FiletypesForBuffer( current_buffer ),
-                 contains( '42' ) )
+                 contains_exactly( '42' ) )
 
 
 @patch( 'ycm.vimsupport.VariableExists', return_value = False )
@@ -1682,8 +1701,6 @@ def InsertNamespace_append_test( vim_current, *args ):
 
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_SameFile_SameBuffer_NoSwapFile_test( vim_command ):
-  # No 'u' prefix for the current buffer name string to simulate Vim returning
-  # bytes on Python 2 but unicode on Python 3.
   current_buffer = VimBuffer( 'uni¢𐍈d€' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ) as vim:
     vimsupport.JumpToLocation( os.path.realpath( u'uni¢𐍈d€' ),
@@ -1854,6 +1871,35 @@ def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_test(
     ] )
 
 
+@WindowsAndMacOnly
+@patch( 'vim.command', new_callable = ExtendedMock )
+def JumpToLocation_DifferentFile_Split_CurrentTab_AlreadyOpened_Case_test(
+    vim_command ):
+
+  current_buffer = VimBuffer( 'current_buffer' )
+  different_buffer = VimBuffer( 'AnotHer_buFfeR' )
+  current_window = MagicMock( buffer = current_buffer )
+  different_window = MagicMock( buffer = different_buffer )
+  current_tab = MagicMock( windows = [ current_window, different_window ] )
+  with MockVimBuffers( [ current_buffer, different_buffer ],
+                       [ current_buffer ] ) as vim:
+    vim.current.tabpage = current_tab
+
+    vimsupport.JumpToLocation( os.path.realpath( 'anOther_BuffEr' ),
+                               4,
+                               1,
+                               'belowright',
+                               'split-or-existing-window' )
+
+    assert_that( vim.current.tabpage, equal_to( current_tab ) )
+    assert_that( vim.current.window, equal_to( different_window ) )
+    assert_that( vim.current.window.cursor, equal_to( ( 4, 0 ) ) )
+    vim_command.assert_has_exact_calls( [
+      call( 'normal! m\'' ),
+      call( 'normal! zz' )
+    ] )
+
+
 @patch( 'vim.command', new_callable = ExtendedMock )
 def JumpToLocation_DifferentFile_Split_AllTabs_NotAlreadyOpened_test(
     vim_command ):
@@ -1957,3 +2003,36 @@ def VimVersionAtLeast_test():
   assert_that( not vimsupport.VimVersionAtLeast( '7.4.1579' ) )
   assert_that( not vimsupport.VimVersionAtLeast( '7.4.1898' ) )
   assert_that( not vimsupport.VimVersionAtLeast( '8.1.278' ) )
+
+
+@patch( 'ycm.vimsupport.GetIntValue', return_value = 1 )
+def VimSupportsPopupWindows_Memo_test( *args ):
+  vimsupport.MEMO = {}
+
+  try:
+    assert_that( vimsupport.VimSupportsPopupWindows() )
+    assert_that( vimsupport.MEMO, is_not( empty() ) )
+
+    # If the momizer did not step in, we would throw an error in the following
+    # call to VimVersionAtLeast
+    with patch( 'ycm.vimsupport.VimHasFunctions', side_effect = RuntimeError ):
+      assert_that( vimsupport.VimSupportsPopupWindows() )
+  finally:
+    vimsupport.MEMO = {}
+
+
+@patch( 'ycm.vimsupport.GetIntValue', return_value = 1 )
+def VimHasFunction_Memo_test( GetIntValue ):
+  vimsupport.MEMO = {}
+
+  try:
+    assert_that( vimsupport.VimHasFunction( 'test' ) )
+    assert_that( vimsupport.MEMO, is_not( empty() ) )
+
+    GetIntValue.return_value = 0
+
+    # If the memoizer didn't kick in, the following call would return False
+    assert_that( vimsupport.VimHasFunction( 'test' ) )
+
+  finally:
+    vimsupport.MEMO = {}

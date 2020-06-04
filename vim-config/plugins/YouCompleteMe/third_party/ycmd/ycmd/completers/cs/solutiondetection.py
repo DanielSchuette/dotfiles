@@ -1,5 +1,4 @@
-# Copyright (C) 2013  Google Inc.
-# Copyright (C) 2016  ycmd contributors.
+# Copyright (C) 2013-2020 ycmd contributors.
 #
 # This file is part of ycmd.
 #
@@ -16,21 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import os
 import glob
-import logging
 from inspect import getfile
 from ycmd import extra_conf_store
-from ycmd.utils import ToUnicode
-
-__logger = logging.getLogger( __name__ )
+from ycmd.utils import LOGGER
 
 
 def FindSolutionPath( filepath ):
@@ -56,8 +45,8 @@ def PollModule( module, filepath ):
   if module:
     try:
       module_hint = module.CSharpSolutionFile( filepath )
-      __logger.info( u'extra_conf_store suggests {0} as solution file'.format(
-        ToUnicode( module_hint ) ) )
+      LOGGER.info( 'extra_conf_store suggests %s as solution file',
+                   module_hint )
       if module_hint:
         # received a full path or one relative to the config's location?
         candidates = [ module_hint,
@@ -68,15 +57,13 @@ def PollModule( module, filepath ):
           if os.path.isfile( path ):
             # path seems to point to a solution
             path_to_solutionfile = path
-            __logger.info(
-                u'Using solution file {0} selected by extra_conf_store'.format(
-                  path_to_solutionfile ) )
+            LOGGER.info( 'Using solution file %s selected by extra_conf_store',
+                         path_to_solutionfile )
             break
-    except AttributeError as e:
+    except AttributeError:
       # the config script might not provide solution file locations
-      __logger.error(
-          u'Could not retrieve solution for {0}'
-           'from extra_conf_store: {1}'.format( filepath, str( e ) ) )
+      LOGGER.exception( 'Could not retrieve solution for %s'
+                        'from extra_conf_store', filepath )
   return path_to_solutionfile
 
 
@@ -99,31 +86,27 @@ def _SolutionTestCheckHeuristics( candidates, tokens, i ):
   # if there is just one file here, use that
   if len( candidates ) == 1 :
     selection = os.path.join( path, candidates[ 0 ] )
-    __logger.info(
-        u'Selected solution file {0} as it is the first one found'.format(
-          selection ) )
+    LOGGER.info( 'Selected solution file %s as it is the first one found',
+                 selection )
 
   # there is more than one file, try some hints to decide
   # 1. is there a solution named just like the subdirectory with the source?
   if ( not selection and i < len( tokens ) - 1 and
-       u'{0}.sln'.format( tokens[ i + 1 ] ) in candidates ):
-    selection = os.path.join( path, u'{0}.sln'.format( tokens[ i + 1 ] ) )
-    __logger.info(
-        u'Selected solution file {0} as it matches source subfolder'.format(
-          selection ) )
+       '{0}.sln'.format( tokens[ i + 1 ] ) in candidates ):
+    selection = os.path.join( path, '{0}.sln'.format( tokens[ i + 1 ] ) )
+    LOGGER.info( 'Selected solution file %s as it matches source subfolder',
+                 selection )
 
   # 2. is there a solution named just like the directory containing the
   # solution?
-  if not selection and u'{0}.sln'.format( tokens[ i ] ) in candidates :
-    selection = os.path.join( path, u'{0}.sln'.format( tokens[ i ] ) )
-    __logger.info(
-        u'Selected solution file {0} as it matches containing folder'.format(
-          selection ) )
+  if not selection and '{0}.sln'.format( tokens[ i ] ) in candidates :
+    selection = os.path.join( path, '{0}.sln'.format( tokens[ i ] ) )
+    LOGGER.info( 'Selected solution file %s as it matches containing folder',
+                 selection )
 
   if not selection:
-    __logger.error(
-        u'Could not decide between multiple solution files:\n{0}'.format(
-          candidates ) )
+    LOGGER.error( 'Could not decide between multiple solution files:\n%s',
+                  candidates )
 
   return selection
 

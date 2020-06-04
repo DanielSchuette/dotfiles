@@ -1,6 +1,4 @@
-# encoding: utf8
-#
-# Copyright (C) 2014-2018 ycmd contributors
+# Copyright (C) 2014-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -17,30 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iteritems
-
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
                          CodepointOffsetToByteOffset,
                          HashableDict,
+                         LOGGER,
                          ToUnicode,
                          ToBytes,
                          SplitLines )
 from ycmd.identifier_utils import StartOfLongestIdentifierEndingAtIndex
 from ycmd.request_validation import EnsureRequestValid
-import logging
-_logger = logging.getLogger( __name__ )
 
 
 # TODO: Change the custom computed (and other) keys to be actual properties on
 # the object.
-class RequestWrap( object ):
+class RequestWrap:
   def __init__( self, request, validate = True ):
     if validate:
       EnsureRequestValid( request )
@@ -94,7 +82,7 @@ class RequestWrap( object ):
 
       'lines': ( self._CurrentLines, None ),
 
-      'extra_conf_data': ( self._GetExtraConfData, None )
+      'extra_conf_data': ( self._GetExtraConfData, None ),
     }
     self._cached_computed = {}
 
@@ -135,7 +123,7 @@ class RequestWrap( object ):
          len( self[ 'file_data' ] ) != len( other[ 'file_data' ] ) ):
       return False
 
-    for filename, file_data in iteritems( self[ 'file_data' ] ):
+    for filename, file_data in self[ 'file_data' ].items():
       if filename == self[ 'filepath' ]:
         lines = self[ 'lines' ]
         other_lines = other[ 'lines' ]
@@ -171,10 +159,10 @@ class RequestWrap( object ):
     try:
       return self[ 'lines' ][ self[ 'line_num' ] - 1 ]
     except IndexError:
-      _logger.exception( 'Client returned invalid line number {0} '
-                         'for file {1}. Assuming empty.'.format(
-                           self[ 'line_num' ],
-                           self[ 'filepath' ] ) )
+      LOGGER.exception( 'Client returned invalid line number %s '
+                        'for file %s. Assuming empty',
+                        self[ 'line_num' ],
+                        self[ 'filepath' ] )
       return ''
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 ycmd contributors
+# Copyright (C) 2013-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -14,13 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
 
 import os
 from ycmd.utils import ProcessIsRunning
@@ -38,28 +31,39 @@ NO_EXTRA_CONF_FILENAME_MESSAGE = ( 'No {0} file detected, so no compile flags '
 NO_DIAGNOSTIC_SUPPORT_MESSAGE = ( 'YCM has no diagnostics support for this '
   'filetype; refer to Syntastic docs if using Syntastic.' )
 
+EMPTY_SIGNATURE_INFO = {
+  'activeSignature': 0,
+  'activeParameter': 0,
+  'signatures': [],
+}
+
+
+class SignatureHelpAvailalability:
+  AVAILABLE = 'YES'
+  NOT_AVAILABLE = 'NO'
+  PENDING = 'PENDING'
+
 
 class ServerError( Exception ):
   def __init__( self, message ):
-    super( ServerError, self ).__init__( message )
+    super().__init__( message )
 
 
 class UnknownExtraConf( ServerError ):
   def __init__( self, extra_conf_file ):
     message = CONFIRM_CONF_FILE_MESSAGE.format( extra_conf_file )
-    super( UnknownExtraConf, self ).__init__( message )
+    super().__init__( message )
     self.extra_conf_file = extra_conf_file
 
 
 class NoExtraConfDetected( ServerError ):
   def __init__( self ):
-    super( NoExtraConfDetected, self ).__init__(
-      NO_EXTRA_CONF_FILENAME_MESSAGE )
+    super().__init__( NO_EXTRA_CONF_FILENAME_MESSAGE )
 
 
 class NoDiagnosticSupport( ServerError ):
   def __init__( self ):
-    super( NoDiagnosticSupport, self ).__init__( NO_DIAGNOSTIC_SUPPORT_MESSAGE )
+    super().__init__( NO_DIAGNOSTIC_SUPPORT_MESSAGE )
 
 
 # column_num is a byte offset
@@ -123,12 +127,20 @@ def BuildCompletionData( insertion_text,
 
 
 # start_column is a byte offset
-def BuildCompletionResponse( completion_datas,
+def BuildCompletionResponse( completions,
                              start_column,
                              errors=None ):
   return {
-    'completions': completion_datas,
+    'completions': completions,
     'completion_start_column': start_column,
+    'errors': errors if errors else [],
+  }
+
+
+def BuildSignatureHelpResponse( signature_info, errors = None ):
+  return {
+    'signature_help':
+      signature_info if signature_info else EMPTY_SIGNATURE_INFO,
     'errors': errors if errors else [],
   }
 
@@ -150,7 +162,7 @@ def BuildRangeData( source_range ):
   }
 
 
-class Diagnostic( object ):
+class Diagnostic:
   def __init__( self,
                 ranges,
                 location,
@@ -166,7 +178,14 @@ class Diagnostic( object ):
     self.fixits_ = fixits
 
 
-class FixIt( object ):
+class UnresolvedFixIt:
+  def __init__( self, command, text ):
+    self.command = command
+    self.text = text
+    self.resolve = True
+
+
+class FixIt:
   """A set of replacements (of type FixItChunk) to be applied to fix a single
   diagnostic. This can be used for any type of refactoring command, not just
   quick fixes. The individual chunks may span multiple files.
@@ -182,7 +201,7 @@ class FixIt( object ):
     self.text = text
 
 
-class FixItChunk( object ):
+class FixItChunk:
   """An individual replacement within a FixIt (aka Refactor)"""
 
   def __init__( self, replacement_text, range ):
@@ -191,7 +210,7 @@ class FixItChunk( object ):
     self.range = range
 
 
-class Range( object ):
+class Range:
   """Source code range relating to a diagnostic or FixIt (aka Refactor)."""
 
   def __init__( self, start, end ):
@@ -200,7 +219,7 @@ class Range( object ):
     self.end_ = end
 
 
-class Location( object ):
+class Location:
   """Source code location for a diagnostic or FixIt (aka Refactor)."""
 
   def __init__( self, line, column, filename ):
@@ -267,11 +286,19 @@ def BuildFixItResponse( fixits ):
     }
 
   def BuildFixItData( fixit ):
-    return {
-      'location': BuildLocationData( fixit.location ),
-      'chunks' : [ BuildFixitChunkData( x ) for x in fixit.chunks ],
-      'text': fixit.text,
-    }
+    if hasattr( fixit, 'resolve' ):
+      return {
+        'command': fixit.command,
+        'text': fixit.text,
+        'resolve': fixit.resolve
+      }
+    else:
+      return {
+        'location': BuildLocationData( fixit.location ),
+        'chunks' : [ BuildFixitChunkData( x ) for x in fixit.chunks ],
+        'text': fixit.text,
+        'resolve': False
+      }
 
   return {
     'fixits' : [ BuildFixItData( x ) for x in fixits ]
@@ -286,7 +313,7 @@ def BuildExceptionResponse( exception, traceback ):
   }
 
 
-class DebugInfoServer( object ):
+class DebugInfoServer:
   """Store debugging information on a server:
   - name: the server name;
   - is_running: True if the server process is alive, False otherwise;
@@ -320,7 +347,7 @@ class DebugInfoServer( object ):
     self.extras = extras
 
 
-class DebugInfoItem( object ):
+class DebugInfoItem:
 
   def __init__( self, key, value ):
     self.key = key
@@ -360,3 +387,7 @@ def BuildDebugInfoResponse( name, servers = [], items = [] ):
     'servers': [ BuildServerData( server ) for server in servers ],
     'items': [ BuildItemData( item ) for item in items ]
   }
+
+
+def BuildSignatureHelpAvailableResponse( value ):
+  return { 'available': value }

@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm.client.base_request import BaseRequest, BuildRequestData
 from ycm import vimsupport
 from ycmd.utils import ToUnicode
@@ -44,17 +37,19 @@ class CommandRequest( BaseRequest ):
     self._buffer_command = buffer_command
     self._extra_data = extra_data
     self._response = None
+    self._request_data = None
 
 
-  def Start( self ):
-    request_data = BuildRequestData()
+  def Start( self, silent = False ):
+    self._request_data = BuildRequestData()
     if self._extra_data:
-      request_data.update( self._extra_data )
-    request_data.update( {
+      self._request_data.update( self._extra_data )
+    self._request_data.update( {
       'command_arguments': self._arguments
     } )
-    self._response = self.PostDataToHandler( request_data,
-                                             'run_completer_command' )
+    self._response = self.PostDataToHandler( self._request_data,
+                                             'run_completer_command',
+                                             display_message = not silent )
 
 
   def Response( self ):
@@ -86,6 +81,37 @@ class CommandRequest( BaseRequest ):
     return self._HandleGotoResponse( modifiers )
 
 
+  def StringResponse( self ):
+    # Retuns a supporable public API version of the response. The reason this
+    # exists is that the ycmd API here is wonky as it originally only supported
+    # text-responses and now has things like fixits and such.
+    #
+    # The supportable public API is basically any text-only response. All other
+    # response types are returned as empty strings
+    if not self.Done():
+      raise RuntimeError( "Response is not ready" )
+
+    # Completer threw an error ?
+    if self._response is None:
+      return ""
+
+    # If not a dictionary or a list, the response is necessarily a
+    # scalar: boolean, number, string, etc. In this case, we print
+    # it to the user.
+    if not isinstance( self._response, ( dict, list ) ):
+      return str( self._response )
+
+    if 'message' in self._response:
+      return self._response[ 'message' ]
+
+    if 'detailed_info' in self._response:
+      return self._response[ 'detailed_info' ]
+
+    # The only other type of response we understand is 'fixits' and GoTo. We
+    # don't provide string versions of them.
+    return ""
+
+
   def _HandleGotoResponse( self, modifiers ):
     if isinstance( self._response, list ):
       vimsupport.SetQuickFixList(
@@ -109,14 +135,23 @@ class CommandRequest( BaseRequest ):
 
         # When there are multiple fixit suggestions, present them as a list to
         # the user hand have her choose which one to apply.
-        if len( self._response[ 'fixits' ] ) > 1:
+        fixits = self._response[ 'fixits' ]
+        if len( fixits ) > 1:
           fixit_index = vimsupport.SelectFromList(
             "Multiple FixIt suggestions are available at this location. "
             "Which one would you like to apply?",
-            [ fixit[ 'text' ] for fixit in self._response[ 'fixits' ] ] )
+            [ fixit[ 'text' ] for fixit in fixits ] )
+        chosen_fixit = fixits[ fixit_index ]
+        if chosen_fixit[ 'resolve' ]:
+          self._request_data.update( { 'fixit': chosen_fixit } )
+          response = self.PostDataToHandler( self._request_data,
+                                             'resolve_fixit' )
+          fixits = response[ 'fixits' ]
+          assert len( fixits ) == 1
+          chosen_fixit = fixits[ 0 ]
 
         vimsupport.ReplaceChunks(
-          self._response[ 'fixits' ][ fixit_index ][ 'chunks' ],
+          chosen_fixit[ 'chunks' ],
           silent = self._command == 'Format' )
       except RuntimeError as e:
         vimsupport.PostVimMessage( str( e ) )
@@ -143,6 +178,13 @@ def SendCommandRequest( arguments,
   request.Start()
   request.RunPostCommandActionsIfNeeded( modifiers )
   return request.Response()
+
+
+def GetCommandResponse( arguments, extra_data = None ):
+  request = CommandRequest( arguments, "", extra_data )
+  # This is a blocking call.
+  request.Start( silent = True )
+  return request.StringResponse()
 
 
 def _BuildQfListItem( goto_data_item ):

@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018 ycmd contributors
+# Copyright (C) 2013-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -16,51 +16,54 @@
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iteritems, PY2
-from hamcrest import contains_string, has_entry, has_entries, assert_that
-from mock import patch
+from hamcrest import ( assert_that,
+                       contains_exactly,
+                       contains_string,
+                       empty,
+                       equal_to,
+                       has_entries,
+                       has_entry,
+                       has_item )
+from unittest.mock import patch
+from pprint import pformat
 from webtest import TestApp
 import bottle
 import contextlib
-import nose
+import pytest
 import functools
 import os
 import tempfile
 import time
 import stat
 import shutil
+import json
 
 from ycmd import extra_conf_store, handlers, user_options_store
 from ycmd.completers.completer import Completer
 from ycmd.responses import BuildCompletionData
 from ycmd.utils import ( GetCurrentDirectory,
+                         ImportCore,
                          OnMac,
                          OnWindows,
                          ToUnicode,
                          WaitUntilProcessIsTerminated )
-import ycm_core
+ycm_core = ImportCore()
 
-try:
-  from unittest import skipIf
-except ImportError:
-  from unittest2 import skipIf
+from unittest import skipIf
 
 TESTS_DIR = os.path.abspath( os.path.dirname( __file__ ) )
 
-Py2Only = skipIf( not PY2, 'Python 2 only' )
-Py3Only = skipIf( PY2, 'Python 3 only' )
 WindowsOnly = skipIf( not OnWindows(), 'Windows only' )
 ClangOnly = skipIf( not ycm_core.HasClangSupport(),
                     'Only when Clang support available' )
 MacOnly = skipIf( not OnMac(), 'Mac only' )
 UnixOnly = skipIf( OnWindows(), 'Unix only' )
+
+EMPTY_SIGNATURE_HELP = has_entries( {
+  'activeParameter': 0,
+  'activeSignature': 0,
+  'signatures': empty(),
+} )
 
 
 def BuildRequest( **kwargs ):
@@ -81,7 +84,7 @@ def BuildRequest( **kwargs ):
     }
   }
 
-  for key, value in iteritems( kwargs ):
+  for key, value in kwargs.items():
     if key in [ 'contents', 'filetype', 'filepath' ]:
       continue
 
@@ -124,12 +127,6 @@ def CompletionEntryMatcher( insertion_text,
   return has_entries( match )
 
 
-def CompletionLocationMatcher( location_type, value ):
-  return has_entry( 'extra_data',
-                    has_entry( 'location',
-                               has_entry( location_type, value ) ) )
-
-
 def MessageMatcher( msg ):
   return has_entry( 'message', contains_string( msg ) )
 
@@ -163,6 +160,37 @@ def LineColMatcher( line, col ):
   return has_entries( {
     'line_num': line,
     'column_num': col
+  } )
+
+
+def CompleterProjectDirectoryMatcher( project_directory ):
+  return has_entry(
+    'completer',
+    has_entry( 'servers', contains_exactly(
+      has_entry( 'extras', has_item(
+        has_entries( {
+          'key': 'Project Directory',
+          'value': project_directory,
+        } )
+      ) )
+    ) )
+  )
+
+
+def SignatureMatcher( label, parameters ):
+  return has_entries( {
+    'label': equal_to( label ),
+    'parameters': contains_exactly( *parameters )
+  } )
+
+
+def SignatureAvailableMatcher( available ):
+  return has_entries( { 'available': equal_to( available ) } )
+
+
+def ParameterMatcher( begin, end ):
+  return has_entries( {
+    'label': contains_exactly( begin, end )
   } )
 
 
@@ -283,7 +311,7 @@ def ClearCompletionsCache():
 
 class DummyCompleter( Completer ):
   def __init__( self, user_options ):
-    super( DummyCompleter, self ).__init__( user_options )
+    super().__init__( user_options )
 
   def SupportedFiletypes( self ):
     return []
@@ -334,7 +362,7 @@ def ExpectedFailure( reason, *exception_matchers ):
           raise test_exception
 
         # Failed for the right reason
-        raise nose.SkipTest( reason )
+        pytest.skip( reason )
       else:
         raise AssertionError( 'Test was expected to fail: {0}'.format(
           reason ) )
@@ -376,3 +404,91 @@ def WithRetry( test ):
         print( 'Test failed, retrying: {0}'.format( str( test_exception ) ) )
         time.sleep( 0.25 )
   return wrapper
+
+
+@contextlib.contextmanager
+def TemporaryClangProject( tmp_dir, compile_commands ):
+  """Context manager to create a compilation database in a directory and delete
+  it when the test completes. |tmp_dir| is the directory in which to create the
+  database file (typically used in conjunction with |TemporaryTestDir|) and
+  |compile_commands| is a python object representing the compilation database.
+
+  e.g.:
+    with TemporaryTestDir() as tmp_dir:
+      database = [
+        {
+          'directory': os.path.join( tmp_dir, dir ),
+          'command': compiler_invocation,
+          'file': os.path.join( tmp_dir, dir, filename )
+        },
+        ...
+      ]
+      with TemporaryClangProject( tmp_dir, database ):
+        <test here>
+
+  The context manager does not yield anything.
+  """
+  path = os.path.join( tmp_dir, 'compile_commands.json' )
+
+  with open( path, 'w' ) as f:
+    f.write( ToUnicode( json.dumps( compile_commands, indent=2 ) ) )
+
+  try:
+    yield
+  finally:
+    os.remove( path )
+
+
+def WaitForDiagnosticsToBeReady( app, filepath, contents, filetype, **kwargs ):
+  results = None
+  for tries in range( 0, 60 ):
+    event_data = BuildRequest( event_name = 'FileReadyToParse',
+                               contents = contents,
+                               filepath = filepath,
+                               filetype = filetype,
+                               **kwargs )
+
+    results = app.post_json( '/event_notification', event_data ).json
+
+    if results:
+      break
+
+    time.sleep( 0.5 )
+
+  return results
+
+
+class PollForMessagesTimeoutException( Exception ):
+  pass
+
+
+def PollForMessages( app, request_data, timeout = 60 ):
+  expiration = time.time() + timeout
+  while True:
+    if time.time() > expiration:
+      raise PollForMessagesTimeoutException(
+        'Waited for diagnostics to be ready for {0} seconds, aborting.'.format(
+          timeout ) )
+
+    default_args = {
+      'line_num'  : 1,
+      'column_num': 1,
+    }
+    args = dict( default_args )
+    args.update( request_data )
+
+    response = app.post_json( '/receive_messages', BuildRequest( **args ) ).json
+
+    print( 'poll response: {0}'.format( pformat( response ) ) )
+
+    if isinstance( response, bool ):
+      if not response:
+        raise RuntimeError( 'The message poll was aborted by the server' )
+    elif isinstance( response, list ):
+      for message in response:
+        yield message
+    else:
+      raise AssertionError( 'Message poll response was wrong type: {0}'.format(
+        type( response ).__name__ ) )
+
+    time.sleep( 0.25 )

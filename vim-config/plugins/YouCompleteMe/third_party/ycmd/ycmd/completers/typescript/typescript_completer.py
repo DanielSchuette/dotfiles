@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018 ycmd contributors
+# Copyright (C) 2015-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,13 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import json
 import logging
 import os
@@ -37,12 +30,12 @@ from ycmd import responses
 from ycmd import utils
 from ycmd.completers.completer import Completer
 from ycmd.completers.completer_utils import GetFileLines
-from ycmd.utils import re
+from ycmd.utils import LOGGER, re
 
 SERVER_NOT_RUNNING_MESSAGE = 'TSServer is not running.'
 NO_DIAGNOSTIC_MESSAGE = 'No diagnostic for current line!'
 
-RESPONSE_TIMEOUT_SECONDS = 10
+RESPONSE_TIMEOUT_SECONDS = 20
 
 TSSERVER_DIR = os.path.abspath(
   os.path.join( os.path.dirname( __file__ ), '..', '..', '..', 'third_party',
@@ -50,10 +43,8 @@ TSSERVER_DIR = os.path.abspath(
 
 LOGFILE_FORMAT = 'tsserver_'
 
-_logger = logging.getLogger( __name__ )
 
-
-class DeferredResponse( object ):
+class DeferredResponse:
   """
   A deferred that resolves to a response from TSServer.
   """
@@ -80,7 +71,10 @@ class DeferredResponse( object ):
       return self._message[ 'body' ]
 
 
-def FindTSServer():
+def FindTSServer( user_options_path ):
+  tsserver = utils.FindExecutableWithFallback( user_options_path , None )
+  if tsserver and os.path.isfile( tsserver ):
+    return tsserver
   # The TSServer executable is installed at the root directory on Windows while
   # it's installed in the bin folder on other platforms.
   for executable in [ os.path.join( TSSERVER_DIR, 'bin', 'tsserver' ),
@@ -92,13 +86,13 @@ def FindTSServer():
   return None
 
 
-def ShouldEnableTypeScriptCompleter():
-  tsserver = FindTSServer()
+def ShouldEnableTypeScriptCompleter( user_options ):
+  tsserver = FindTSServer( user_options[ 'tsserver_binary_path' ] )
   if not tsserver:
-    _logger.error( 'Not using TypeScript completer: TSServer not installed '
-                   'in %s', TSSERVER_DIR )
+    LOGGER.error( 'Not using TypeScript completer: TSServer not installed '
+                  'in %s', TSSERVER_DIR )
     return False
-  _logger.info( 'Using TypeScript completer with %s', tsserver )
+  LOGGER.info( 'Using TypeScript completer with %s', tsserver )
   return True
 
 
@@ -140,14 +134,15 @@ class TypeScriptCompleter( Completer ):
 
 
   def __init__( self, user_options ):
-    super( TypeScriptCompleter, self ).__init__( user_options )
+    super().__init__( user_options )
 
     self._logfile = None
 
-    self._tsserver_lock = threading.RLock()
+    self._tsserver_lock = threading.Lock()
     self._tsserver_handle = None
     self._tsserver_version = None
-    self._tsserver_executable = FindTSServer()
+    self._tsserver_executable = FindTSServer(
+        user_options[ 'tsserver_binary_path' ] )
     # Used to read response only if TSServer is running.
     self._tsserver_is_running = threading.Event()
 
@@ -178,7 +173,12 @@ class TypeScriptCompleter( Completer ):
     self._latest_diagnostics_for_file_lock = threading.Lock()
     self._latest_diagnostics_for_file = defaultdict( list )
 
-    _logger.info( 'Enabling typescript completion' )
+    # There's someting in the API that lists the trigger characters, but
+    # there is no way to request that from the server, so we just hard-code
+    # the signature triggers.
+    self.SetSignatureHelpTriggers( [ '(', ',', '<' ] )
+
+    LOGGER.info( 'Enabling TypeScript completion' )
 
 
   def _SetServerVersion( self ):
@@ -189,31 +189,35 @@ class TypeScriptCompleter( Completer ):
 
   def _StartServer( self ):
     with self._tsserver_lock:
-      if self._ServerIsRunning():
-        return
+      self._StartServerNoLock()
 
-      self._logfile = utils.CreateLogfile( LOGFILE_FORMAT )
-      tsserver_log = '-file {path} -level {level}'.format( path = self._logfile,
-                                                           level = _LogLevel() )
-      # TSServer gets the configuration for the log file through the
-      # environment variable 'TSS_LOG'. This seems to be undocumented but
-      # looking at the source code it seems like this is the way:
-      # https://github.com/Microsoft/TypeScript/blob/8a93b489454fdcbdf544edef05f73a913449be1d/src/server/server.ts#L136
-      environ = os.environ.copy()
-      utils.SetEnviron( environ, 'TSS_LOG', tsserver_log )
 
-      _logger.info( 'TSServer log file: {0}'.format( self._logfile ) )
+  def _StartServerNoLock( self ):
+    if self._ServerIsRunning():
+      return
 
-      # We need to redirect the error stream to the output one on Windows.
-      self._tsserver_handle = utils.SafePopen( self._tsserver_executable,
-                                               stdin = subprocess.PIPE,
-                                               stdout = subprocess.PIPE,
-                                               stderr = subprocess.STDOUT,
-                                               env = environ )
+    self._logfile = utils.CreateLogfile( LOGFILE_FORMAT )
+    tsserver_log = '-file {path} -level {level}'.format( path = self._logfile,
+                                                         level = _LogLevel() )
+    # TSServer gets the configuration for the log file through the
+    # environment variable 'TSS_LOG'. This seems to be undocumented but
+    # looking at the source code it seems like this is the way:
+    # https://github.com/Microsoft/TypeScript/blob/8a93b489454fdcbdf544edef05f73a913449be1d/src/server/server.ts#L136
+    environ = os.environ.copy()
+    environ[ 'TSS_LOG' ] = tsserver_log
 
-      self._tsserver_is_running.set()
+    LOGGER.info( 'TSServer log file: %s', self._logfile )
 
-      utils.StartThread( self._SetServerVersion )
+    # We need to redirect the error stream to the output one on Windows.
+    self._tsserver_handle = utils.SafePopen( self._tsserver_executable,
+                                             stdin = subprocess.PIPE,
+                                             stdout = subprocess.PIPE,
+                                             stderr = subprocess.STDOUT,
+                                             env = environ )
+
+    self._tsserver_is_running.set()
+
+    utils.StartThread( self._SetServerVersion )
 
 
   def _ReaderLoop( self ):
@@ -228,7 +232,7 @@ class TypeScriptCompleter( Completer ):
       try:
         message = self._ReadMessage()
       except ( RuntimeError, ValueError ):
-        _logger.exception( 'Error while reading message from server' )
+        LOGGER.exception( 'Error while reading message from server' )
         if not self._ServerIsRunning():
           self._tsserver_is_running.clear()
         continue
@@ -237,10 +241,10 @@ class TypeScriptCompleter( Completer ):
       msgtype = message[ 'type' ]
       if msgtype == 'event':
         eventname = message[ 'event' ]
-        _logger.info( 'Received {0} event from tsserver'.format( eventname ) )
+        LOGGER.info( 'Received %s event from TSServer',  eventname )
         continue
       if msgtype != 'response':
-        _logger.error( 'Unsupported message type {0}'.format( msgtype ) )
+        LOGGER.error( 'Unsupported message type', msgtype )
         continue
 
       seq = message[ 'request_seq' ]
@@ -297,14 +301,15 @@ class TypeScriptCompleter( Completer ):
   def _WriteRequest( self, request ):
     """Write a request to TSServer stdin."""
 
-    serialized_request = utils.ToBytes( json.dumps( request ) + '\n' )
+    serialized_request = utils.ToBytes(
+        json.dumps( request, separators = ( ',', ':' ) ) + '\n' )
     with self._write_lock:
       try:
         self._tsserver_handle.stdin.write( serialized_request )
         self._tsserver_handle.stdin.flush()
       # IOError is an alias of OSError in Python 3.
       except ( AttributeError, IOError ):
-        _logger.exception( SERVER_NOT_RUNNING_MESSAGE )
+        LOGGER.exception( SERVER_NOT_RUNNING_MESSAGE )
         raise RuntimeError( SERVER_NOT_RUNNING_MESSAGE )
 
 
@@ -353,8 +358,7 @@ class TypeScriptCompleter( Completer ):
 
 
   def _ServerIsRunning( self ):
-    with self._tsserver_lock:
-      return utils.ProcessIsRunning( self._tsserver_handle )
+    return utils.ProcessIsRunning( self._tsserver_handle )
 
 
   def ServerIsHealthy( self ):
@@ -362,18 +366,14 @@ class TypeScriptCompleter( Completer ):
 
 
   def SupportedFiletypes( self ):
-    return [ 'javascript', 'typescript' ]
+    return [ 'javascript', 'typescript', 'typescriptreact' ]
+
+
+  def SignatureHelpAvailable( self ):
+    return responses.SignatureHelpAvailalability.AVAILABLE
 
 
   def ComputeCandidatesInner( self, request_data ):
-    def FormatEntry( entry ):
-      if 'source' in entry:
-        return {
-          'name': entry[ 'name' ],
-          'source': entry[ 'source' ]
-        }
-      return entry[ 'name' ]
-
     self._Reload( request_data )
     entries = self._SendRequest( 'completions', {
       'file':                         request_data[ 'filepath' ],
@@ -381,45 +381,80 @@ class TypeScriptCompleter( Completer ):
       'offset':                       request_data[ 'start_codepoint' ],
       'includeExternalModuleExports': True
     } )
+    # Ignore entries with the "warning" kind. They are identifiers from the
+    # current file that TSServer returns sometimes in JavaScript.
+    return [ responses.BuildCompletionData(
+      insertion_text = entry[ 'name' ],
+      # We store the entries returned by TSServer in the extra_data field to
+      # detail the candidates once the filtering is done.
+      extra_data = entry
+    ) for entry in entries if entry[ 'kind' ] != 'warning' ]
+
+
+  def DetailCandidates( self, request_data, candidates ):
+    undetailed_entries = []
+    map_entries_to_candidates = {}
+    for candidate in candidates:
+      undetailed_entry = candidate[ 'extra_data' ]
+      if 'name' not in undetailed_entry:
+        # This candidate is already detailed.
+        continue
+      map_entries_to_candidates[ undetailed_entry[ 'name' ] ] = candidate
+      undetailed_entries.append( undetailed_entry )
+
+    if not undetailed_entries:
+      # All candidates are already detailed.
+      return candidates
 
     detailed_entries = self._SendRequest( 'completionEntryDetails', {
       'file':       request_data[ 'filepath' ],
       'line':       request_data[ 'line_num' ],
       'offset':     request_data[ 'start_codepoint' ],
-      'entryNames': [ FormatEntry( entry ) for entry in entries ]
+      'entryNames': undetailed_entries
     } )
-    return [ _ConvertDetailedCompletionData( request_data, entry )
-             for entry in detailed_entries ]
+    for entry in detailed_entries:
+      candidate = map_entries_to_candidates[ entry[ 'name' ] ]
+      extra_menu_info, detailed_info = _BuildCompletionExtraMenuAndDetailedInfo(
+        request_data, entry )
+      if extra_menu_info:
+        candidate[ 'extra_menu_info' ] = extra_menu_info
+      if detailed_info:
+        candidate[ 'detailed_info' ] = detailed_info
+      candidate[ 'kind' ] = entry[ 'kind' ]
+      candidate[ 'extra_data' ] = _BuildCompletionFixIts( request_data, entry )
+    return candidates
 
 
   def GetSubcommandsMap( self ):
     return {
-      'RestartServer'  : ( lambda self, request_data, args:
-                           self._RestartServer( request_data ) ),
-      'StopServer'     : ( lambda self, request_data, args:
-                           self._StopServer() ),
-      'GoTo'           : ( lambda self, request_data, args:
-                           self._GoToDefinition( request_data ) ),
-      'GoToDefinition' : ( lambda self, request_data, args:
-                           self._GoToDefinition( request_data ) ),
-      'GoToDeclaration': ( lambda self, request_data, args:
-                           self._GoToDefinition( request_data ) ),
-      'GoToReferences' : ( lambda self, request_data, args:
-                           self._GoToReferences( request_data ) ),
-      'GoToType'       : ( lambda self, request_data, args:
-                           self._GoToType( request_data ) ),
-      'GetType'        : ( lambda self, request_data, args:
-                           self._GetType( request_data ) ),
-      'GetDoc'         : ( lambda self, request_data, args:
-                           self._GetDoc( request_data ) ),
-      'FixIt'          : ( lambda self, request_data, args:
-                           self._FixIt( request_data, args ) ),
-      'OrganizeImports': ( lambda self, request_data, args:
-                           self._OrganizeImports( request_data ) ),
-      'RefactorRename' : ( lambda self, request_data, args:
-                           self._RefactorRename( request_data, args ) ),
-      'Format'         : ( lambda self, request_data, args:
-                           self._Format( request_data ) ),
+      'RestartServer'     : ( lambda self, request_data, args:
+                              self._RestartServer( request_data ) ),
+      'StopServer'        : ( lambda self, request_data, args:
+                              self._StopServer() ),
+      'GoTo'              : ( lambda self, request_data, args:
+                              self._GoToDefinition( request_data ) ),
+      'GoToDefinition'    : ( lambda self, request_data, args:
+                              self._GoToDefinition( request_data ) ),
+      'GoToDeclaration'   : ( lambda self, request_data, args:
+                              self._GoToDefinition( request_data ) ),
+      'GoToImplementation': ( lambda self, request_data, args:
+                              self._GoToImplementation( request_data ) ),
+      'GoToReferences'    : ( lambda self, request_data, args:
+                              self._GoToReferences( request_data ) ),
+      'GoToType'          : ( lambda self, request_data, args:
+                              self._GoToType( request_data ) ),
+      'GetType'           : ( lambda self, request_data, args:
+                              self._GetType( request_data ) ),
+      'GetDoc'            : ( lambda self, request_data, args:
+                              self._GetDoc( request_data ) ),
+      'FixIt'             : ( lambda self, request_data, args:
+                              self._FixIt( request_data, args ) ),
+      'OrganizeImports'   : ( lambda self, request_data, args:
+                              self._OrganizeImports( request_data ) ),
+      'RefactorRename'    : ( lambda self, request_data, args:
+                              self._RefactorRename( request_data, args ) ),
+      'Format'            : ( lambda self, request_data, args:
+                              self._Format( request_data ) ),
     }
 
 
@@ -557,6 +592,55 @@ class TypeScriptCompleter( Completer ):
     return responses.BuildDisplayMessageResponse( closest_diagnostic.text_ )
 
 
+  def ComputeSignaturesInner( self, request_data ):
+    self._Reload( request_data )
+    try:
+      items = self._SendRequest( 'signatureHelp', {
+        'file': request_data[ 'filepath' ],
+        'line': request_data[ 'line_num' ],
+        'offset': request_data[ 'start_codepoint' ],
+        # triggerReason - opitonal and tricky to populate
+      } )
+    except RuntimeError:
+      # We get an exception when there are no results, so squash it
+      if LOGGER.isEnabledFor( logging.DEBUG ):
+        LOGGER.exception( "No signatures from tsserver" )
+      return {}
+
+    def MakeSignature( s ):
+      label = _DisplayPartsToString( s[ 'prefixDisplayParts' ] )
+      parameters = []
+      sep = _DisplayPartsToString( s[ 'separatorDisplayParts' ] )
+      for index, p in enumerate( s[ 'parameters' ] ):
+        param = _DisplayPartsToString( p[ 'displayParts' ] )
+        start = len( label )
+        end = start + len( param )
+
+        label += param
+        if index < len( s[ 'parameters' ] ) - 1:
+          label += sep
+
+        parameters.append( {
+          'label': [ utils.CodepointOffsetToByteOffset( label, start ),
+                     utils.CodepointOffsetToByteOffset( label, end ) ]
+        } )
+
+      label += _DisplayPartsToString( s[ 'suffixDisplayParts' ] )
+
+      return {
+        'label': label,
+        'parameters': parameters
+      }
+
+    return {
+      'activeSignature': items[ 'selectedItemIndex' ],
+      'activeParameter': items[ 'argumentIndex' ],
+      'signatures': [
+        MakeSignature( s ) for s in items[ 'items' ]
+      ]
+    }
+
+
   def _GetSemanticDiagnostics( self, filename ):
     return self._SendRequest( 'semanticDiagnosticsSync', {
       'file': filename,
@@ -573,14 +657,11 @@ class TypeScriptCompleter( Completer ):
 
   def _GoToDefinition( self, request_data ):
     self._Reload( request_data )
-    try:
-      filespans = self._SendRequest( 'definition', {
-        'file':   request_data[ 'filepath' ],
-        'line':   request_data[ 'line_num' ],
-        'offset': request_data[ 'column_codepoint' ]
-      } )
-    except RuntimeError:
-      raise RuntimeError( 'Could not find definition.' )
+    filespans = self._SendRequest( 'definition', {
+      'file':   request_data[ 'filepath' ],
+      'line':   request_data[ 'line_num' ],
+      'offset': request_data[ 'column_codepoint' ]
+    } )
 
     if not filespans:
       raise RuntimeError( 'Could not find definition.' )
@@ -591,6 +672,29 @@ class TypeScriptCompleter( Completer ):
                       span[ 'file' ],
                       span[ 'start' ][ 'line' ],
                       span[ 'start' ][ 'offset' ] ) )
+
+
+  def _GoToImplementation( self, request_data ):
+    self._Reload( request_data )
+    filespans = self._SendRequest( 'implementation', {
+      'file':   request_data[ 'filepath' ],
+      'line':   request_data[ 'line_num' ],
+      'offset': request_data[ 'column_codepoint' ]
+    } )
+
+    if not filespans:
+      raise RuntimeError( 'No implementation found.' )
+
+    results = []
+    for span in filespans:
+      filename = span[ 'file' ]
+      start = span[ 'start' ]
+      lines = GetFileLines( request_data, span[ 'file' ] )
+      line_num = start[ 'line' ]
+      results.append( responses.BuildGoToResponseFromLocation(
+        _BuildLocation( lines, filename, line_num, start[ 'offset' ] ),
+        lines[ line_num - 1 ] ) )
+    return results
 
 
   def _GoToReferences( self, request_data ):
@@ -794,8 +898,8 @@ class TypeScriptCompleter( Completer ):
 
   def _RestartServer( self, request_data ):
     with self._tsserver_lock:
-      self._StopServer()
-      self._StartServer()
+      self._StopServerNoLock()
+      self._StartServerNoLock()
       # This is needed because after we restart the TSServer it would lose all
       # the information about the files we were working on. This means that the
       # newly started TSServer will know nothing about the buffer we're working
@@ -807,18 +911,22 @@ class TypeScriptCompleter( Completer ):
 
   def _StopServer( self ):
     with self._tsserver_lock:
-      if self._ServerIsRunning():
-        _logger.info( 'Stopping TSServer with PID {0}'.format(
-                          self._tsserver_handle.pid ) )
-        try:
-          self._SendCommand( 'exit' )
-          utils.WaitUntilProcessIsTerminated( self._tsserver_handle,
-                                              timeout = 5 )
-          _logger.info( 'TSServer stopped' )
-        except Exception:
-          _logger.exception( 'Error while stopping TSServer' )
+      self._StopServerNoLock()
 
-      self._CleanUp()
+
+  def _StopServerNoLock( self ):
+    if self._ServerIsRunning():
+      LOGGER.info( 'Stopping TSServer with PID %s',
+                   self._tsserver_handle.pid )
+      try:
+        self._SendCommand( 'exit' )
+        utils.WaitUntilProcessIsTerminated( self._tsserver_handle,
+                                            timeout = 5 )
+        LOGGER.info( 'TSServer stopped' )
+      except Exception:
+        LOGGER.exception( 'Error while stopping TSServer' )
+
+    self._CleanUp()
 
 
   def _CleanUp( self ):
@@ -850,14 +958,12 @@ class TypeScriptCompleter( Completer ):
 
 
 def _LogLevel():
-  return 'verbose' if _logger.isEnabledFor( logging.DEBUG ) else 'normal'
+  return 'verbose' if LOGGER.isEnabledFor( logging.DEBUG ) else 'normal'
 
 
-def _ConvertDetailedCompletionData( request_data, completion_data ):
-  name = completion_data[ 'name' ]
-  display_parts = completion_data[ 'displayParts' ]
-  signature = ''.join( [ part[ 'text' ] for part in display_parts ] )
-  if name == signature:
+def _BuildCompletionExtraMenuAndDetailedInfo( request_data, entry ):
+  signature = _DisplayPartsToString( entry[ 'displayParts' ] )
+  if entry[ 'name' ] == signature:
     extra_menu_info = None
     detailed_info = []
   else:
@@ -866,30 +972,26 @@ def _ConvertDetailedCompletionData( request_data, completion_data ):
     extra_menu_info = re.sub( '\\s+', ' ', signature )
     detailed_info = [ signature ]
 
-  docs = completion_data.get( 'documentation', [] )
+  docs = entry.get( 'documentation', [] )
   detailed_info += [ doc[ 'text' ].strip() for doc in docs if doc ]
   detailed_info = '\n\n'.join( detailed_info )
 
-  fixits = None
-  if 'codeActions' in completion_data:
+  return extra_menu_info, detailed_info
+
+
+def _BuildCompletionFixIts( request_data, entry ):
+  if 'codeActions' in entry:
     location = responses.Location( request_data[ 'line_num' ],
                                    request_data[ 'column_num' ],
                                    request_data[ 'filepath' ] )
-    fixits = responses.BuildFixItResponse( [
+    return responses.BuildFixItResponse( [
       responses.FixIt( location,
                        _BuildFixItForChanges( request_data,
                                               action[ 'changes' ] ),
                        action[ 'description' ] )
-      for action in completion_data[ 'codeActions' ]
+      for action in entry[ 'codeActions' ]
     ] )
-
-  return responses.BuildCompletionData(
-    insertion_text  = name,
-    extra_menu_info = extra_menu_info,
-    detailed_info   = detailed_info,
-    kind            = completion_data[ 'kind' ],
-    extra_data      = fixits
-  )
+  return {}
 
 
 def _BuildFixItChunkForRange( new_name,
@@ -982,3 +1084,7 @@ def _BuildTsFormatRange( request_data ):
     'endLine': end_line_num,
     'endOffset': end_codepoint
   }
+
+
+def _DisplayPartsToString( parts ):
+  return ''.join( [ p[ 'text' ] for p in parts ] )

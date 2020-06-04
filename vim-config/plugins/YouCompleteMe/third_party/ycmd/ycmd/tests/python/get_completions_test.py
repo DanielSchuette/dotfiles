@@ -1,6 +1,4 @@
-# coding: utf-8
-#
-# Copyright (C) 2015-2018 ycmd contributors
+# Copyright (C) 2015-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -17,16 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import absolute_import
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from nose.tools import eq_
-from hamcrest import ( assert_that, has_item, has_items, has_entry,
-                       has_entries, contains, empty, contains_string )
+from hamcrest import ( all_of,
+                       assert_that,
+                       contains_exactly,
+                       contains_string,
+                       empty,
+                       equal_to,
+                       has_item,
+                       has_items,
+                       has_entry,
+                       has_entries,
+                       is_not )
 import requests
 
 from ycmd.utils import ReadFile
@@ -34,7 +33,6 @@ from ycmd.tests.python import IsolatedYcmd, PathToTestFile, SharedYcmd
 from ycmd.tests.test_utils import ( BuildRequest,
                                     CombineRequest,
                                     CompletionEntryMatcher,
-                                    CompletionLocationMatcher,
                                     ErrorMatcher )
 
 
@@ -66,11 +64,10 @@ def RunTest( app, test ):
                             } ),
                             expect_errors = True )
 
-  eq_( response.status_code, test[ 'expect' ][ 'response' ] )
+  assert_that( response.status_code,
+               equal_to( test[ 'expect' ][ 'response' ] ) )
 
   assert_that( response.json, test[ 'expect' ][ 'data' ] )
-
-
 
 
 @SharedYcmd
@@ -84,15 +81,41 @@ def GetCompletions_Basic_test( app ):
 
   results = app.post_json( '/completions',
                            completion_data ).json[ 'completions' ]
-
   assert_that( results,
                has_items(
-                 CompletionEntryMatcher( 'a' ),
-                 CompletionEntryMatcher( 'b' ),
-                 CompletionLocationMatcher( 'line_num', 3 ),
-                 CompletionLocationMatcher( 'line_num', 4 ),
-                 CompletionLocationMatcher( 'column_num', 10 ),
-                 CompletionLocationMatcher( 'filepath', filepath ) ) )
+                 CompletionEntryMatcher( 'a',
+                                         'self.a = 1',
+                                         {
+                                           'detailed_info': '',
+                                           'kind': 'statement'
+                                         } ),
+                 CompletionEntryMatcher( 'b',
+                                         'self.b = 2',
+                                         {
+                                           'detailed_info': '',
+                                           'kind': 'statement'
+                                         } )
+               ) )
+
+  completion_data = BuildRequest( filepath = filepath,
+                                  filetype = 'python',
+                                  contents = ReadFile( filepath ),
+                                  line_num = 7,
+                                  column_num = 4 )
+
+  results = app.post_json( '/completions',
+                           completion_data ).json[ 'completions' ]
+  assert_that( results,
+               all_of(
+                 has_item(
+                   CompletionEntryMatcher( 'a',
+                                           'self.a = 1',
+                                           {
+                                             'detailed_info': '',
+                                             'kind': 'statement'
+                                           } ) ),
+                 is_not( has_item( CompletionEntryMatcher( 'b' ) ) )
+               ) )
 
 
 @SharedYcmd
@@ -130,7 +153,7 @@ def GetCompletions_NoSuggestions_Fallback_test( app ):
     'expect': {
       'response': requests.codes.ok,
       'data': has_entries( {
-        'completions': contains(
+        'completions': contains_exactly(
           CompletionEntryMatcher( 'a_parameter', '[ID]' ),
           CompletionEntryMatcher( 'another_parameter', '[ID]' ),
         ),
@@ -153,8 +176,9 @@ def GetCompletions_Unicode_InLine_test( app ):
     'expect': {
       'response': requests.codes.ok,
       'data': has_entries( {
-        'completions': contains(
-          CompletionEntryMatcher( 'center', 'def center' )
+        'completions': contains_exactly(
+          CompletionEntryMatcher(
+            'center', 'def center(width: int, fillchar: str=...)' )
         ),
         'errors': empty()
       } )
@@ -186,6 +210,33 @@ def GetCompletions_SysPath_EmptyExtraConf_test( app ):
 @IsolatedYcmd( { 'global_ycm_extra_conf':
                  PathToTestFile( 'project', 'settings_extra_conf.py' ) } )
 def GetCompletions_SysPath_SettingsFunctionInExtraConf_test( app ):
+  RunTest( app, {
+    'description': 'Module is added to sys.path through the Settings '
+                   'function in extra conf file',
+    'request': {
+      'filetype'  : 'python',
+      'filepath'  : PathToTestFile( 'project', '__main__.py' ),
+      'line_num'  : 3,
+      'column_num': 8
+    },
+    'expect': {
+      'response': requests.codes.ok,
+      'data': has_entries( {
+        'completions': has_item(
+          CompletionEntryMatcher( 'SOME_CONSTANT', 'SOME_CONSTANT = 1' )
+        ),
+        'errors': empty()
+      } )
+    }
+  } )
+
+
+@IsolatedYcmd( {
+  'global_ycm_extra_conf': PathToTestFile( 'project',
+                                           'settings_extra_conf.py' ),
+  'disable_signature_help': True
+} )
+def GetCompletions_SysPath_SettingsFunctionInExtraConf_DisableSig_test( app ):
   RunTest( app, {
     'description': 'Module is added to sys.path through the Settings '
                    'function in extra conf file',
@@ -290,7 +341,7 @@ def GetCompletions_PythonInterpreter_InvalidPythonInExtraConf_test( app ):
       'response': requests.codes.ok,
       'data': has_entries( {
         'completions': empty(),
-        'errors': contains(
+        'errors': contains_exactly(
           ErrorMatcher( RuntimeError,
                         'Cannot find Python interpreter path '
                         '/non/existing/python.' )
@@ -341,3 +392,26 @@ def GetCompletions_PythonInterpreter_ExtraConfData_test( app ):
       'errors': empty()
     } )
   )
+
+
+@SharedYcmd
+def GetCompletions_NumpyDoc_test( app ):
+  RunTest( app, {
+    'description': 'Type hinting is working with docstrings '
+                   'in the Numpy format',
+    'request': {
+      'filetype'  : 'python',
+      'filepath'  : PathToTestFile( 'numpy_docstring.py' ),
+      'line_num'  : 11,
+      'column_num': 18
+    },
+    'expect': {
+      'response': requests.codes.ok,
+      'data': has_entries( {
+        'completions': contains_exactly(
+          CompletionEntryMatcher( 'SomeMethod', 'def SomeMethod()' ),
+        ),
+        'errors': empty()
+      } )
+    }
+  } )

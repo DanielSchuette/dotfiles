@@ -15,21 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from future.utils import iterkeys
 import vim
 import os
 import json
 import re
 from collections import defaultdict, namedtuple
-from ycmd.utils import ( ByteOffsetToCodepointOffset, GetCurrentDirectory,
-                         JoinLinesAsUnicode, ToBytes, ToUnicode )
+from ycmd.utils import ( ByteOffsetToCodepointOffset,
+                         GetCurrentDirectory,
+                         JoinLinesAsUnicode,
+                         OnMac,
+                         OnWindows,
+                         ToBytes,
+                         ToUnicode )
 
 BUFFER_COMMAND_MAP = { 'same-buffer'      : 'edit',
                        'split'            : 'split',
@@ -73,6 +70,29 @@ NO_COMPLETIONS = {
   'completion_start_column': -1,
   'completions': []
 }
+
+# checking for existence of funcitons is a little slow and can't change at
+# tuntime, so we cache the results
+MEMO = {}
+
+
+def memoize( func ):
+  global MEMO
+
+  import functools
+
+  @functools.wraps( func )
+  def wrapper( *args, **kwargs ):
+    dct = MEMO.setdefault( func, {} )
+    key = ( args, frozenset( kwargs.items() ) )
+    try:
+      return dct[ key ]
+    except KeyError:
+      result = func( *args, **kwargs )
+      dct[ key ] = result
+      return result
+
+  return wrapper
 
 
 def CurrentLineAndColumn():
@@ -257,6 +277,8 @@ def GetDiagnosticMatchesInCurrentWindow():
 
 
 def AddDiagnosticMatch( match ):
+  # TODO: Use matchaddpos which is much faster given that we always are using a
+  # location rather than an actual pattern
   return GetIntValue( "matchadd('{}', '{}')".format( match.group,
                                                      match.pattern ) )
 
@@ -270,14 +292,16 @@ def GetDiagnosticMatchPattern( line_num,
                                line_end_num = None,
                                column_end_num = None ):
   line_num, column_num = LineAndColumnNumbersClamped( line_num, column_num )
+  column_num = max( column_num, 1 )
 
-  if not line_end_num or not column_end_num:
+  if line_end_num is None or column_end_num is None:
     return '\\%{}l\\%{}c'.format( line_num, column_num )
 
   # -1 and then +1 to account for column end not included in the range.
   line_end_num, column_end_num = LineAndColumnNumbersClamped(
       line_end_num, column_end_num - 1 )
-  column_end_num += 1
+  column_end_num = max( column_end_num + 1, 1 )
+
   return '\\%{}l\\%{}c\\_.\\{{-}}\\%{}l\\%{}c'.format( line_num,
                                                        column_num,
                                                        line_end_num,
@@ -287,20 +311,12 @@ def GetDiagnosticMatchPattern( line_num,
 # Clamps the line and column numbers so that they are not past the contents of
 # the buffer. Numbers are 1-based byte offsets.
 def LineAndColumnNumbersClamped( line_num, column_num ):
-  new_line_num = line_num
-  new_column_num = column_num
+  line_num = max( min( line_num, len( vim.current.buffer ) ), 1 )
 
-  max_line = len( vim.current.buffer )
-  if line_num and line_num > max_line:
-    new_line_num = max_line
+  # Vim buffers are a list of Unicode objects on Python 3.
+  max_column = len( ToBytes( vim.current.buffer[ line_num - 1 ] ) )
 
-  # Vim buffers are a list of byte objects on Python 2 but Unicode objects on
-  # Python 3.
-  max_column = len( ToBytes( vim.current.buffer[ new_line_num - 1 ] ) )
-  if column_num and column_num > max_column:
-    new_column_num = max_column
-
-  return new_line_num, new_column_num
+  return line_num, min( column_num, max_column )
 
 
 def SetLocationList( diagnostics ):
@@ -341,9 +357,7 @@ def OpenLocationList( focus = False, autoclose = False ):
   SetFittingHeightForCurrentWindow()
 
   if autoclose:
-    # This autocommand is automatically removed when the location list window is
-    # closed.
-    vim.command( 'au WinLeave <buffer> q' )
+    AutoCloseOnCurrentBuffer( 'ycmlocation' )
 
   if VariableExists( '#User#YcmLocationOpened' ):
     vim.command( 'doautocmd User YcmLocationOpened' )
@@ -368,9 +382,7 @@ def OpenQuickFixList( focus = False, autoclose = False ):
   SetFittingHeightForCurrentWindow()
 
   if autoclose:
-    # This autocommand is automatically removed when the quickfix window is
-    # closed.
-    vim.command( 'au WinLeave <buffer> q' )
+    AutoCloseOnCurrentBuffer( 'ycmquickfix' )
 
   if VariableExists( '#User#YcmQuickFixOpened' ):
     vim.command( 'doautocmd User YcmQuickFixOpened' )
@@ -464,10 +476,21 @@ def EscapeFilepathForVimCommand( filepath ):
   return GetVariableValue( to_eval )
 
 
+def ComparePaths( path1, path2 ):
+  # Assume that the file system is case-insensitive on Windows and macOS and
+  # case-sensitive on other platforms. While this is not necessarily true, being
+  # completely correct here is not worth the trouble as this assumption
+  # represents the overwhelming use case and detecting the case sensitivity of a
+  # file system is tricky.
+  if OnWindows() or OnMac():
+    return path1.lower() == path2.lower()
+  return path1 == path2
+
+
 # Both |line| and |column| need to be 1-based
 def TryJumpLocationInTab( tab, filename, line, column ):
   for win in tab.windows:
-    if GetBufferFilepath( win.buffer ) == filename:
+    if ComparePaths( GetBufferFilepath( win.buffer ), filename ):
       vim.current.tabpage = tab
       vim.current.window = win
       vim.current.window.cursor = ( line, column - 1 )
@@ -844,7 +867,7 @@ def ReplaceChunks( chunks, silent=False ):
   chunks_by_file = _SortChunksByFile( chunks )
 
   # We sort the file list simply to enable repeatable testing.
-  sorted_file_list = sorted( iterkeys( chunks_by_file ) )
+  sorted_file_list = sorted( chunks_by_file.keys() )
 
   if not silent:
     # Make sure the user is prepared to have her screen mutilated by the new
@@ -965,8 +988,7 @@ def ReplaceChunk( start, end, replacement_text, vim_buffer ):
   # so we convert to bytes
   replacement_lines = SplitLines( ToBytes( replacement_text ) )
 
-  # NOTE: Vim buffers are a list of byte objects on Python 2 but unicode
-  # objects on Python 3.
+  # NOTE: Vim buffers are a list of unicode objects on Python 3.
   start_existing_text = ToBytes( vim_buffer[ start_line ] )[ : start_column ]
   end_line_text = ToBytes( vim_buffer[ end_line ] )
   end_existing_text = end_line_text[ end_column : ]
@@ -1130,7 +1152,8 @@ def OpenFilename( filename, options = {} ):
   - watch: automatically watch for changes (default: False). This is useful
   for logs;
   - position: set the position where the file is opened (default: start).
-  Choices are start and end."""
+  Choices are start and end.
+  - mods: The vim <mods> for the command, such as :vertical"""
 
   # Set the options.
   command = GetVimCommand( options.get( 'command', 'horizontal-split' ),
@@ -1148,7 +1171,10 @@ def OpenFilename( filename, options = {} ):
 
   # Open the file.
   try:
-    vim.command( '{0}{1} {2}'.format( size, command, filename ) )
+    vim.command( '{mods}{0}{1} {2}'.format( size,
+                                            command,
+                                            filename,
+                                            mods=options.get( 'mods', '' ) ) )
   # When the file we are trying to jump to has a swap file,
   # Vim opens swap-exists-choices dialog and throws vim.error with E325 error,
   # or KeyboardInterrupt after user selects one of the options which actually
@@ -1238,3 +1264,47 @@ def VimVersionAtLeast( version_string ):
     return actual_major_and_minor > matching_major_and_minor
 
   return GetBoolValue( "has( 'patch{0}' )".format( patch ) )
+
+
+def AutoCloseOnCurrentBuffer( name ):
+  """Create an autocommand group with name |name| on the current buffer that
+  automatically closes it when leaving its window."""
+  vim.command( 'augroup {}'.format( name ) )
+  vim.command( 'autocmd! * <buffer>' )
+  vim.command( 'autocmd WinLeave <buffer> '
+               'if bufnr( "%" ) == expand( "<abuf>" ) | q | endif '
+               '| autocmd! {}'.format( name ) )
+  vim.command( 'augroup END' )
+
+
+@memoize
+def VimSupportsPopupWindows():
+  return VimHasFunctions( 'popup_create',
+                          'popup_move',
+                          'popup_hide',
+                          'popup_settext',
+                          'popup_show',
+                          'popup_close',
+                          'prop_add',
+                          'prop_type_add' )
+
+
+@memoize
+def VimHasFunction( func ):
+  return bool( GetIntValue( "exists( '*{}' )".format( EscapeForVim( func ) ) ) )
+
+
+def VimHasFunctions( *functions ):
+  return all( VimHasFunction( f ) for f in functions )
+
+
+def WinIDForWindow( window ):
+  return GetIntValue( 'win_getid( {}, {} )'.format( window.number,
+                                                    window.tabpage.number ) )
+
+
+def ScreenPositionForLineColumnInWindow( window, line, column ):
+  return vim.eval( 'screenpos( {}, {}, {} )'.format(
+      WinIDForWindow( window ),
+      line,
+      column ) )

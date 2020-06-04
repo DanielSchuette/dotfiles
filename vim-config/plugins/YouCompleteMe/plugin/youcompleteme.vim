@@ -55,17 +55,17 @@ elseif !has( 'timers' )
   call s:restore_cpo()
   finish
 elseif ( v:version > 800 || ( v:version == 800 && has( 'patch1436' ) ) ) &&
-     \ !has( 'python_compiled' ) && !has( 'python3_compiled' )
+     \ !has( 'python3_compiled' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: requires Vim compiled with " .
-        \ "Python (2.7.1+ or 3.4+) support." |
+        \ "Python (3.5.1+) support." |
         \ echohl None
   call s:restore_cpo()
   finish
-" These calls try to load the Python 2 and Python 3 libraries when Vim is
+" These calls try to load the Python 3 libraries when Vim is
 " compiled dynamically against them. Since only one can be loaded at a time on
 " some platforms, we first check if Python 3 is available.
-elseif !has( 'python3' ) && !has( 'python' )
+elseif !has( 'python3' )
   echohl WarningMsg |
         \ echomsg "YouCompleteMe unavailable: unable to load Python." |
         \ echohl None
@@ -82,6 +82,16 @@ endif
 
 let g:loaded_youcompleteme = 1
 
+let s:default_options = {}
+if exists( '*json_decode' )
+  let s:script_folder_path = expand( '<sfile>:p:h' )
+  let s:option_file = s:script_folder_path .
+        \ '/../third_party/ycmd/ycmd/default_settings.json'
+  if filereadable( s:option_file )
+    let s:default_options = json_decode( join( readfile( s:option_file ) ) )
+  endif
+endif
+
 "
 " List of YCM options.
 "
@@ -91,7 +101,6 @@ let g:ycm_filetype_whitelist =
 let g:ycm_filetype_blacklist =
       \ get( g:, 'ycm_filetype_blacklist', {
       \   'tagbar': 1,
-      \   'qf': 1,
       \   'notes': 1,
       \   'markdown': 1,
       \   'netrw': 1,
@@ -100,6 +109,7 @@ let g:ycm_filetype_blacklist =
       \   'vimwiki': 1,
       \   'pandoc': 1,
       \   'infolog': 1,
+      \   'leaderf': 1,
       \   'mail': 1
       \ } )
 
@@ -196,6 +206,9 @@ let g:ycm_goto_buffer_command =
 let g:ycm_disable_for_files_larger_than_kb =
       \ get( g:, 'ycm_disable_for_files_larger_than_kb', 1000 )
 
+let g:ycm_auto_hover =
+      \ get( g:, 'ycm_auto_hover', 'CursorHold' )
+
 "
 " List of ycmd options.
 "
@@ -258,25 +271,41 @@ let g:ycm_use_ultisnips_completer =
 let g:ycm_csharp_server_port =
       \ get( g:, 'ycm_csharp_server_port', 0 )
 
+let g:ycm_use_clangd =
+      \ get( g:, 'ycm_use_clangd', 1 )
+
+let g:ycm_clangd_binary_path =
+      \ get( g:, 'ycm_clangd_binary_path', '' )
+
+let g:ycm_clangd_args =
+      \ get( g:, 'ycm_clangd_args', [] )
+
+let g:ycm_clangd_uses_ycmd_caching =
+      \ get( g:, 'ycm_clangd_uses_ycmd_caching', 1 )
+
 " These options are not documented.
-let g:ycm_gocode_binary_path =
-      \ get( g:, 'ycm_gocode_binary_path', '' )
-
-let g:ycm_godef_binary_path =
-      \ get( g:, 'ycm_godef_binary_path', '' )
-
-let g:ycm_rust_src_path =
-      \ get( g:, 'ycm_rust_src_path', '' )
-
-let g:ycm_racerd_binary_path =
-      \ get( g:, 'ycm_racerd_binary_path', '' )
+let g:ycm_java_jdtls_extension_path =
+      \ get( g:, 'ycm_java_jdtls_extension_path', [] )
 
 let g:ycm_java_jdtls_use_clean_workspace =
       \ get( g:, 'ycm_java_jdtls_use_clean_workspace', 1 )
 
+let g:ycm_java_jdtls_workspace_root_path =
+      \ get( g:, 'ycm_java_jdtls_workspace_root_path', '' )
+
 " This option is deprecated.
 let g:ycm_python_binary_path =
       \ get( g:, 'ycm_python_binary_path', '' )
+
+" Populate any other (undocumented) options set in the ycmd
+" default_settings.json. This ensures that any part of ycm that uses ycmd code
+" will have the default set. I'm looking at you, Omni-completer.
+for key in keys( s:default_options )
+  if ! has_key( g:, 'ycm_' . key )
+    let g:[ 'ycm_' . key ] = s:default_options[ key ]
+  endif
+endfor
+unlet key
 
 if has( 'vim_starting' ) " Loading at startup.
   " We defer loading until after VimEnter to allow the gui to fork (see

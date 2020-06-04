@@ -59,20 +59,10 @@ GOBIN="$HOME/code/go_src/bin"
 export GOBIN
 GOPATH="$HOME/code/go_src"
 export GOPATH
-GOROOT="" # needs to be set if go is in custom location
+GOROOT="/usr/local/go" # needs to be set if go is in custom location
 export GOROOT
-PATH="$HOME/code/go_src/bin:$PATH"
+PATH="$GOROOT/bin:$PATH"
 export PATH
-
-# enable experimental support for modules
-# (to still respect $GOPATH, set to 'auto')
-GO111MODULE="on"
-export GO111MODULE
-
-# alias for installing tools outsite packages
-# required to install go binaries that are not
-# dependencies of a go module
-alias oldgoget="GO111MODULE=off go get"
 
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger

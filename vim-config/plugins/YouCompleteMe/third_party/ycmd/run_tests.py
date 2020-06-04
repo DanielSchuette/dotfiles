@@ -1,95 +1,110 @@
-#!/usr/bin/env python
-
-# Passing an environment variable containing unicode literals to a subprocess
-# on Windows and Python2 raises a TypeError. Since there is no unicode
-# string in this script, we don't import unicode_literals to avoid the issue.
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
+#!/usr/bin/env python3
 
 import argparse
 import platform
 import os
+import glob
 import subprocess
 import os.path as p
 import sys
 
 DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 DIR_OF_THIRD_PARTY = p.join( DIR_OF_THIS_SCRIPT, 'third_party' )
+DIR_OF_WATCHDOG_DEPS = p.join( DIR_OF_THIRD_PARTY, 'watchdog_deps' )
+LIBCLANG_DIR = p.join( DIR_OF_THIRD_PARTY, 'clang', 'lib' )
 
-python_path = []
-for folder in os.listdir( DIR_OF_THIRD_PARTY ):
-  # We skip python-future because it needs to be inserted in sys.path AFTER
-  # the standard library imports but we can't do that with PYTHONPATH because
-  # the std lib paths are always appended to PYTHONPATH. We do it correctly in
-  # prod in ycmd/utils.py because we have access to the right sys.path.
-  # So for dev, we rely on python-future being installed correctly with
-  #   pip install -r test_requirements.txt
-  #
-  # Pip knows how to install this correctly so that it doesn't matter where in
-  # sys.path the path is.
-  if folder == 'python-future':
-    continue
-  if folder == 'cregex':
-    folder = p.join( folder, 'regex_{}'.format( sys.version_info[ 0 ] ) )
-  python_path.append( p.abspath( p.join( DIR_OF_THIRD_PARTY, folder ) ) )
+python_path = [
+  p.join( DIR_OF_THIRD_PARTY, 'bottle' ),
+  p.join( DIR_OF_THIRD_PARTY, 'cregex', 'regex_3' ),
+  p.join( DIR_OF_THIRD_PARTY, 'frozendict' ),
+  p.join( DIR_OF_THIRD_PARTY, 'jedi_deps', 'jedi' ),
+  p.join( DIR_OF_THIRD_PARTY, 'jedi_deps', 'parso' ),
+  p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'certifi' ),
+  p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'chardet' ),
+  p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'idna' ),
+  p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'requests' ),
+  p.join( DIR_OF_THIRD_PARTY, 'requests_deps', 'urllib3', 'src' ),
+  p.join( DIR_OF_WATCHDOG_DEPS, 'watchdog', 'build', 'lib3' ),
+  p.join( DIR_OF_WATCHDOG_DEPS, 'pathtools' ),
+  p.join( DIR_OF_THIRD_PARTY, 'waitress' ),
+]
 if os.environ.get( 'PYTHONPATH' ) is not None:
-  python_path.append( os.environ['PYTHONPATH'] )
-os.environ[ 'PYTHONPATH' ] = os.pathsep.join( python_path )
+  python_path.append( os.environ[ 'PYTHONPATH' ] )
+os.environ[ 'PYTHONPATH' ] = (
+    os.pathsep.join( python_path ) +
+    os.pathsep +
+    p.join( DIR_OF_THIRD_PARTY, 'jedi_deps', 'numpydoc' ) )
+
+
+def OnWindows():
+  return platform.system() == 'Windows'
 
 
 def RunFlake8():
   print( 'Running flake8' )
-  subprocess.check_call( [
-    sys.executable, '-m', 'flake8', p.join( DIR_OF_THIS_SCRIPT, 'ycmd' )
-  ] )
+  args = [ sys.executable,
+           '-m',
+           'flake8',
+           p.join( DIR_OF_THIS_SCRIPT, 'ycmd' ) ]
+  root_dir_scripts = glob.glob( p.join( DIR_OF_THIS_SCRIPT, '*.py' ) )
+  args.extend( root_dir_scripts )
+  subprocess.check_call( args )
 
 
+# Newer completers follow a standard convention of:
+#  - build: --<completer>-completer
+#  - test directory: ycmd/tests/<completer>
+#  - no aliases.
+SIMPLE_COMPLETERS = [
+  'clangd',
+  'rust',
+  'go',
+]
+
+# More complex or legacy cases can specify all of:
+#  - build: flags to add to build.py to include this completer
+#  - test: flags to add to run_tests.py when _not_ testing this completer
+#  - aliases?: list of completer aliases for the --completers option
 COMPLETERS = {
   'cfamily': {
     'build': [ '--clang-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/clang' ],
+    'test': [ '--ignore=ycmd/tests/clang' ],
     'aliases': [ 'c', 'cpp', 'c++', 'objc', 'clang', ]
   },
   'cs': {
     'build': [ '--cs-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/cs' ],
+    'test': [ '--ignore=ycmd/tests/cs' ],
     'aliases': [ 'omnisharp', 'csharp', 'c#' ]
   },
   'javascript': {
     'build': [ '--js-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/tern' ],
+    'test': [ '--ignore=ycmd/tests/tern' ],
     'aliases': [ 'js', 'tern' ]
-  },
-  'go': {
-    'build': [ '--go-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/go' ],
-    'aliases': [ 'gocode' ]
-  },
-  'rust': {
-    'build': [ '--rust-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/rust' ],
-    'aliases': [ 'racer', 'racerd', ]
   },
   'typescript': {
     'build': [ '--ts-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/javascript',
-              '--exclude-dir=ycmd/tests/typescript' ],
+    'test': [ '--ignore=ycmd/tests/javascript',
+              '--ignore=ycmd/tests/typescript' ],
     'aliases': [ 'ts' ]
   },
   'python': {
     'build': [],
-    'test': [ '--exclude-dir=ycmd/tests/python' ],
+    'test': [ '--ignore=ycmd/tests/python' ],
     'aliases': [ 'jedi', 'jedihttp', ]
   },
   'java': {
     'build': [ '--java-completer' ],
-    'test': [ '--exclude-dir=ycmd/tests/java' ],
+    'test': [ '--ignore=ycmd/tests/java' ],
     'aliases': [ 'jdt' ],
   },
 }
+
+# Add in the simple completers
+for completer in SIMPLE_COMPLETERS:
+  COMPLETERS[ completer ] = {
+    'build': [ '--{}-completer'.format( completer ) ],
+    'test': [ '--ignore=ycmd/tests/{}'.format( completer ) ],
+  }
 
 
 def CompleterType( value ):
@@ -97,8 +112,8 @@ def CompleterType( value ):
   if value in COMPLETERS:
     return value
   else:
-    aliases_to_completer = dict( ( i, k ) for k, v in COMPLETERS.items()
-                                 for i in v[ 'aliases' ] )
+    aliases_to_completer = { i: k for k, v in COMPLETERS.items()
+                             for i in v[ 'aliases' ] }
     if value in aliases_to_completer:
       return aliases_to_completer[ value ]
     else:
@@ -115,15 +130,15 @@ def ParseArguments():
   group.add_argument( '--no-completers', nargs ='*', type = CompleterType,
                        help = 'Do not build or test with listed semantic '
                        'completion engine(s). Valid values: {0}'.format(
-                        COMPLETERS.keys()) )
+                        COMPLETERS.keys() ) )
   group.add_argument( '--completers', nargs ='*', type = CompleterType,
                        help = 'Only build and test with listed semantic '
                        'completion engine(s). Valid values: {0}'.format(
-                        COMPLETERS.keys()) )
+                        COMPLETERS.keys() ) )
   parser.add_argument( '--skip-build', action = 'store_true',
                        help = 'Do not build ycmd before testing.' )
-  parser.add_argument( '--msvc', type = int, choices = [ 14, 15 ],
-                       default = 15, help = 'Choose the Microsoft Visual '
+  parser.add_argument( '--msvc', type = int, choices = [ 14, 15, 16 ],
+                       default = 16, help = 'Choose the Microsoft Visual '
                        'Studio version (default: %(default)s).' )
   parser.add_argument( '--coverage', action = 'store_true',
                        help = 'Enable coverage report (requires coverage pkg)' )
@@ -134,15 +149,21 @@ def ParseArguments():
                               'manually, then exit.' )
   parser.add_argument( '--no-retry', action = 'store_true',
                        help = 'Disable retry of flaky tests' )
+  parser.add_argument( '--quiet', action = 'store_true',
+                       help = 'Quiet installation mode. Just print overall '
+                              'progress and errors' )
+  parser.add_argument( '--valgrind',
+                       action = 'store_true',
+                       help = 'Run tests inside valgrind.' )
 
-  parsed_args, nosetests_args = parser.parse_known_args()
+  parsed_args, pytests_args = parser.parse_known_args()
 
   parsed_args.completers = FixupCompleters( parsed_args )
 
   if 'COVERAGE' in os.environ:
     parsed_args.coverage = ( os.environ[ 'COVERAGE' ] == 'true' )
 
-  return parsed_args, nosetests_args
+  return parsed_args, pytests_args
 
 
 def FixupCompleters( parsed_args ):
@@ -175,8 +196,7 @@ def BuildYcmdLibs( args ):
     build_cmd = [
       sys.executable,
       p.join( DIR_OF_THIS_SCRIPT, 'build.py' ),
-      '--core-tests',
-      '--quiet',
+      '--core-tests'
     ]
 
     for key in COMPLETERS:
@@ -193,35 +213,59 @@ def BuildYcmdLibs( args ):
       # to generate the c++ coverage information.
       build_cmd.extend( [ '--enable-coverage', '--build-dir', '.build' ] )
 
+    if args.quiet:
+      build_cmd.append( '--quiet' )
+
     subprocess.check_call( build_cmd )
 
 
-def NoseTests( parsed_args, extra_nosetests_args ):
-  # Always passing --with-id to nosetests enables non-surprising usage of
-  # its --failed flag.
-  # By default, nose does not include files starting with a underscore in its
-  # report but we want __main__.py to be included. Only ignore files starting
-  # with a dot and setup.py.
-  nosetests_args = [ '-v', '--with-id', '--ignore-files=(^\.|^setup\.py$)' ]
+def PytestValgrind( parsed_args, extra_pytests_args ):
+  pytests_args = [ '-v' ]
+  if extra_pytests_args:
+    pytests_args.extend( extra_pytests_args )
+  else:
+    pytests_args += glob.glob(
+      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', 'bindings', '*_test.py' ) )
+    pytests_args += glob.glob(
+      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', 'clang', '*_test.py' ) )
+    pytests_args += glob.glob(
+      p.join( DIR_OF_THIS_SCRIPT, 'ycmd', 'tests', '*_test.py' ) )
+    # Avoids needing all completers for a valgrind run
+    pytests_args += [ '-m', 'not valgrind_skip' ]
+
+  new_env = os.environ.copy()
+  new_env[ 'PYTHONMALLOC' ] = 'malloc'
+  new_env[ 'LD_LIBRARY_PATH' ] = LIBCLANG_DIR
+  cmd = [ 'valgrind',
+          '--gen-suppressions=all',
+          '--error-exitcode=1',
+          '--leak-check=full',
+          '--show-leak-kinds=all',
+          '--show-reachable=no',
+          '--suppressions=' + p.join( DIR_OF_THIS_SCRIPT,
+                                      'valgrind.suppressions' ) ]
+  subprocess.check_call( cmd +
+                         [ sys.executable, '-m', 'pytest' ] +
+                         pytests_args,
+                         env = new_env )
+
+
+def PytestTests( parsed_args, extra_pytests_args ):
+  pytests_args = [ '-v' ]
 
   for key in COMPLETERS:
     if key not in parsed_args.completers:
-      nosetests_args.extend( COMPLETERS[ key ][ 'test' ] )
+      pytests_args.extend( COMPLETERS[ key ][ 'test' ] )
 
   if parsed_args.coverage:
     # We need to exclude the ycmd/tests/python/testdata directory since it
     # contains Python files and its base name starts with "test".
-    nosetests_args += [ '--exclude-dir=ycmd/tests/python/testdata',
-                        '--with-coverage',
-                        '--cover-erase',
-                        '--cover-package=ycmd',
-                        '--cover-html',
-                        '--cover-inclusive' ]
+    pytests_args += [ '--ignore=ycmd/tests/python/testdata', '--cov=ycmd' ]
 
-  if extra_nosetests_args:
-    nosetests_args.extend( extra_nosetests_args )
+  if extra_pytests_args:
+    pytests_args.extend( extra_pytests_args )
   else:
-    nosetests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'ycmd' ) )
+    pytests_args.append( p.join( DIR_OF_THIS_SCRIPT, 'ycmd' ) )
 
   env = os.environ.copy()
 
@@ -229,20 +273,79 @@ def NoseTests( parsed_args, extra_nosetests_args ):
     # Useful for _writing_ tests
     env[ 'YCM_TEST_NO_RETRY' ] = '1'
 
-  subprocess.check_call( [ sys.executable, '-m', 'nose' ] + nosetests_args,
+  if OnWindows():
+    # We prepend the Clang third-party directory to the PATH instead of
+    # overwriting it so that the executable is able to find the Python library.
+    env[ 'PATH' ] = LIBCLANG_DIR + ';' + env[ 'PATH' ]
+  else:
+    env[ 'LD_LIBRARY_PATH' ] = LIBCLANG_DIR
+
+  subprocess.check_call( [ sys.executable, '-m', 'pytest' ] + pytests_args,
                          env=env )
 
 
+# On Windows, distutils.spawn.find_executable only works for .exe files
+# but .bat and .cmd files are also executables, so we use our own
+# implementation.
+def FindExecutable( executable ):
+  # Executable extensions used on Windows
+  WIN_EXECUTABLE_EXTS = [ '.exe', '.bat', '.cmd' ]
+
+  paths = os.environ[ 'PATH' ].split( os.pathsep )
+  base, extension = os.path.splitext( executable )
+
+  if OnWindows() and extension.lower() not in WIN_EXECUTABLE_EXTS:
+    extensions = WIN_EXECUTABLE_EXTS
+  else:
+    extensions = [ '' ]
+
+  for extension in extensions:
+    executable_name = executable + extension
+    if not os.path.isfile( executable_name ):
+      for path in paths:
+        executable_path = os.path.join( path, executable_name )
+        if os.path.isfile( executable_path ):
+          return executable_path
+    else:
+      return executable_name
+  return None
+
+
+def FindExecutableOrDie( executable, message ):
+  path = FindExecutable( executable )
+
+  if not path:
+    sys.exit( "ERROR: Unable to find executable '{0}'. {1}".format(
+      executable,
+      message ) )
+
+  return path
+
+
+def SetUpGenericLSPCompleter():
+  old_cwd = os.getcwd()
+  os.chdir( os.path.join( DIR_OF_THIRD_PARTY, 'generic_server' ) )
+  npm = FindExecutableOrDie( 'npm', 'npm is required to'
+                                    'run GenericLSPCompleter tests.' )
+  subprocess.check_call( [ npm, 'install' ] )
+  os.chdir( old_cwd )
+
+
 def Main():
-  parsed_args, nosetests_args = ParseArguments()
+  parsed_args, pytests_args = ParseArguments()
   if parsed_args.dump_path:
     print( os.environ[ 'PYTHONPATH' ] )
     sys.exit()
+
   print( 'Running tests on Python', platform.python_version() )
+  SetUpGenericLSPCompleter()
   if not parsed_args.no_flake8:
     RunFlake8()
   BuildYcmdLibs( parsed_args )
-  NoseTests( parsed_args, nosetests_args )
+  if parsed_args.valgrind:
+    PytestValgrind( parsed_args, pytests_args )
+  else:
+    PytestTests( parsed_args, pytests_args )
 
 
 if __name__ == "__main__":

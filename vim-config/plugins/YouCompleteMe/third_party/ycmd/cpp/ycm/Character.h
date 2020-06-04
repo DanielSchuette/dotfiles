@@ -26,7 +26,7 @@ namespace YouCompleteMe {
 // This class represents a UTF-8 character. It takes a UTF-8 encoded string
 // corresponding to a grapheme cluster (see
 // https://www.unicode.org/glossary/#grapheme_cluster), normalize it through NFD
-// (see https://www.unicode.org/versions/Unicode10.0.0/ch03.pdf#G49621), and
+// (see https://www.unicode.org/versions/Unicode13.0.0/ch03.pdf#G49621), and
 // compute the folded and swapped case versions of the normalized character. It
 // also holds some properties like if the character is a letter or a
 // punctuation, and if it is uppercase.
@@ -36,6 +36,8 @@ public:
   // Make class noncopyable
   Character( const Character& ) = delete;
   Character& operator=( const Character& ) = delete;
+  Character( Character&& ) = default;
+  Character& operator=( Character&& ) = default;
 
   inline std::string Normal() const {
     return normal_;
@@ -71,7 +73,7 @@ public:
 
   inline bool operator== ( const Character &other ) const {
     return normal_ == other.normal_;
-  };
+  }
 
   inline bool EqualsBase( const Character &other ) const {
     return base_ == other.base_;
@@ -79,7 +81,7 @@ public:
 
   inline bool EqualsIgnoreCase( const Character &other ) const {
     return folded_case_ == other.folded_case_;
-  };
+  }
 
   // Smart base matching on top of smart case matching, e.g.:
   //  - e matches e, é, E, É;
@@ -91,7 +93,7 @@ public:
              ( !is_uppercase_ || other.is_uppercase_ ) ) ||
            ( !is_uppercase_ && EqualsIgnoreCase( other ) ) ||
            normal_ == other.normal_;
-  };
+  }
 
 private:
   std::string normal_;

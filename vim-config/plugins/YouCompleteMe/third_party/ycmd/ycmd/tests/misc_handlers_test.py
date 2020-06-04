@@ -1,5 +1,4 @@
-# Copyright (C) 2013      Google Inc.
-#               2015-2017 ycmd contributors
+# Copyright (C) 2015-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -16,19 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
-from hamcrest import ( any_of, assert_that, contains, empty, equal_to,
+from hamcrest import ( any_of, assert_that, contains_exactly, empty, equal_to,
                        has_entries, instance_of )
+from unittest.mock import patch
 import requests
 
 from ycmd.tests import IsolatedYcmd, PathToTestFile, SharedYcmd
-from ycmd.tests.test_utils import BuildRequest, DummyCompleter, PatchCompleter
+from ycmd.tests.test_utils import ( BuildRequest,
+                                    DummyCompleter,
+                                    PatchCompleter,
+                                    SignatureAvailableMatcher,
+                                    ErrorMatcher )
 
 
 @SharedYcmd
@@ -41,6 +38,28 @@ def MiscHandlers_Healthy_Subserver_test( app ):
   with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
     assert_that( app.get( '/healthy', { 'subserver': 'dummy_filetype' } ).json,
                  equal_to( True ) )
+
+
+@SharedYcmd
+def MiscHandlers_SignatureHelpAvailable_test( app ):
+  response = app.get( '/signature_help_available', expect_errors = True ).json
+  assert_that( response,
+               ErrorMatcher( RuntimeError, 'Subserver not specified' ) )
+
+
+@SharedYcmd
+def MiscHandlers_SignatureHelpAvailable_Subserver_test( app ):
+  with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
+    assert_that( app.get( '/signature_help_available',
+                          { 'subserver': 'dummy_filetype' } ).json,
+                 SignatureAvailableMatcher( 'NO' ) )
+
+
+@SharedYcmd
+def MiscHandlers_SignatureHelpAvailable_NoSemanticCompleter_test( app ):
+  assert_that( app.get( '/signature_help_available',
+                        { 'subserver': 'dummy_filetype' } ).json,
+               SignatureAvailableMatcher( 'NO' ) )
 
 
 @SharedYcmd
@@ -105,7 +124,7 @@ def MiscHandlers_FilterAndSortCandidates_Basic_test( app ):
 
   response_data = app.post_json( '/filter_and_sort_candidates', data ).json
 
-  assert_that( response_data, contains( candidate2, candidate3 ) )
+  assert_that( response_data, contains_exactly( candidate2, candidate3 ) )
 
 
 @SharedYcmd
@@ -126,7 +145,7 @@ def MiscHandlers_IgnoreExtraConfFile_AlwaysJsonResponse_test( app ):
                equal_to( True ) )
 
 
-@SharedYcmd
+@IsolatedYcmd()
 def MiscHandlers_DebugInfo_ExtraConfLoaded_test( app ):
   filepath = PathToTestFile( 'extra_conf', 'project', '.ycm_extra_conf.py' )
   app.post_json( '/load_extra_conf_file', { 'filepath': filepath } )
@@ -212,3 +231,40 @@ def MiscHandlers_ReceiveMessages_NotSupportedByCompleter_test( app ):
     request_data = BuildRequest( filetype = 'dummy_filetype' )
     assert_that( app.post_json( '/receive_messages', request_data ).json,
                  equal_to( False ) )
+
+
+@SharedYcmd
+@patch( 'ycmd.completers.completer.Completer.ShouldUseSignatureHelpNow',
+        return_value = True )
+def MiscHandlers_SignatureHelp_DefaultEmptyResponse_test( should_use, app ):
+  with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
+    request_data = BuildRequest( filetype = 'dummy_filetype' )
+    response = app.post_json( '/signature_help', request_data ).json
+    assert_that( response, has_entries( {
+      'signature_help': has_entries( {
+        'activeSignature': 0,
+        'activeParameter': 0,
+        'signatures': empty()
+      } ),
+      'errors': empty()
+    } ) )
+
+
+@SharedYcmd
+@patch( 'ycmd.completers.completer.Completer.ComputeSignatures',
+        side_effect = RuntimeError )
+def MiscHandlers_SignatureHelp_ComputeSignatureThrows_test( compute_sig, app ):
+  with PatchCompleter( DummyCompleter, filetype = 'dummy_filetype' ):
+    request_data = BuildRequest( filetype = 'dummy_filetype' )
+    response = app.post_json( '/signature_help', request_data ).json
+    print( response )
+    assert_that( response, has_entries( {
+      'signature_help': has_entries( {
+        'activeSignature': 0,
+        'activeParameter': 0,
+        'signatures': empty()
+      } ),
+      'errors': contains_exactly(
+        ErrorMatcher( RuntimeError, '' )
+      )
+    } ) )

@@ -15,13 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
+from ycm.client.messages_request import MessagesPoll
 from ycm.tests.test_utils import ( ExtendedMock,
                                    MockVimBuffers,
                                    MockVimModule,
@@ -33,9 +27,9 @@ MockVimModule()
 
 import os
 import sys
-from hamcrest import ( assert_that, contains, empty, equal_to, has_entries,
-                       is_in, is_not, matches_regexp )
-from mock import call, MagicMock, patch
+from hamcrest import ( assert_that, contains_exactly, empty, equal_to,
+                       has_entries, is_in, is_not, matches_regexp )
+from unittest.mock import call, MagicMock, patch
 
 from ycm import vimsupport
 from ycm.paths import _PathToPythonUsedDuringBuild
@@ -54,9 +48,6 @@ from ycm.tests.mock_utils import ( MockAsyncServerResponseDone,
                                    MockAsyncServerResponseException )
 
 
-from ycm import buffer as ycm_buffer_module
-
-
 @YouCompleteMeInstance()
 def YouCompleteMe_YcmCoreNotImported_test( ycm ):
   assert_that( 'ycm_core', is_not( is_in( sys.modules ) ) )
@@ -73,7 +64,7 @@ def YouCompleteMe_InvalidPythonInterpreterPath_test( post_vim_message ):
       post_vim_message.assert_called_once_with(
         "Unable to start the ycmd server. "
         "Path in 'g:ycm_server_python_interpreter' option does not point "
-        "to a valid Python 2.7 or 3.4+. "
+        "to a valid Python 3.5+. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
 
       post_vim_message.reset_mock()
@@ -100,7 +91,7 @@ def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
 
       assert_that( ycm.IsServerAlive(), equal_to( False ) )
       post_vim_message.assert_called_once_with(
-        "Unable to start the ycmd server. Cannot find Python 2.7 or 3.4+. "
+        "Unable to start the ycmd server. Cannot find Python 3.5+. "
         "Set the 'g:ycm_server_python_interpreter' option to a Python "
         "interpreter path. "
         "Correct the error then restart the server with ':YcmRestartServer'." )
@@ -118,9 +109,7 @@ def YouCompleteMe_NoPythonInterpreterFound_test( post_vim_message, *args ):
       StopServer( ycm )
 
 
-@YouCompleteMeInstance()
-@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
+def RunNotifyUserIfServerCrashed( ycm, post_vim_message, test ):
   StopServer( ycm )
 
   ycm._logger = MagicMock( autospec = True )
@@ -135,65 +124,55 @@ def RunNotifyUserIfServerCrashed( ycm, test, post_vim_message ):
                test[ 'expected_message' ] )
 
 
-def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedCore_test():
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedCore_test(
+    post_vim_message, ycm ):
   message = (
     "The ycmd server SHUT DOWN \\(restart with ':YcmRestartServer'\\). "
     "Unexpected error while loading the YCM core library. Type "
     "':YcmToggleLogs ycmd_\\d+_stderr_.+.log' to check the logs." )
-  RunNotifyUserIfServerCrashed( {
+  RunNotifyUserIfServerCrashed( ycm, post_vim_message, {
     'return_code': 3,
     'expected_message': matches_regexp( message )
   } )
 
 
-def YouCompleteMe_NotifyUserIfServerCrashed_MissingCore_test():
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_NotifyUserIfServerCrashed_MissingCore_test(
+    post_vim_message, ycm ):
   message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
               "YCM core library not detected; you need to compile YCM before "
               "using it. Follow the instructions in the documentation." )
-  RunNotifyUserIfServerCrashed( {
+  RunNotifyUserIfServerCrashed( ycm, post_vim_message, {
     'return_code': 4,
     'expected_message': equal_to( message )
   } )
 
 
-def YouCompleteMe_NotifyUserIfServerCrashed_Python2Core_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "YCM core library compiled for Python 2 but loaded in Python 3. "
-              "Set the 'g:ycm_server_python_interpreter' option to a Python 2 "
-              "interpreter path." )
-  RunNotifyUserIfServerCrashed( {
-    'return_code': 5,
-    'expected_message': equal_to( message )
-  } )
-
-
-def YouCompleteMe_NotifyUserIfServerCrashed_Python3Core_test():
-  message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
-              "YCM core library compiled for Python 3 but loaded in Python 2. "
-              "Set the 'g:ycm_server_python_interpreter' option to a Python 3 "
-              "interpreter path." )
-  RunNotifyUserIfServerCrashed( {
-    'return_code': 6,
-    'expected_message': equal_to( message )
-  } )
-
-
-def YouCompleteMe_NotifyUserIfServerCrashed_OutdatedCore_test():
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_NotifyUserIfServerCrashed_OutdatedCore_test(
+  post_vim_message, ycm ):
   message = ( "The ycmd server SHUT DOWN (restart with ':YcmRestartServer'). "
               "YCM core library too old; PLEASE RECOMPILE by running the "
               "install.py script. See the documentation for more details." )
-  RunNotifyUserIfServerCrashed( {
+  RunNotifyUserIfServerCrashed( ycm, post_vim_message, {
     'return_code': 7,
     'expected_message': equal_to( message )
   } )
 
 
-def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test():
+@YouCompleteMeInstance()
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_NotifyUserIfServerCrashed_UnexpectedExitCode_test(
+    post_vim_message, ycm ):
   message = (
     "The ycmd server SHUT DOWN \\(restart with ':YcmRestartServer'\\). "
     "Unexpected exit code 1. Type "
     "':YcmToggleLogs ycmd_\\d+_stderr_.+.log' to check the logs." )
-  RunNotifyUserIfServerCrashed( {
+  RunNotifyUserIfServerCrashed( ycm, post_vim_message, {
     'return_code': 1,
     'expected_message': matches_regexp( message )
   } )
@@ -214,15 +193,11 @@ def YouCompleteMe_DebugInfo_ServerRunning_test( ycm ):
         'Client logfile: .+\n'
         'Server Python interpreter: .+\n'
         'Server Python version: .+\n'
-        'Server has Clang support compiled in: '
-        '(?P<CLANG>True)?(?(CLANG)|False)\n'
+        'Server has Clang support compiled in: (False|True)\n'
         'Clang version: .+\n'
         'Extra configuration file found and loaded\n'
         'Extra configuration path: .*testdata[/\\\\]\\.ycm_extra_conf\\.py\n'
-        '(?(CLANG)C-family completer debug information:\n'
-        '  Compilation database path: None\n'
-        '  Flags: \\[u?\'_TEMP_FILE_\'.*\\]\n'
-        '  Translation unit: .+\n)'
+        '[\\w\\W]*'
         'Server running at: .+\n'
         'Server process ID: \\d+\n'
         'Server logfiles:\n'
@@ -273,21 +248,24 @@ def YouCompleteMe_OnVimLeave_KeepClientLogfile_test( ycm ):
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.CloseBuffersForFilename', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenFilename', new_callable = ExtendedMock )
-def YouCompleteMe_ToggleLogs_WithParameters_test( ycm,
-                                                  open_filename,
-                                                  close_buffers_for_filename ):
+def YouCompleteMe_ToggleLogs_WithParameters_test( open_filename,
+                                                  close_buffers_for_filename,
+                                                  ycm ):
   logfile_buffer = VimBuffer( ycm._client_logfile )
   with MockVimBuffers( [ logfile_buffer ], [ logfile_buffer ] ):
-    ycm.ToggleLogs( os.path.basename( ycm._client_logfile ),
+    ycm.ToggleLogs( 90,
+                    'botright vertical',
+                    os.path.basename( ycm._client_logfile ),
                     'nonexisting_logfile',
                     os.path.basename( ycm._server_stdout ) )
 
     open_filename.assert_has_exact_calls( [
-      call( ycm._server_stdout, { 'size': 12,
+      call( ycm._server_stdout, { 'size': 90,
                                   'watch': True,
                                   'fix': True,
                                   'focus': False,
-                                  'position': 'end' } )
+                                  'position': 'end',
+                                  'mods': 'botright vertical' } )
     ] )
     close_buffers_for_filename.assert_has_exact_calls( [
       call( ycm._client_logfile )
@@ -299,18 +277,19 @@ def YouCompleteMe_ToggleLogs_WithParameters_test( ycm,
 @patch( 'ycm.vimsupport.SelectFromList', return_value = 1 )
 @patch( 'ycm.vimsupport.OpenFilename', new_callable = ExtendedMock )
 def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileNotAlreadyOpen_test(
-  ycm, open_filename, *args ):
+  open_filename, select_from_list, ycm ):
 
   current_buffer = VimBuffer( 'current_buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   open_filename.assert_has_exact_calls( [
     call( ycm._server_stderr, { 'size': 12,
                                 'watch': True,
                                 'fix': True,
                                 'focus': False,
-                                'position': 'end' } )
+                                'position': 'end',
+                                'mods': '' } )
   ] )
 
 
@@ -319,11 +298,11 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileNotAlreadyOpen_test(
 @patch( 'ycm.vimsupport.SelectFromList', return_value = 2 )
 @patch( 'ycm.vimsupport.CloseBuffersForFilename', new_callable = ExtendedMock )
 def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileAlreadyOpen_test(
-  ycm, close_buffers_for_filename, *args ):
+  close_buffers_for_filename, select_from_list, ycm ):
 
   logfile_buffer = VimBuffer( ycm._server_stdout )
   with MockVimBuffers( [ logfile_buffer ], [ logfile_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   close_buffers_for_filename.assert_has_exact_calls( [
     call( ycm._server_stdout )
@@ -335,11 +314,11 @@ def YouCompleteMe_ToggleLogs_WithoutParameters_SelectLogfileAlreadyOpen_test(
         side_effect = RuntimeError( 'Error message' ) )
 @patch( 'ycm.vimsupport.PostVimMessage' )
 def YouCompleteMe_ToggleLogs_WithoutParameters_NoSelection_test(
-  ycm, post_vim_message, *args ):
+  post_vim_message, select_from_list, ycm ):
 
   current_buffer = VimBuffer( 'current_buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
-    ycm.ToggleLogs()
+    ycm.ToggleLogs( 0, '' )
 
   assert_that(
     # Argument passed to PostVimMessage.
@@ -356,7 +335,7 @@ def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
                 return_value = [ 'SomeCommand', 'AnotherCommand' ] ):
       assert_that(
         ycm.GetDefinedSubcommands(),
-        contains(
+        contains_exactly(
           'SomeCommand',
           'AnotherCommand'
         )
@@ -366,9 +345,9 @@ def YouCompleteMe_GetDefinedSubcommands_ListFromServer_test( ycm ):
 @YouCompleteMeInstance()
 @patch( 'ycm.client.base_request._logger', autospec = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( ycm,
-                                                              post_vim_message,
-                                                              logger ):
+def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( post_vim_message,
+                                                              logger,
+                                                              ycm ):
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
     with patch( 'ycm.client.base_request._JsonFromFuture',
@@ -385,7 +364,7 @@ def YouCompleteMe_GetDefinedSubcommands_ErrorFromServer_test( ycm,
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
-  ycm, post_vim_message ):
+  post_vim_message, ycm ):
 
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -401,7 +380,7 @@ def YouCompleteMe_ShowDetailedDiagnostic_MessageFromServer_test(
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDetailedDiagnostic_Exception_test(
-  ycm, post_vim_message ):
+  post_vim_message, ycm ):
 
   current_buffer = VimBuffer( 'buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -416,8 +395,8 @@ def YouCompleteMe_ShowDetailedDiagnostic_Exception_test(
 
 @YouCompleteMeInstance()
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( ycm,
-                                                             post_vim_message ):
+def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( post_vim_message,
+                                                             ycm ):
 
   current_buffer = VimBuffer( 'buffer', filetype = 'not_supported' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -434,7 +413,10 @@ def YouCompleteMe_ShowDiagnostics_FiletypeNotSupported_test( ycm,
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
-  ycm, set_location_list_for_window, post_vim_message, *args ):
+  set_location_list_for_window,
+  post_vim_message,
+  filetype_completer_exists,
+  ycm ):
 
   current_buffer = VimBuffer( 'buffer', filetype = 'cpp' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ] ):
@@ -459,7 +441,10 @@ def YouCompleteMe_ShowDiagnostics_NoDiagnosticsDetected_test(
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
-  ycm, set_location_list_for_window, post_vim_message, *args ):
+  set_location_list_for_window,
+  post_vim_message,
+  filetype_completer_exists,
+  ycm ):
 
   diagnostic = {
     'kind': 'ERROR',
@@ -501,11 +486,11 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_DoNotOpenLocationList_test(
 @patch( 'ycm.vimsupport.SetLocationListForWindow', new_callable = ExtendedMock )
 @patch( 'ycm.vimsupport.OpenLocationList', new_callable = ExtendedMock )
 def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
-  ycm,
   open_location_list,
   set_location_list_for_window,
   post_vim_message,
-  *args ):
+  filetype_completer_exists,
+  ycm ):
 
   diagnostic = {
     'kind': 'ERROR',
@@ -541,14 +526,7 @@ def YouCompleteMe_ShowDiagnostics_DiagnosticsFound_OpenLocationList_test(
   open_location_list.assert_called_once_with( focus = True )
 
 
-@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
-                          'g:ycm_enable_diagnostic_signs': 1,
-                          'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
-        return_value = True )
-@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def YouCompleteMe_UpdateDiagnosticInterface(
-  ycm, post_vim_message, *args ):
+def YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message, *args ):
 
   contents = """int main() {
   int x, y;
@@ -619,7 +597,6 @@ def YouCompleteMe_UpdateDiagnosticInterface(
                               contents = contents.splitlines(),
                               number = 5 )
 
-  test_utils.VIM_MATCHES_FOR_WINDOW.clear()
   test_utils.VIM_SIGNS = []
   vimsupport.SIGN_ID_FOR_BUFFER.clear()
 
@@ -638,7 +615,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     assert_that(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
-        1: contains(
+        1: contains_exactly(
           VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
           VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
           VimMatch( 'YcmErrorSection', '\\%3l\\%8c' )
@@ -649,7 +626,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     # Only the error sign is placed.
     assert_that(
       test_utils.VIM_SIGNS,
-      contains(
+      contains_exactly(
         VimSign( SIGN_BUFFER_ID_INITIAL_VALUE, 3, 'YcmError', 5 )
       )
     )
@@ -682,7 +659,7 @@ def YouCompleteMe_UpdateDiagnosticInterface(
     assert_that(
       test_utils.VIM_MATCHES_FOR_WINDOW,
       has_entries( {
-        1: contains(
+        1: contains_exactly(
           VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
           VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' )
         )
@@ -691,19 +668,37 @@ def YouCompleteMe_UpdateDiagnosticInterface(
 
     assert_that(
       test_utils.VIM_SIGNS,
-      contains(
+      contains_exactly(
         VimSign( SIGN_BUFFER_ID_INITIAL_VALUE + 1, 3, 'YcmWarning', 5 )
       )
     )
 
 
-def YouCompleteMe_UpdateDiagnosticInterface_OldVim_test():
-  YouCompleteMe_UpdateDiagnosticInterface()
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_enable_diagnostic_signs': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+@patch( 'ycm.client.event_notification.EventNotification.Done',
+        return_value = True )
+def YouCompleteMe_UpdateDiagnosticInterface_OldVim_test(
+    request_done, post_vim_message, filetype_completer_exists, ycm ):
+  YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
 
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_enable_diagnostic_signs': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
 @patch( 'ycm.tests.test_utils.VIM_VERSION', Version( 8, 1, 614 ) )
-def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test():
-  YouCompleteMe_UpdateDiagnosticInterface()
+@patch( 'ycm.client.event_notification.EventNotification.Done',
+        return_value = True )
+def YouCompleteMe_UpdateDiagnosticInterface_NewVim_test(
+    request_done, post_vim_message, filetype_completer_exists, ycm ):
+  YouCompleteMe_UpdateDiagnosticInterface( ycm, post_vim_message )
 
 
 @YouCompleteMeInstance( { 'g:ycm_enable_diagnostic_highlighting': 1 } )
@@ -712,7 +707,6 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
                               filetype = 'c',
                               number = 5 )
 
-  test_utils.VIM_MATCHES_FOR_WINDOW.clear()
   test_utils.VIM_MATCHES_FOR_WINDOW[ 1 ] = [
     VimMatch( 'YcmWarningSection', '\\%3l\\%5c\\_.\\{-}\\%3l\\%7c' ),
     VimMatch( 'YcmWarningSection', '\\%3l\\%3c\\_.\\{-}\\%3l\\%9c' ),
@@ -728,16 +722,74 @@ def YouCompleteMe_UpdateMatches_ClearDiagnosticMatchesInNewBuffer_test( ycm ):
 
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_show_diagnostics_ui': 0,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch.object( ycm_buffer_module,
-               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
-               [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
-                                                         post_vim_message,
-                                                         *args ):
+def YouCompleteMe_AsyncDiagnosticUpdate_UserDisabled_test(
+    post_vim_message,
+    filetype_completer_exists,
+    ycm ):
+  diagnostics = [
+    {
+      'kind': 'ERROR',
+      'text': 'error text in current buffer',
+      'location': {
+        'filepath': '/current',
+        'line_num': 1,
+        'column_num': 1
+      },
+      'location_extent': {
+        'start': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        },
+        'end': {
+          'filepath': '/current',
+          'line_num': 1,
+          'column_num': 1,
+        }
+      },
+      'ranges': []
+    },
+  ]
+  current_buffer = VimBuffer( '/current',
+                              filetype = 'ycmtest',
+                              contents = [ 'current' ] * 10,
+                              number = 1 )
+  buffers = [ current_buffer ]
+  windows = [ current_buffer ]
+
+  # Register each buffer internally with YCM
+  for current in buffers:
+    with MockVimBuffers( buffers, [ current ] ):
+      ycm.OnFileReadyToParse()
+  with patch( 'ycm.vimsupport.SetLocationListForWindow',
+              new_callable = ExtendedMock ) as set_location_list_for_window:
+    with MockVimBuffers( buffers, windows ):
+      ycm.UpdateWithNewDiagnosticsForFile( '/current', diagnostics )
+
+  post_vim_message.assert_has_exact_calls( [] )
+  set_location_list_for_window.assert_has_exact_calls( [] )
+
+  assert_that(
+    test_utils.VIM_MATCHES_FOR_WINDOW,
+    empty()
+  )
+
+
+@YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
+                          'g:ycm_always_populate_location_list': 1,
+                          'g:ycm_enable_diagnostic_highlighting': 1 } )
+@patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
+        return_value = True )
+@patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
+def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test(
+    post_vim_message,
+    filetype_completer_exists,
+    ycm ):
 
   # This test simulates asynchronous diagnostic updates associated with a single
   # file (e.g. Translation Unit), but where the actual errors refer to other
@@ -883,7 +935,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
   assert_that(
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
-      1: contains(
+      1: contains_exactly(
         VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       )
     } )
@@ -893,15 +945,13 @@ def YouCompleteMe_AsyncDiagnosticUpdate_SingleFile_test( ycm,
 @YouCompleteMeInstance( { 'g:ycm_echo_current_diagnostic': 1,
                           'g:ycm_always_populate_location_list': 1,
                           'g:ycm_enable_diagnostic_highlighting': 1 } )
-@patch.object( ycm_buffer_module,
-               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
-               [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.vimsupport.PostVimMessage', new_callable = ExtendedMock )
-def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
-                                                      post_vim_message,
-                                                      *args ):
+def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test(
+    post_vim_message,
+    filetype_completer_exists,
+    ycm ):
 
   # This test simulates asynchronous diagnostic updates which are delivered per
   # file, including files which are open and files which are not.
@@ -1072,7 +1122,7 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
   assert_that(
     test_utils.VIM_MATCHES_FOR_WINDOW,
     has_entries( {
-      1: contains(
+      1: contains_exactly(
         VimMatch( 'YcmErrorSection', '\\%1l\\%1c\\_.\\{-}\\%1l\\%1c' )
       )
     } )
@@ -1080,29 +1130,28 @@ def YouCompleteMe_AsyncDiagnosticUpdate_PerFile_test( ycm,
 
 
 @YouCompleteMeInstance()
-def YouCompleteMe_OnPeriodicTick_ServerNotRunning_test( ycm, *args ):
+def YouCompleteMe_OnPeriodicTick_ServerNotRunning_test( ycm ):
   with patch.object( ycm, 'IsServerAlive', return_value = False ):
     assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
 
 
 @YouCompleteMeInstance()
-def YouCompleteMe_OnPeriodicTick_ServerNotReady_test( ycm, *args ):
+def YouCompleteMe_OnPeriodicTick_ServerNotReady_test( ycm ):
   with patch.object( ycm, 'IsServerAlive', return_value = True ):
     with patch.object( ycm, 'IsServerReady', return_value = False ):
       assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
-               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
-               [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
-def YouCompleteMe_OnPeriodicTick_DontRetry_test( ycm,
-                                                 post_data_to_handler_async,
-                                                 *args ):
+def YouCompleteMe_OnPeriodicTick_DontRetry_test(
+    post_data_to_handler_async,
+    validate_response_object,
+    filetype_completer_exists,
+    ycm ):
 
   current_buffer = VimBuffer( '/current',
                               filetype = 'ycmtest',
@@ -1113,45 +1162,48 @@ def YouCompleteMe_OnPeriodicTick_DontRetry_test( ycm,
     assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
     post_data_to_handler_async.assert_called()
 
-  assert ycm._message_poll_request is not None
+  assert ycm._message_poll_requests[ 'ycmtest' ] is not None
   post_data_to_handler_async.reset_mock()
 
   # OK that sent the request, now poll to check if it is complete (say it is
   # not)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseInProgress() ) as mock_future:
-    poll_again = ycm.OnPeriodicTick()
-    mock_future.done.assert_called()
-    mock_future.result.assert_not_called()
-    assert_that( poll_again, equal_to( True ) )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseInProgress()
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ 'ycmtest' ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ 'ycmtest' ]._response_future = mock_response
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      poll_again = ycm.OnPeriodicTick()
+      mock_future.done.assert_called()
+      mock_future.result.assert_not_called()
+      assert_that( poll_again, equal_to( True ) )
 
   # Poll again, but return a response (telling us to stop polling)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseDone( False ) ) \
-      as mock_future:
-    poll_again = ycm.OnPeriodicTick()
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_not_called()
-    # We reset and don't poll anymore
-    assert_that( ycm._message_poll_request is None )
-    assert_that( poll_again, equal_to( False ) )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseDone( False )
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ 'ycmtest' ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ 'ycmtest' ]._response_future = mock_response
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      poll_again = ycm.OnPeriodicTick()
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_not_called()
+      # We reset and don't poll anymore
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is None )
+      assert_that( poll_again, equal_to( False ) )
 
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
-               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
-               [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
-def YouCompleteMe_OnPeriodicTick_Exception_test( ycm,
-                                                 post_data_to_handler_async,
-                                                 *args ):
+def YouCompleteMe_OnPeriodicTick_Exception_test( post_data_to_handler_async,
+                                                 validate_response_object,
+                                                 filetype_completer_exists,
+                                                 ycm ):
 
   current_buffer = VimBuffer( '/current',
                               filetype = 'ycmtest',
@@ -1165,31 +1217,31 @@ def YouCompleteMe_OnPeriodicTick_Exception_test( ycm,
   post_data_to_handler_async.reset_mock()
 
   # Poll again, but return an exception response
-  mock_response = MockAsyncServerResponseException( RuntimeError( 'test' ) )
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = mock_response ) as mock_future:
-    assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_not_called()
-    # We reset and don't poll anymore
-    assert_that( ycm._message_poll_request is None )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseException( RuntimeError( 'test' ) )
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ 'ycmtest' ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ 'ycmtest' ]._response_future = mock_response
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      assert_that( ycm.OnPeriodicTick(), equal_to( False ) )
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_not_called()
+      # We reset and don't poll anymore
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is None )
 
 
 @YouCompleteMeInstance()
-@patch.object( ycm_buffer_module,
-               'DIAGNOSTIC_UI_ASYNC_FILETYPES',
-               [ 'ycmtest' ] )
 @patch( 'ycm.youcompleteme.YouCompleteMe.FiletypeCompleterExistsForFiletype',
         return_value = True )
 @patch( 'ycm.client.base_request._ValidateResponseObject', return_value = True )
 @patch( 'ycm.client.base_request.BaseRequest.PostDataToHandlerAsync' )
 @patch( 'ycm.client.messages_request._HandlePollResponse' )
-def YouCompleteMe_OnPeriodicTick_ValidResponse_test( ycm,
-                                                     handle_poll_response,
+def YouCompleteMe_OnPeriodicTick_ValidResponse_test( handle_poll_response,
                                                      post_data_to_handler_async,
-                                                     *args ):
+                                                     validate_response_object,
+                                                     filetype_completer_exists,
+                                                     ycm ):
 
   current_buffer = VimBuffer( '/current',
                               filetype = 'ycmtest',
@@ -1204,21 +1256,24 @@ def YouCompleteMe_OnPeriodicTick_ValidResponse_test( ycm,
 
   # Poll again, and return a _proper_ response (finally!).
   # Note, _HandlePollResponse is tested independently (for simplicity)
-  with patch.object( ycm._message_poll_request,
-                     '_response_future',
-                     new = MockAsyncServerResponseDone( [] ) ) as mock_future:
-    assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
-    handle_poll_response.assert_called()
-    mock_future.done.assert_called()
-    mock_future.result.assert_called()
-    post_data_to_handler_async.assert_called() # Poll again!
-    assert_that( ycm._message_poll_request is not None )
+  with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ) as v:
+    mock_response = MockAsyncServerResponseDone( [] )
+    with patch.dict( ycm._message_poll_requests, {} ):
+      ycm._message_poll_requests[ 'ycmtest' ] = MessagesPoll( v.current.buffer )
+      ycm._message_poll_requests[ 'ycmtest' ]._response_future = mock_response
+      mock_future = ycm._message_poll_requests[ 'ycmtest' ]._response_future
+      assert_that( ycm.OnPeriodicTick(), equal_to( True ) )
+      handle_poll_response.assert_called()
+      mock_future.done.assert_called()
+      mock_future.result.assert_called()
+      post_data_to_handler_async.assert_called() # Poll again!
+      assert_that( ycm._message_poll_requests[ 'ycmtest' ] is not None )
 
 
 @YouCompleteMeInstance()
 @patch( 'ycm.client.completion_request.CompletionRequest.OnCompleteDone' )
-def YouCompleteMe_OnCompleteDone_CompletionRequest_test( ycm,
-                                                         on_complete_done ):
+def YouCompleteMe_OnCompleteDone_CompletionRequest_test( on_complete_done,
+                                                         ycm ):
   current_buffer = VimBuffer( 'current_buffer' )
   with MockVimBuffers( [ current_buffer ], [ current_buffer ], ( 1, 1 ) ):
     ycm.SendCompletionRequest()
@@ -1228,8 +1283,8 @@ def YouCompleteMe_OnCompleteDone_CompletionRequest_test( ycm,
 
 @YouCompleteMeInstance()
 @patch( 'ycm.client.completion_request.CompletionRequest.OnCompleteDone' )
-def YouCompleteMe_OnCompleteDone_NoCompletionRequest_test( ycm,
-                                                           on_complete_done ):
+def YouCompleteMe_OnCompleteDone_NoCompletionRequest_test( on_complete_done,
+                                                           ycm ):
   ycm.OnCompleteDone()
   on_complete_done.assert_not_called()
 

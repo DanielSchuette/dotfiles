@@ -38,10 +38,9 @@ public:
 BENCHMARK_DEFINE_F( IdentifierCompleterFixture, CandidatesWithCommonPrefix )(
     benchmark::State& state ) {
 
-  std::vector< std::string > candidates;
-  candidates = GenerateCandidatesWithCommonPrefix( "a_A_a_",
-                                                   state.range( 0 ) );
-  IdentifierCompleter completer( candidates );
+  std::vector< std::string > candidates =
+    GenerateCandidatesWithCommonPrefix( "a_A_a_", state.range( 0 ) );
+  IdentifierCompleter completer( std::move( candidates ) );
 
   while ( state.KeepRunning() ) {
     completer.CandidatesForQuery( "aA", state.range( 1 ) );

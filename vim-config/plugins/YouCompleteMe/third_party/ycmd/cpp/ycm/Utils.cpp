@@ -21,24 +21,23 @@
 #include <boost/filesystem/fstream.hpp>
 #include <cmath>
 #include <limits>
+#include <string>
+#include <vector>
 
 namespace fs = boost::filesystem;
 
 namespace YouCompleteMe {
 
-std::string ReadUtf8File( const fs::path &filepath ) {
-  // fs::is_empty() can throw basic_filesystem_error< Path >
-  // in case filepath doesn't exist, or
-  // in case filepath's file_status is "other".
-  // "other" in this case means everything that is not a regular file,
-  // directory or a symlink.
+std::vector< std::string > ReadUtf8File( const fs::path &filepath ) {
+  std::vector< std::string > contents;
   if ( !fs::is_empty( filepath ) && fs::is_regular_file( filepath ) ) {
-    fs::ifstream file( filepath, std::ios::in | std::ios::binary );
-    std::vector< char > contents( ( std::istreambuf_iterator< char >( file ) ),
-                                  std::istreambuf_iterator< char >() );
-    return std::string( contents.begin(), contents.end() );
+    std::string line;
+    for( fs::ifstream file( filepath, std::ios::in | std::ios::binary );
+         std::getline( file, line ); ) {
+      contents.push_back( std::move( line ) );
+    }
   }
-  return std::string();
+  return contents;
 }
 
 

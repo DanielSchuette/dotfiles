@@ -1,5 +1,4 @@
-# Copyright (C) 2011-2012 Google Inc.
-#               2016      ycmd contributors
+# Copyright (C) 2011-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -18,27 +17,17 @@
 
 # NOTE: This module is used as a Singleton
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import os
 import random
 import string
 import sys
-import logging
 from threading import Lock
 from ycmd import user_options_store
 from ycmd.responses import UnknownExtraConf, YCM_EXTRA_CONF_FILENAME
-from ycmd.utils import ( ExpandVariablesInPath, LoadPythonSource,
+from ycmd.utils import ( ExpandVariablesInPath, LoadPythonSource, LOGGER,
                          PathsToAllParentFolders )
 from fnmatch import fnmatch
 
-
-_logger = logging.getLogger( __name__ )
 
 # Singleton variables
 _module_for_module_file = {}
@@ -96,31 +85,30 @@ def _CallGlobalExtraConfMethod( function_name ):
   global_ycm_extra_conf = _GlobalYcmExtraConfFileLocation()
   if not ( global_ycm_extra_conf and
            os.path.exists( global_ycm_extra_conf ) ):
-    _logger.debug( 'No global extra conf, '
-                   'not calling method {0}'.format( function_name ) )
+    LOGGER.debug( 'No global extra conf, not calling method %s', function_name )
     return
 
   try:
     module = Load( global_ycm_extra_conf, force = True )
   except Exception:
-    _logger.exception( 'Error occurred while loading '
-                       'global extra conf {0}'.format( global_ycm_extra_conf ) )
+    LOGGER.exception( 'Error occurred while loading global extra conf %s',
+                      global_ycm_extra_conf )
     return
 
   if not module or not hasattr( module, function_name ):
-    _logger.debug( 'Global extra conf not loaded or no function ' +
-                   function_name )
+    LOGGER.debug( 'Global extra conf not loaded or no function %s',
+                  function_name )
     return
 
   try:
-    _logger.info(
-      'Calling global extra conf method {0} '
-      'on conf file {1}'.format( function_name, global_ycm_extra_conf ) )
+    LOGGER.info( 'Calling global extra conf method %s on conf file %s',
+                 function_name,
+                 global_ycm_extra_conf )
     getattr( module, function_name )()
   except Exception:
-    _logger.exception(
-      'Error occurred while calling global extra conf method {0} '
-      'on conf file {1}'.format( function_name, global_ycm_extra_conf ) )
+    LOGGER.exception(
+      'Error occurred while calling global extra conf method %s '
+      'on conf file %s', function_name, global_ycm_extra_conf )
 
 
 def Disable( module_file ):
@@ -237,3 +225,7 @@ def _RandomName():
 def _GlobalYcmExtraConfFileLocation():
   return ExpandVariablesInPath(
     user_options_store.Value( 'global_ycm_extra_conf' ) )
+
+
+def IsGlobalExtraConfModule( module ):
+  return module.is_global_ycm_extra_conf

@@ -33,13 +33,15 @@ using Bitset = std::bitset< NUM_BYTES >;
 
 // This class represents a sequence of UTF-8 characters. It takes a UTF-8
 // encoded string and splits that string into characters following the rules in
-// https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundary_Rules
+// https://www.unicode.org/reports/tr29/tr29-37.html#Grapheme_Cluster_Boundary_Rules
 class Word {
 public:
-  YCM_EXPORT explicit Word( const std::string &text );
+  YCM_EXPORT explicit Word( std::string&& text );
   // Make class noncopyable
   Word( const Word& ) = delete;
   Word& operator=( const Word& ) = delete;
+  Word( Word&& ) = default;
+  Word& operator=( Word&& ) = default;
   ~Word() = default;
 
   inline const CharacterSequence &Characters() const {

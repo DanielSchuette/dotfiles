@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018 ycmd contributors
+# Copyright (C) 2011-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,18 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import abc
 import threading
 from ycmd.completers import completer_utils
-from ycmd.responses import NoDiagnosticSupport
-from future.utils import with_metaclass
+from ycmd.responses import NoDiagnosticSupport, SignatureHelpAvailalability
 
 NO_USER_COMMANDS = 'This completer does not define any commands.'
 
@@ -34,7 +26,7 @@ NO_USER_COMMANDS = 'This completer does not define any commands.'
 MESSAGE_POLL_TIMEOUT = 10
 
 
-class Completer( with_metaclass( abc.ABCMeta, object ) ):
+class Completer( metaclass = abc.ABCMeta ):
   """A base class for all Completers in YCM.
 
   Here's several important things you need to know if you're writing a custom
@@ -121,7 +113,11 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
   ycmd.responses.BuildCompletionData to build the detailed response. See
   clang_completer.py to see how its used in practice.
 
-  Again, you probably want to override ComputeCandidatesInner().
+  Again, you probably want to override ComputeCandidatesInner(). If computing
+  the fields of the candidates is costly, you should consider building only the
+  "insertion_text" field in ComputeCandidatesInner() then fill the remaining
+  fields in DetailCandidates() which is called after the filtering is done. See
+  python_completer.py for an example.
 
   You also need to implement the SupportedFiletypes() function which should
   return a list of strings, where the strings are Vim filetypes your completer
@@ -164,18 +160,36 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
 
   If your server is based on the Language Server Protocol (LSP), take a look at
   language_server/language_server_completer, which provides most of the work
-  necessary to get a LSP-based completion engine up and running."""
+  necessary to get a LSP-based completion engine up and running.
+
+  If your completer supports signature help, then you need to implemment:
+    - SignatureHelpAvailable
+    - something which calls self.SetSignatureHelpTriggers()
+    - ComputeSignaturesInner
+  See the language_server_completer or Python completers for examples.
+
+  If your server returns lists of "code actions" that need to be resolved,
+  instead of returning FixIts right away, you should override ResolveFixit.
+  """
 
   def __init__( self, user_options ):
     self.user_options = user_options
     self.min_num_chars = user_options[ 'min_num_of_chars_for_completion' ]
     self.max_diagnostics_to_display = user_options[
         'max_diagnostics_to_display' ]
-    self.prepared_triggers = (
+    self.completion_triggers = (
         completer_utils.PreparedTriggers(
             user_trigger_map = user_options[ 'semantic_triggers' ],
             filetype_set = set( self.SupportedFiletypes() ) )
         if user_options[ 'auto_trigger' ] else None )
+
+    self._signature_triggers = (
+      completer_utils.PreparedTriggers(
+        user_trigger_map = {}, # user triggers not supported for signature help
+        filetype_set = set( self.SupportedFiletypes() ),
+        default_triggers = {} )
+      if not user_options[ 'disable_signature_help' ] else None )
+
     self._completions_cache = CompletionsCache()
     self._max_candidates = user_options[ 'max_num_candidates' ]
 
@@ -202,15 +216,50 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
 
 
   def ShouldUseNowInner( self, request_data ):
-    if not self.prepared_triggers:
+    if not self.completion_triggers:
       return False
+
     current_line = request_data[ 'line_value' ]
     start_codepoint = request_data[ 'start_codepoint' ] - 1
     column_codepoint = request_data[ 'column_codepoint' ] - 1
     filetype = self._CurrentFiletype( request_data[ 'filetypes' ] )
 
-    return self.prepared_triggers.MatchesForFiletype(
-        current_line, start_codepoint, column_codepoint, filetype )
+    return self.completion_triggers.MatchesForFiletype( current_line,
+                                                        start_codepoint,
+                                                        column_codepoint,
+                                                        filetype )
+
+
+  def ShouldUseSignatureHelpNow( self, request_data ):
+    if self.user_options[ 'disable_signature_help' ]:
+      return False
+
+    state = request_data.get( 'signature_help_state', 'INACTIVE' )
+
+    current_line = request_data[ 'line_value' ]
+    # Note: We use the cursor column for all triggering of signature help, not
+    # the calculated "start" codepoint. This is because start_codepoint is based
+    # on the completion triggers, not the signature_triggers.
+    column_codepoint = request_data[ 'column_codepoint' ] - 1
+    filetype = self._CurrentFiletype( request_data[ 'filetypes' ] )
+
+    if state == 'ACTIVE':
+      # Signature help is already active (the menu is displayed), always
+      # re-trigger until we return no signatures (and the client thus closes
+      # the menu and returns state 'INACTIVE').
+      return True
+
+    return self._signature_triggers.MatchesForFiletype( current_line,
+                                                        column_codepoint,
+                                                        column_codepoint,
+                                                        filetype )
+
+
+  def SetSignatureHelpTriggers( self, trigger_characters ):
+    if self._signature_triggers is None:
+      return
+
+    self._signature_triggers.SetServerSemanticTriggers( trigger_characters )
 
 
   def QueryLengthAboveMinThreshold( self, request_data ):
@@ -229,7 +278,9 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
       return []
 
     candidates = self._GetCandidatesFromSubclass( request_data )
-    return self.FilterAndSortCandidates( candidates, request_data[ 'query' ] )
+    candidates = self.FilterAndSortCandidates( candidates,
+                                               request_data[ 'query' ] )
+    return self.DetailCandidates( request_data, candidates )
 
 
   def _GetCandidatesFromSubclass( self, request_data ):
@@ -244,8 +295,23 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
     return raw_completions
 
 
+  def DetailCandidates( self, request_data, candidates ):
+    return candidates
+
+
   def ComputeCandidatesInner( self, request_data ):
-    pass # pragma: no cover
+    return [] # pragma: no cover
+
+
+  def ComputeSignatures( self, request_data ):
+    if not self.ShouldUseSignatureHelpNow( request_data ):
+      return {}
+
+    return self.ComputeSignaturesInner( request_data )
+
+
+  def ComputeSignaturesInner( self, request_data ):
+    return {}
 
 
   def DefinedSubcommands( self ):
@@ -274,6 +340,10 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
              empty.
     """
     return {}
+
+
+  def ResolveFixit( self, request_data ):
+    return { 'fixits': [ request_data[ 'fixit' ] ] }
 
 
   def UserCommandsHelpMessage( self ):
@@ -311,6 +381,10 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
 
 
   def OnFileReadyToParse( self, request_data ):
+    pass # pragma: no cover
+
+
+  def OnFileSave( self, request_data ):
     pass # pragma: no cover
 
 
@@ -379,6 +453,10 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
     return self.ServerIsHealthy()
 
 
+  def SignatureHelpAvailable( self ):
+    return SignatureHelpAvailalability.NOT_AVAILABLE
+
+
   def ServerIsHealthy( self ):
     """Called by the /healthy handler to check if the underlying completion
     server is started and ready to receive requests. Returns bool."""
@@ -397,7 +475,7 @@ class Completer( with_metaclass( abc.ABCMeta, object ) ):
     return False
 
 
-class CompletionsCache( object ):
+class CompletionsCache:
   """Cache of computed completions for a particular request."""
 
   def __init__( self ):
@@ -407,18 +485,30 @@ class CompletionsCache( object ):
 
   def Invalidate( self ):
     with self._access_lock:
-      self._request_data = None
-      self._completions = None
+      self.InvalidateNoLock()
+
+
+  def InvalidateNoLock( self ):
+    self._request_data = None
+    self._completions = None
 
 
   def Update( self, request_data, completions ):
     with self._access_lock:
-      self._request_data = request_data
-      self._completions = completions
+      self.UpdateNoLock( request_data, completions )
+
+
+  def UpdateNoLock( self, request_data, completions ):
+    self._request_data = request_data
+    self._completions = completions
 
 
   def GetCompletionsIfCacheValid( self, request_data ):
     with self._access_lock:
-      if self._request_data and self._request_data == request_data:
-        return self._completions
-      return None
+      return self.GetCompletionsIfCacheValidNoLock( request_data )
+
+
+  def GetCompletionsIfCacheValidNoLock( self, request_data ):
+    if self._request_data and self._request_data == request_data:
+      return self._completions
+    return None

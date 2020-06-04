@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2018 ycmd contributors
+// Copyright (C) 2011-2020 ycmd contributors
 //
 // This file is part of ycmd.
 //
@@ -29,14 +29,14 @@ namespace YouCompleteMe {
 /// |max_candidates|. If |max_candidates| is omitted or 0, all candidates are
 /// sorted.
 YCM_EXPORT pybind11::list FilterAndSortCandidates(
-  const pybind11::list &candidates,
+  pybind11::list candidates,
   const std::string &candidate_property,
-  const std::string &query,
+  std::string query,
   const size_t max_candidates = 0 );
 
 /// Given a Python object that's supposed to be "string-like", returns a UTF-8
 /// encoded std::string. Raises an exception if the object can't be converted to
-/// a string. Supports newstr and newbytes from python-future on Python 2.
+/// a string.
 std::string GetUtf8String( const pybind11::object &value );
 
 } // namespace YouCompleteMe

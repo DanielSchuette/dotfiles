@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2018 ycmd contributors
+# Copyright (C) 2017-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,25 +15,46 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
+import collections
 import os
 import json
 import hashlib
+from urllib.parse import urljoin, urlparse, unquote
+from urllib.request import pathname2url, url2pathname
 
 from ycmd.utils import ( ByteOffsetToCodepointOffset,
-                         pathname2url,
                          ToBytes,
-                         ToUnicode,
-                         unquote,
-                         url2pathname,
-                         urlparse,
-                         urljoin )
+                         ToUnicode )
+
+
+Error = collections.namedtuple( 'RequestError', [ 'code', 'reason' ] )
+
+
+class Errors:
+  # From
+  # https://microsoft.github.io/language-server-protocol/specification#response-message
+  #
+  # JSON RPC
+  ParseError = Error( -32700, "Parse error" )
+  InvalidRequest = Error( -32600, "Invalid request" )
+  MethodNotFound = Error( -32601, "Method not found" )
+  InvalidParams = Error( -32602, "Invalid parameters" )
+  InternalError = Error( -32603, "Internal error" )
+
+  # The following sentinel values represent the range of errors for "user
+  # defined" server errors. We don't define them as actual errors, as they are
+  # just representing a valid range.
+  #
+  # export const serverErrorStart: number = -32099;
+  # export const serverErrorEnd: number = -32000;
+
+  # LSP defines the following custom server errors
+  ServerNotInitialized = Error( -32002, "Server not initialized" )
+  UnknownErrorCode = Error( -32001, "Unknown error code" )
+
+  # LSP request errors
+  RequestCancelled = Error( -32800, "The request was canceled" )
+  ContentModified = Error( -32801, "Content was modified" )
 
 
 INSERT_TEXT_FORMAT = [
@@ -79,6 +100,12 @@ SEVERITY = [
   'Hint',
 ]
 
+FILE_EVENT_KIND = {
+  'create': 1,
+  'modify': 2,
+  'delete': 3
+}
+
 
 class InvalidUriException( Exception ):
   """Raised when trying to convert a server URI to a file path but the scheme
@@ -95,7 +122,7 @@ class ServerFileStateStore( dict ):
     return self[ key ]
 
 
-class ServerFileState( object ):
+class ServerFileState:
   """State machine for a particular file from the server's perspective,
   including version."""
 
@@ -194,25 +221,78 @@ def BuildNotification( method, parameters ):
   } )
 
 
-def Initialize( request_id, project_directory ):
+def BuildResponse( request, parameters ):
+  """Builds a JSON RPC response message to respond to the supplied |request|
+  message. |parameters| should contain either 'error' or 'result'"""
+  message = { 'id': request[ 'id' ] }
+  message.update( parameters )
+  return _BuildMessageData( message )
+
+
+def Initialize( request_id, project_directory, settings ):
   """Build the Language Server initialize request"""
 
   return BuildRequest( request_id, 'initialize', {
     'processId': os.getpid(),
     'rootPath': project_directory,
     'rootUri': FilePathToUri( project_directory ),
-    'initializationOptions': {
-      # We don't currently support any server-specific options.
-    },
+    'initializationOptions': settings,
     'capabilities': {
+      'workspace': {
+        'applyEdit': True,
+        'didChangeWatchedFiles': {
+          'dynamicRegistration': True
+        },
+        'documentChanges': True
+      },
       'textDocument': {
+        'codeAction': {
+          'codeActionLiteralSupport': {
+            'codeActionKind': {
+              'valueSet': [ '',
+                            'quickfix',
+                            'refactor',
+                            'refactor.extract',
+                            'refactor.inline',
+                            'refactor.rewrite',
+                            'source',
+                            'source.organizeImports' ]
+            }
+          }
+        },
         'completion': {
           'completionItemKind': {
             # ITEM_KIND list is 1-based.
-            'valueSet': list( range( 1, len( ITEM_KIND ) + 1 ) ),
-          }
-        }
-      }
+            'valueSet': list( range( 1, len( ITEM_KIND ) ) ),
+          },
+          'completionItem': {
+            'documentationFormat': [
+              'plaintext',
+              'markdown'
+            ],
+          },
+        },
+        'hover': {
+          'contentFormat': [
+            'plaintext',
+            'markdown'
+          ]
+        },
+        'signatureHelp': {
+          'signatureInformation': {
+            'parameterInformation': {
+              'labelOffsetSupport': False, # For now.
+            },
+            'documentationFormat': [
+              'plaintext',
+              'markdown'
+            ],
+          },
+        },
+        'synchronization': {
+          'didSave': True
+        },
+      },
     },
   } )
 
@@ -227,6 +307,44 @@ def Shutdown( request_id ):
 
 def Exit():
   return BuildNotification( 'exit', None )
+
+
+def Void( request ):
+  return Accept( request, None )
+
+
+def Reject( request, request_error, data = None ):
+  msg = {
+    'error': {
+      'code': request_error.code,
+      'message': request_error.reason,
+    }
+  }
+  if data is not None:
+    msg[ 'error' ][ 'data' ] = data
+
+  return BuildResponse( request, msg )
+
+
+def Accept( request, result ):
+  msg = {
+    'result': result
+  }
+  return BuildResponse( request, msg )
+
+
+def ApplyEditResponse( request, applied ):
+  msg = { 'applied': applied }
+  return Accept( request, msg )
+
+
+def DidChangeWatchedFiles( path, kind ):
+  return BuildNotification( 'workspace/didChangeWatchedFiles', {
+    'changes': [ {
+      'uri': FilePathToUri( path ),
+      'type': FILE_EVENT_KIND[ kind ]
+    } ]
+  } )
 
 
 def DidChangeConfiguration( config ):
@@ -247,6 +365,10 @@ def DidOpenTextDocument( file_state, file_types, file_contents ):
 
 
 def DidChangeTextDocument( file_state, file_contents ):
+  # NOTE: Passing `None` for the second argument will send an empty
+  # textDocument/didChange notification. It is useful when a LSP server
+  # needs to be forced to reparse a file without sending all the changes.
+  # More specifically, clangd completer relies on this.
   return BuildNotification( 'textDocument/didChange', {
     'textDocument': {
       'uri': FilePathToUri( file_state.filename ),
@@ -254,8 +376,21 @@ def DidChangeTextDocument( file_state, file_contents ):
     },
     'contentChanges': [
       { 'text': file_contents },
-    ],
+    ] if file_contents is not None else [],
   } )
+
+
+def DidSaveTextDocument( file_state, file_contents ):
+  params = {
+    'textDocument': {
+      'uri': FilePathToUri( file_state.filename ),
+      'version': file_state.version,
+    },
+  }
+  if file_contents is not None:
+    params.update( { 'text': file_contents } )
+
+  return BuildNotification( 'textDocument/didSave', params )
 
 
 def DidCloseTextDocument( file_state ):
@@ -282,6 +417,12 @@ def ResolveCompletion( request_id, completion ):
   return BuildRequest( request_id, 'completionItem/resolve', completion )
 
 
+def SignatureHelp( request_id, request_data ):
+  return BuildRequest( request_id,
+                       'textDocument/signatureHelp',
+                       BuildTextDocumentPositionParams( request_data ) )
+
+
 def Hover( request_id, request_data ):
   return BuildRequest( request_id,
                        'textDocument/hover',
@@ -291,6 +432,25 @@ def Hover( request_id, request_data ):
 def Definition( request_id, request_data ):
   return BuildRequest( request_id,
                        'textDocument/definition',
+                       BuildTextDocumentPositionParams( request_data ) )
+
+
+def Declaration( request_id, request_data ):
+  return BuildRequest( request_id,
+                       'textDocument/declaration',
+                       BuildTextDocumentPositionParams( request_data ) )
+
+
+def TypeDefinition( request_id, request_data ):
+  return BuildRequest( request_id,
+                       'textDocument/typeDefinition',
+                       BuildTextDocumentPositionParams( request_data ) )
+
+
+
+def Implementation( request_id, request_data ):
+  return BuildRequest( request_id,
+                       'textDocument/implementation',
                        BuildTextDocumentPositionParams( request_data ) )
 
 
@@ -364,10 +524,12 @@ def RangeFormatting( request_id, request_data ):
 
 def FormattingOptions( request_data ):
   options = request_data[ 'options' ]
-  return {
-    'tabSize': options[ 'tab_size' ],
-    'insertSpaces': options[ 'insert_spaces' ]
+  format_options = {
+    'tabSize': options.pop( 'tab_size' ),
+    'insertSpaces': options.pop( 'insert_spaces' )
   }
+  format_options.update( options )
+  return format_options
 
 
 def Range( request_data ):
@@ -429,7 +591,9 @@ def _BuildMessageData( message ):
   # NOTE: sort_keys=True is needed to workaround a 'limitation' of clangd where
   # it requires keys to be in a specific order, due to a somewhat naive
   # JSON/YAML parser.
-  data = ToBytes( json.dumps( message, sort_keys=True ) )
+  data = ToBytes( json.dumps( message,
+                              separators = ( ',', ':' ),
+                              sort_keys=True ) )
   packet = ToBytes( 'Content-Length: {0}\r\n'
                     '\r\n'.format( len( data ) ) ) + data
   return packet

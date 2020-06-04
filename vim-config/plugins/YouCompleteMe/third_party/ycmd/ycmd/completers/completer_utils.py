@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Google Inc.
+# Copyright (C) 2013-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,37 +15,53 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 # Must not import ycm_core here! Vim imports completer, which imports this file.
 # We don't want ycm_core inside Vim.
-import logging
-import os
 from collections import defaultdict
-from future.utils import iteritems
-from ycmd.utils import ( ToCppStringCompatible, ToUnicode, re, ReadFile,
-                         SplitLines )
-
-_logger = logging.getLogger( __name__ )
+from ycmd.utils import LOGGER, ToUnicode, re, ReadFile, SplitLines
 
 
-class PreparedTriggers( object ):
-  def __init__( self, user_trigger_map = None, filetype_set = None ):
+class PreparedTriggers:
+  def __init__( self,
+                user_trigger_map = None,
+                filetype_set = None,
+                default_triggers = None ):
+    self._user_trigger_map = user_trigger_map
+    self._server_trigger_map = None
+    self._filetype_set = filetype_set
+    self._default_triggers = (
+      default_triggers if default_triggers is not None
+                       else PREPARED_DEFAULT_FILETYPE_TRIGGERS
+    )
+
+    self._CombineTriggers()
+
+
+  def _CombineTriggers( self ):
     user_prepared_triggers = ( _FiletypeTriggerDictFromSpec(
-        dict( user_trigger_map ) ) if user_trigger_map else
-        defaultdict( set ) )
-    final_triggers = _FiletypeDictUnion( PREPARED_DEFAULT_FILETYPE_TRIGGERS,
+      dict( self._user_trigger_map ) ) if self._user_trigger_map else
+      defaultdict( set ) )
+    server_prepared_triggers = ( _FiletypeTriggerDictFromSpec(
+      dict( self._server_trigger_map ) ) if self._server_trigger_map else
+      defaultdict( set ) )
+
+    # Combine all of the defaults, server-supplied and user-supplied triggers
+    final_triggers = _FiletypeDictUnion( self._default_triggers,
+                                         server_prepared_triggers,
                                          user_prepared_triggers )
-    if filetype_set:
-      final_triggers = { k: v for k, v in iteritems( final_triggers )
-                         if k in filetype_set }
+
+    if self._filetype_set:
+      final_triggers = { k: v for k, v in final_triggers.items()
+                         if k in self._filetype_set }
 
     self._filetype_to_prepared_triggers = final_triggers
+
+
+  def SetServerSemanticTriggers( self, server_trigger_characters ):
+    self._server_trigger_map = {
+      ','.join( self._filetype_set ): server_trigger_characters
+    }
+    self._CombineTriggers()
 
 
   def MatchingTriggerForFiletype( self,
@@ -77,7 +93,7 @@ class PreparedTriggers( object ):
 def _FiletypeTriggerDictFromSpec( trigger_dict_spec ):
   triggers_for_filetype = defaultdict( set )
 
-  for key, triggers in iteritems( trigger_dict_spec ):
+  for key, triggers in trigger_dict_spec.items():
     filetypes = key.split( ',' )
     for filetype in filetypes:
       regexes = [ _PrepareTrigger( x ) for x in triggers ]
@@ -87,16 +103,16 @@ def _FiletypeTriggerDictFromSpec( trigger_dict_spec ):
   return triggers_for_filetype
 
 
-def _FiletypeDictUnion( dict_one, dict_two ):
+def _FiletypeDictUnion( *args ):
   """Returns a new filetype dict that's a union of the provided two dicts.
   Dict params are supposed to be type defaultdict(set)."""
   def UpdateDict( first, second ):
-    for key, value in iteritems( second ):
+    for key, value in second.items():
       first[ key ].update( value )
 
   final_dict = defaultdict( set )
-  UpdateDict( final_dict, dict_one )
-  UpdateDict( final_dict, dict_two )
+  for d in args:
+    UpdateDict( final_dict, d )
   return final_dict
 
 
@@ -157,34 +173,13 @@ def _PrepareTrigger( trigger ):
   return re.compile( re.escape( trigger ), re.UNICODE )
 
 
-def _PathToCompletersFolder():
-  dir_of_current_script = os.path.dirname( os.path.abspath( __file__ ) )
-  return os.path.join( dir_of_current_script )
-
-
-def PathToFiletypeCompleterPluginLoader( filetype ):
-  return os.path.join( _PathToCompletersFolder(), filetype, 'hook.py' )
-
-
-def FiletypeCompleterExistsForFiletype( filetype ):
-  return os.path.exists( PathToFiletypeCompleterPluginLoader( filetype ) )
-
-
 def FilterAndSortCandidatesWrap( candidates, sort_property, query,
                                  max_candidates ):
   from ycm_core import FilterAndSortCandidates
 
-  # The c++ interface we use only understands the (*native*) 'str' type (i.e.
-  # not the 'str' type from python-future. If we pass it a 'unicode' or
-  # 'bytes' instance then various things blow up, such as converting to
-  # std::string. Therefore all strings passed into the c++ API must pass through
-  # ToCppStringCompatible (or more strictly all strings which the C++ code
-  # needs to use and convert. In this case, just the insertion text property)
-  # For efficiency, the conversion of the insertion text property is done in the
-  # C++ layer.
   return FilterAndSortCandidates( candidates,
-                                  ToCppStringCompatible( sort_property ),
-                                  ToCppStringCompatible( query ),
+                                  sort_property,
+                                  query,
                                   max_candidates )
 
 
@@ -200,11 +195,10 @@ DEFAULT_FILETYPE_TRIGGERS = {
     r're!\[.*\]\s',             # method composition
   ],
   'ocaml' : [ '.', '#' ],
-  'cpp,cuda,objcpp' : [ '->', '.', '::' ],
+  'cpp,cuda,objcpp,cs' : [ '->', '.', '::' ],
   'perl' : [ '->' ],
   'php' : [ '->', '::' ],
-  ( 'cs,'
-    'd,'
+  ( 'd,'
     'elixir,'
     'go,'
     'groovy,'
@@ -215,6 +209,7 @@ DEFAULT_FILETYPE_TRIGGERS = {
     'python,'
     'scala,'
     'typescript,'
+    'typescriptreact,'
     'vb' ) : [ '.' ],
   'ruby,rust' : [ '.', '::' ],
   'lua' : [ '.', ':' ],
@@ -238,7 +233,7 @@ def GetFileContents( request_data, filename ):
   try:
     return ToUnicode( ReadFile( filename ) )
   except IOError:
-    _logger.exception( 'Error reading file {}'.format( filename ) )
+    LOGGER.exception( 'Error reading file %s', filename )
     return ''
 
 

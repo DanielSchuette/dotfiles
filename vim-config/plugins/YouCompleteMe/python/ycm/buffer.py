@@ -15,36 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with YouCompleteMe.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 from ycm import vimsupport
 from ycm.client.event_notification import EventNotification
 from ycm.diagnostic_interface import DiagnosticInterface
 
-
 DIAGNOSTIC_UI_FILETYPES = { 'cpp', 'cs', 'c', 'objc', 'objcpp', 'cuda',
-                            'javascript', 'typescript' }
-DIAGNOSTIC_UI_ASYNC_FILETYPES = { 'java' }
+                            'javascript', 'typescript', 'typescriptreact' }
 
 
 # Emulates Vim buffer
 # Used to store buffer related information like diagnostics, latest parse
 # request. Stores buffer change tick at the parse request moment, allowing
 # to effectively determine whether reparse is needed for the buffer.
-class Buffer( object ):
+class Buffer:
 
-  def __init__( self, bufnr, user_options, async_diags ):
-    self.number = bufnr
+  def __init__( self, bufnr, user_options, filetypes ):
+    self._number = bufnr
     self._parse_tick = 0
     self._handled_tick = 0
     self._parse_request = None
-    self._async_diags = async_diags
+    self._should_resend = False
     self._diag_interface = DiagnosticInterface( bufnr, user_options )
+    self.UpdateFromFileTypes( filetypes )
 
 
   def FileParseRequestReady( self, block = False ):
@@ -53,6 +45,13 @@ class Buffer( object ):
 
 
   def SendParseRequest( self, extra_data ):
+    # Don't send a parse request if one is in progress
+    if self._parse_request is not None and not self._parse_request.Done():
+      self._should_resend = True
+      return
+
+    self._should_resend = False
+
     self._parse_request = EventNotification( 'FileReadyToParse',
                                              extra_data = extra_data )
     self._parse_request.Start()
@@ -67,10 +66,12 @@ class Buffer( object ):
 
 
   def ShouldResendParseRequest( self ):
-    return bool( self._parse_request and self._parse_request.ShouldResend() )
+    return ( self._should_resend
+             or ( bool( self._parse_request )
+                  and self._parse_request.ShouldResend() ) )
 
 
-  def UpdateDiagnostics( self, force=False ):
+  def UpdateDiagnostics( self, force = False ):
     if force or not self._async_diags:
       self.UpdateWithNewDiagnostics( self._parse_request.Response() )
     else:
@@ -116,8 +117,14 @@ class Buffer( object ):
     return self._diag_interface.GetWarningCount()
 
 
+  def UpdateFromFileTypes( self, filetypes ):
+    self._filetypes = filetypes
+    self._async_diags = not any( x in DIAGNOSTIC_UI_FILETYPES
+      for x in filetypes )
+
+
   def _ChangedTick( self ):
-    return vimsupport.GetBufferChangedTick( self.number )
+    return vimsupport.GetBufferChangedTick( self._number )
 
 
 class BufferDict( dict ):
@@ -131,7 +138,6 @@ class BufferDict( dict ):
     new_value = self[ key ] = Buffer(
       key,
       self._user_options,
-      any( x in DIAGNOSTIC_UI_ASYNC_FILETYPES
-           for x in vimsupport.GetBufferFiletypes( key ) ) )
+      vimsupport.GetBufferFiletypes( key ) )
 
     return new_value

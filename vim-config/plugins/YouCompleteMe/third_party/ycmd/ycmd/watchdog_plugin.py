@@ -1,4 +1,4 @@
-# Copyright (C) 2013 Google Inc.
+# Copyright (C) 2013-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,21 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
-
 import time
 import copy
-import logging
 from threading import Lock
 from ycmd.handlers import ServerShutdown
-from ycmd.utils import StartThread
-
-_logger = logging.getLogger( __name__ )
+from ycmd.utils import LOGGER, StartThread
 
 
 # This class implements the Bottle plugin API:
@@ -43,7 +33,7 @@ _logger = logging.getLogger( __name__ )
 #
 # We want to do this so that if something goes bonkers in Vim and the server
 # never gets killed by the client, we don't end up with lots of zombie servers.
-class WatchdogPlugin( object ):
+class WatchdogPlugin:
   name = 'watchdog'
   api = 2
 
@@ -95,7 +85,7 @@ class WatchdogPlugin( object ):
       # wait interval to contact us before we die.
       if ( self._TimeSinceLastRequest() > self._idle_suicide_seconds and
            self._TimeSinceLastWakeup() < 2 * self._check_interval_seconds ):
-        _logger.info( 'Shutting down server due to inactivity' )
+        LOGGER.info( 'Shutting down server due to inactivity' )
         ServerShutdown()
 
       self._UpdateLastWakeupTime()

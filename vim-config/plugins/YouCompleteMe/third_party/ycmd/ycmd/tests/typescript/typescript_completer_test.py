@@ -1,4 +1,4 @@
-# Copyright (C) 2017-2018 ycmd contributors
+# Copyright (C) 2017-2020 ycmd contributors
 #
 # This file is part of ycmd.
 #
@@ -15,24 +15,28 @@
 # You should have received a copy of the GNU General Public License
 # along with ycmd.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-from __future__ import absolute_import
-# Not installing aliases from python-future; it's unreliable and slow.
-from builtins import *  # noqa
+from unittest.mock import patch
+from hamcrest import assert_that, equal_to
 
-from mock import patch
-from nose.tools import ok_
-
+from ycmd import user_options_store
 from ycmd.completers.typescript.typescript_completer import (
-    ShouldEnableTypeScriptCompleter )
+    ShouldEnableTypeScriptCompleter,
+    FindTSServer )
 
 
 def ShouldEnableTypeScriptCompleter_NodeAndTsserverFound_test():
-  ok_( ShouldEnableTypeScriptCompleter() )
+  user_options = user_options_store.GetAll()
+  assert_that( ShouldEnableTypeScriptCompleter( user_options ) )
 
 
 @patch( 'ycmd.utils.FindExecutable', return_value = None )
 def ShouldEnableTypeScriptCompleter_TsserverNotFound_test( *args ):
-  ok_( not ShouldEnableTypeScriptCompleter() )
+  user_options = user_options_store.GetAll()
+  assert_that( not ShouldEnableTypeScriptCompleter( user_options ) )
+
+
+@patch( 'ycmd.utils.FindExecutableWithFallback',
+        wraps = lambda x, fb: x if x == 'tsserver' else None )
+@patch( 'os.path.isfile', return_value = True )
+def FindTSServer_CustomTsserverPath_test( *args ):
+  assert_that( 'tsserver', equal_to( FindTSServer( 'tsserver' ) ) )

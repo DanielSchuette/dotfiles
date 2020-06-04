@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import print_function
 from __future__ import division
@@ -16,8 +16,8 @@ DIR_OF_THIS_SCRIPT = p.dirname( p.abspath( __file__ ) )
 
 def ParseArguments():
   parser = argparse.ArgumentParser()
-  parser.add_argument( '--msvc', type = int, choices = [ 12, 14, 15 ],
-                       default = 15, help = 'Choose the Microsoft Visual '
+  parser.add_argument( '--msvc', type = int, choices = [ 14, 15, 16 ],
+                       default = 16, help = 'Choose the Microsoft Visual '
                        'Studio version (default: %(default)s).' )
 
   return parser.parse_known_args()
@@ -28,7 +28,6 @@ def BuildYcmdLibsAndRunBenchmark( args, extra_args ):
     sys.executable,
     p.join( DIR_OF_THIS_SCRIPT, 'build.py' ),
     '--clang-completer',
-    '--no-regex'
   ] + extra_args
 
   os.environ[ 'YCM_BENCHMARK' ] = '1'

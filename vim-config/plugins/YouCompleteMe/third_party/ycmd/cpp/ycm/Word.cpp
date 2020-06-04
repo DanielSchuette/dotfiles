@@ -27,7 +27,7 @@ namespace {
 
 // Break a sequence of code points into characters (grapheme clusters) according
 // to the rules in
-// https://www.unicode.org/reports/tr29/#Grapheme_Cluster_Boundary_Rules
+// https://www.unicode.org/reports/tr29/tr29-37.html#Grapheme_Cluster_Boundary_Rules
 std::vector< std::string > BreakCodePointsIntoCharacters(
   const CodePointSequence &code_points ) {
 
@@ -279,15 +279,15 @@ void Word::BreakIntoCharacters() {
 
 void Word::ComputeBytesPresent() {
   for ( const auto &character : characters_ ) {
-    for ( uint8_t byte : character->Base() ) {
-      bytes_present_.set( byte );
+    for ( auto byte : character->Base() ) {
+      bytes_present_.set( static_cast< uint8_t >( byte ) );
     }
   }
 }
 
 
-Word::Word( const std::string &text )
-  : text_( text ) {
+Word::Word( std::string&& text )
+  : text_( std::move( text ) ) {
   BreakIntoCharacters();
   ComputeBytesPresent();
 }

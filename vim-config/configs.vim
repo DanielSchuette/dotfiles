@@ -66,8 +66,9 @@ source $VIMRUNTIME/menu.vim
 " With some fonts, it looks better to use ⎇ as a branch symbol..
 " On the right site,  can be used as the major delimiter.
 " Also, instead of showing the absolute file path, 'filename' can be used.
+" NOTE(daniel): change colorscheme back to solarized if wanted!
 let g:lightline = {
-      \ 'colorscheme': 'solarized',
+      \ 'colorscheme': 'gruvbox',
       \ 'active': {
       \   'left': [ ['mode', 'paste'],
       \             ['fugitive', 'readonly', 'absolutepath', 'modified'] ],
@@ -417,8 +418,8 @@ let g:go_auto_sameids = 1
 let g:ale_set_highlights = 1
 
 " change the error and warning signs ale uses
-let g:ale_sign_warning = '**'
-let g:ale_sign_error = '??'
+let g:ale_sign_warning = '* '
+let g:ale_sign_error = '? '
 
 " re-format the error messages
 let g:ale_echo_msg_format = '[%linter%] %s'
@@ -555,14 +556,20 @@ endif
 " Set a non-default color scheme. To get the dark solarized
 " color scheme, the block below (resetting background,
 " hightlights, etc.) is required, too!
-colorscheme solarized
+" solarized: colorscheme solarized
+colorscheme gruvbox
 set background=dark
 highlight Normal ctermbg=None
 highlight nonText ctermbg=None
 highlight clear LineNr
+highlight clear CursorLineNr
 highlight clear SignColumn
-highlight Visual guibg=white guifg=black gui=NONE ctermfg=black ctermbg=white cterm=reverse
-highlight CursorLineNr cterm=None
+highlight GitGutterAdd ctermfg=green
+highlight GitGutterChange ctermfg=yellow
+highlight GitGutterDelete ctermfg=red
+highlight GitGutterChangeDelete ctermfg=yellow
+highlight ALEErrorSign ctermfg=red
+highlight ALEWarningSign ctermfg=red
 
 " toggle a color column to visualize a line width of 80 chars with <leader>cc
 function! ToggleColorColumn()
