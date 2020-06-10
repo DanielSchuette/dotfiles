@@ -1,0 +1,11 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =9
+let g:netrw_dirhist_9='/home/daniel/code/hs_src/haskell-ide-engine/src/Haskell/Ide/Engine'
+let g:netrw_dirhist_8='/home/daniel/code/hs_src/haskell-ide-engine/src/Haskell/Ide'
+let g:netrw_dirhist_7='/home/daniel/code/hs_src/haskell-ide-engine/src/Haskell'
+let g:netrw_dirhist_6='/home/daniel/code/hs_src/haskell-ide-engine/src'
+let g:netrw_dirhist_5='/home/daniel/code/hs_src/haskell-ide-engine'
+let g:netrw_dirhist_4='/home/daniel/code/hs_src'
+let g:netrw_dirhist_3='/home/daniel/code/hs_src/hw'
+let g:netrw_dirhist_2='/home/daniel/dotfiles'
+let g:netrw_dirhist_1='/home/daniel/dotfiles/vim-config'

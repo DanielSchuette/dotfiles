@@ -309,6 +309,17 @@ let g:user_emmet_leader_key='<C-D>'
 " set path to extra configs (including compiler flags)
 let g:ycm_global_ycm_extra_conf = '~/dotfiles/.ycm_extra_conf.py'
 
+" haskell language server requires haskell-ide-engine to be installed
+" see https://github.com/ycm-core/YouCompleteMe/issues/3122
+let g:ycm_language_server = [
+    \ {
+        \ 'name': 'haskell',
+        \ 'filetypes': [ 'haskell', 'hs', 'lhs' ],
+        \ 'cmdline': [ 'hie-wrapper', '--lsp' ],
+        \ 'project_root_files': [ '.stack.yaml', 'cabal.config', 'package.yaml' ]
+    \ }
+\ ]
+
 " Toggle diagnostics for c files (disabled by default), this only
 " works if the server is restarted every time the variable is changed.
 " Restarting the server is actually very fragile and fails often.
@@ -328,6 +339,16 @@ nnoremap <leader>yy :<C-U>call ToggleYCMDiagnostics()<CR>:<C-U>YcmRestartServer<
 let g:ycm_filetype_specific_completion_to_disable = {}
 "\   'typescript': 0
 "\}
+
+" haskell-vim Configs
+" -------------------
+let g:haskell_enable_quantification = 1   " to enable highlighting of `forall`
+let g:haskell_enable_recursivedo = 1      " to enable highlighting of `mdo` and `rec`
+let g:haskell_enable_arrowsyntax = 1      " to enable highlighting of `proc`
+let g:haskell_enable_pattern_synonyms = 1 " to enable highlighting of `pattern`
+let g:haskell_enable_typeroles = 1        " to enable highlighting of type roles
+let g:haskell_enable_static_pointers = 1  " to enable highlighting of `static`
+let g:haskell_backpack = 1                " to enable highlighting of backpack keywords
 
 " MRU Configs
 " -----------

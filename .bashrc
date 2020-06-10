@@ -49,10 +49,8 @@ PATH="/opt/mssql/bin:$PATH"
 export PATH
 PATH="/opt/mssql-tools/bin:$PATH"
 export PATH
-
-# Uncomment the following line if you don't like
-# systemctl's auto-paging feature:
-#export SYSTEMD_PAGER=
+PATH="$HOME/.cabal/bin:$PATH"
+export PATH
 
 # set environment variables for go
 GOBIN="$HOME/code/go_src/bin"
