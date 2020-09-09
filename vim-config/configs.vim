@@ -469,14 +469,23 @@ let g:completor_python_binary = '/usr/bin/python3'
 let g:ale_linters = {
 \   'typescript': ['tslint'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
-\   'python': ['flake8'],
+\   'python': ['flake8', 'mypy'],
 \   'go': ['go', 'golint', 'errcheck'],
-\   'vim': ['vint']
+\   'vim': ['vint'],
+\   'elm': ['elm_ls']
 \}
+
+let g:ale_elm_ls_use_global = 1
+let g:ale_elm_ls_executable = '/usr/local/bin/elm-language-server'
+let g:ale_elm_ls_elm_analyse_trigger = 'change'
+let g:ale_elm_ls_elm_path = '/usr/local/bin/elm'
+let g:ale_elm_ls_elm_format_path = '/home/daniel/.local/bin/elm-format'
+let g:ale_elm_ls_elm_test_path = '/home/daniel/.local/bin/elm-test'
 
 let g:ale_fixers = {
 \   'json': ['prettier'],
-\   'python': ['isort', 'autopep8']
+\   'python': ['isort', 'autopep8'],
+\   'elm': ['elm-format']
 \}
 
 " Using `prettier' as a fixer can be annoying, e.g. when writing jsx. If
