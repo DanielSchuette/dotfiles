@@ -68,19 +68,23 @@ syn keyword pascalType			longstring object output pchar pointer real resourcestr
 syn keyword pascalType			shortstring string threadvar variant word UTF8String UTF8 UTF16String
 syn keyword pascalType			UTF16
 
-syn keyword pascalFunction		procedure function
-syn match pascalFunction		"class\s*procedure"
-syn match pascalFunction		"class\s*function"
-syn match pascalFunction		"reference\s*to\s*function"
-syn match pascalFunction		"reference\s*to\s*procedure"
-syn keyword pascalFunction		record type var const constructor destructor property
-
-syn keyword pascalOperator		as div mod not of shl shr with xor and or
+" NOTE(daniel): changed `pascalFunction' to `pascalKeyword' to achieve correct
+"               highlighting
+syn keyword pascalKeyword		procedure function
+syn match pascalKeyword		        "class\s*procedure"
+syn match pascalKeyword		        "class\s*function"
+syn match pascalKeyword		        "reference\s*to\s*function"
+syn match pascalKeyword		        "reference\s*to\s*procedure"
+syn keyword pascalKeyword		record type var const constructor destructor property
+" NOTE(daniel): changed `pascalOperator' to `pascalKeyword' to achieve correct
+"               highlighting
+syn keyword pascalKeyword		as div mod not of shl shr with xor and or
 
 syn keyword pascalKeyword		asm begin
 syn match pascalKeyword			"contains"
 syn keyword pascalKeyword		delete dispose end forward get
 syn keyword pascalKeyword		goto implementation inherited initialization finalization
+syn keyword pascalKeyword		specialize generic
 syn keyword pascalKeyword		insert interface label
 syn keyword pascalKeyword		library exports new package program put read readln
 syn keyword pascalKeyword		requires reset rewrite seek unit uses write writeln
@@ -104,13 +108,11 @@ syn keyword pascalModifier		at default nodefault dispid implements message
 syn keyword pascalModifier		readonly writeonly resident stored
 
 syn keyword pascalObjModifier		abstract virtual override reintroduce
-" removed `name' from `FuncModifier'
+" NOTE(daniel): removed `name' from `FuncModifier'
 syn keyword pascalFuncModifier		cdecl pascal register stdcall safecall dynamic export overload
 syn region pascalDefine			start="{\$" end="}"
 
 " ------------------------------------------------------------------------------
-" NOTE(daniel): replaced all occurances of `Operator' with `Keyword', because
-"               Gruvbox doesn't highlight operators
 hi def link pascalAccess       		Statement
 hi def link pascalAssignment 	        Keyword
 hi def link pascalByte			Number
@@ -130,7 +132,7 @@ hi def link pascalModifier		Type
 hi def link pascalNumber	       	Number
 hi def link pascalObjModifier		Type
 hi def link pascalObject	       	Type
-hi def link pascalOperator		Keyword
+hi def link pascalOperator		Operator
 hi def link pascalRepeat	       	Repeat
 hi def link pascalShowTab		Error
 hi def link pascalShowTabc		Error
@@ -140,8 +142,6 @@ hi def link pascalStructure		Structure
 hi def link pascalTodo			Todo
 hi def link pascalType			Type
 hi def link pascalUnclassified		Statement
-
-" ------------------------------------------------------------------------------
 
 let b:current_syntax = "delphi"
 

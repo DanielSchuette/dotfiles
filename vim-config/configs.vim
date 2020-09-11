@@ -729,11 +729,5 @@ au BufNewFile,BufRead *.dfm,*.DFM set ft=delphi
 au BufNewFile,BufRead *.xfm,*.XFM set ft=delphi
 " Delphi package file
 au BufNewFile,BufRead *.dpk,*.DPK set ft=delphi
-" Delphi .DOF file = INI file for MSDOS
-au BufNewFile,BufRead *.dof,*.DOF set ft=dosini
-au BufNewFile,BufRead *.kof,*.KOF set ft=dosini
-au BufNewFile,BufRead *.dsk,*.DSK set ft=dosini
-au BufNewFile,BufRead *.desk,*.DESK set ft=dosini
-au BufNewFile,BufRead *.dti,*.DTI set ft=dosini
 " Delphi .BPG = Makefile
 au BufNewFile,BufRead *.bpg,*.BPG set ft=make|setlocal makeprg=make\ -f\ %
