@@ -110,6 +110,7 @@ alias tmux_conf="v ~/dotfiles/.tmux.conf"
 # remap some GNU utils to rust utilities
 alias ls="exa --git"
 alias l="exa -lahF --git"
+alias ll="exa -lahF --git"
 alias t="tokei"
 alias b="bat"
 
