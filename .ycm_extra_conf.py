@@ -29,13 +29,14 @@ flags = [
     '-DNDEBUG',
     '-std=c99',
     '-x',
-    # '-std=c++11',  # use for C++ projects
+    '-std=c++20',
     'c',
     '-isystem',
     '/usr/include',
     '-isystem',
     '/usr/local/include',
-    '-ISUB./include'
+    '-ISUB./include',
+    './include'
 ]
 
 # Set this to the absolute path to the folder (NOT the file!) containing the
