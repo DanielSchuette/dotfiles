@@ -472,8 +472,16 @@ let g:ale_linters = {
 \   'python': ['flake8', 'mypy'],
 \   'go': ['go', 'golint', 'errcheck'],
 \   'vim': ['vint'],
-\   'elm': ['elm_ls']
+\   'elm': ['elm_ls'],
+\   'cpp': ['clang', 'clangtidy'],
+\   'cc': ['clang', 'clangtidy']
 \}
+
+let g:ale_cpp_clang_options = '-Wall -Wextra -std=c++20 -x c++'
+let g:ale_cpp_clangtidy_options = '-Wall -Wextra -std=c++20 -x c++'
+let g:ale_cpp_clangcheck_options = '-- -Wall -Wextra -std=c++20 -x c++'
+let g:ale_c_clangtidy_options = '-Wall -Wextra -std=c99 -x c'
+let g:ale_c_clangcheck_options = '-- -Wall -Wextra -std=c99 -x c'
 
 let g:ale_elm_ls_use_global = 1
 let g:ale_elm_ls_executable = '/usr/local/bin/elm-language-server'
@@ -658,6 +666,8 @@ augroup adv_syntax_hi
         \ containedin=.*Comment,vimCommentTitle
 augroup END
 highlight def link MyToDo Todo
+" highlight `TODO' in C++-style comments
+autocmd Syntax * syntax keyword MyToDo NOTE TODO containedin=.*Comment.*
 
 "**********************"
 "** Helper Functions **"
