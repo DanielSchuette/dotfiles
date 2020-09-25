@@ -73,6 +73,9 @@ export RUST_SRC_PATH
 # configure fzf layout
 export FZF_DEFAULT_OPTS='--layout=reverse --height 80%'
 
+# 256-color terminal is needed for vim not to break!
+export TERM="tmux-256color"
+
 #-----------#
 #- Aliases -#
 #-----------#
@@ -83,6 +86,7 @@ alias src="source ~/.bashrc && echo 'sourced .bashrc'"
 alias xup="xrdb ~/dotfiles/.Xresources"
 
 # always use vim-x11 for system clipboard access
+alias nv="nvim -p"
 alias v="vimx -p"
 alias vi="vimx -p"
 alias vim="vimx -p"
@@ -123,13 +127,6 @@ alias xclip="xclip -selection clipboard"
 # access music player more easily
 alias n="sudo ncmpcpp --screen=media_library --bindings=\$HOME/.ncmpcpp/bindings --config=\$HOME/.ncmpcpp/config"
 
-# run MonoDevelop more easily
-alias monodevelop="flatpak run com.xamarin.MonoDevelop"
-
-# open rider more easily
-alias rider="sh ~/code/sim/JetBrains\ Rider-2018.3.2/bin/rider.sh &"
-export TERM="tmux-256color"
-
 # open ipython in vim mode automatically
 alias ipython="ipython --TerminalInteractiveShell.editing_mode=vi"
 
@@ -151,4 +148,3 @@ _suppress() {
 
 _suppress gedit          "Gtk-WARNING\|connect to accessibility bus"
 _suppress firefox        "Gtk-WARNING\|g_slice_set_config\|Gtk\|WARNING\|Warning"
-#_suppress fox            "Gtk-WARNING\|g_slice_set_config"
