@@ -58,6 +58,9 @@ set langmenu=en
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 
+" neovim-specific configuration
+set guicursor=
+
 " Lightline Config
 " ----------------
 " The only plugin configuration that is not in the 'correct' section.
@@ -569,31 +572,8 @@ inoremap $e ""<esc>i
 "*****************"
 "** Colorscheme **"
 "*****************"
-" Disable Background Color Erase (BCE) so that color schemes
-" render properly when inside 256-color tmux and GNU screen.
-" See also http://sunaku.github.io/vim-256color-bce.html.
-if &term =~? '256color'
-    set t_ut=
-endif
-
-" fix tmux color bug by setting `term'
-if exists('$TMUX')
-    if has('nvim')
-        set termguicolors
-    else
-        set term=screen-256color
-    endif
-endif
-
-" enable 256 colors palette in Gnome Terminal
-let g:solarized_termcolors=256
-if $COLORTERM ==? 'gnome-terminal'
-    set t_Co=256
-endif
-
-" Set a non-default color scheme. To get the dark solarized
-" color scheme, the block below (resetting background,
-" hightlights, etc.) is required, too!
+" Set a non-default color scheme. To get the dark solarized color scheme, the
+" block below (resetting background, hightlights, etc.) is required, too!
 " solarized: colorscheme solarized
 colorscheme gruvbox
 set background=dark
