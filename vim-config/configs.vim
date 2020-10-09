@@ -279,9 +279,8 @@ augroup END
 "** Plugin Configs **"
 "********************"
 " Ctags
-" Vim supports ctags natively, but some of the keybindings are
-" awkward by default. They are redefined here. Tagbar must be
-" installed separately.
+" Vim supports ctags natively, but some of the keybindings are awkward by
+" default. They are redefined here. Tagbar must be installed separately.
 set tags=./tags,tags; " where to look for tags file
 nnoremap <leader>ct <C-]>
 nnoremap <leader>cT <C-t>
@@ -342,6 +341,41 @@ nnoremap <leader>yy :<C-U>call ToggleYCMDiagnostics()<CR>:<C-U>YcmRestartServer<
 let g:ycm_filetype_specific_completion_to_disable = {}
 "\   'typescript': 0
 "\}
+
+" Coc Configs
+" -----------
+" enable autocompletion on tab
+set completeopt=longest,menuone
+
+" Use tab for trigger completion with characters ahead and navigate.
+" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
+" other plugin before putting this into your config.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+if has('nvim')
+  inoremap <silent><expr> <c-space> coc#refresh()
+else
+  inoremap <silent><expr> <c-@> coc#refresh()
+endif
+
+" Use <cr> to confirm completion, `<C-g>u` means break undo chain at current
+" position. Coc only does snippet and additional edit on confirm.
+" <cr> could be remapped by other vim plugin, try `:verbose imap <CR>`.
+if exists('*complete_info')
+  inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+else
+  inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+endif
 
 " haskell-vim Configs
 " -------------------
@@ -468,7 +502,7 @@ let g:completor_python_binary = '/usr/bin/python3'
 " Usually, tools only need to be installed to work without
 " additional settings in this file. Some language configs are set
 " manually, anyways.
-" NOTE(daniel): tslint is sometimes slow
+" NOTE: tslint is sometimes slow, the same is true for clangtidy
 let g:ale_linters = {
 \   'typescript': ['tslint'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
@@ -476,8 +510,8 @@ let g:ale_linters = {
 \   'go': ['go', 'golint', 'errcheck'],
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
-\   'cpp': ['clang', 'clangtidy'],
-\   'cc': ['clang', 'clangtidy']
+\   'cpp': ['clang'],
+\   'cc': ['clang']
 \}
 
 let g:ale_cpp_clang_options = '-Wall -Wextra -std=c++20 -x c++'
