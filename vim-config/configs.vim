@@ -344,6 +344,10 @@ let g:ycm_filetype_specific_completion_to_disable = {}
 
 " Coc Configs
 " -----------
+" highlights, NOTE: this doesn't really work (didn't bother to fix it)
+highlight CocErrorSign ctermfg=Red ctermbg=Black
+highlight CocWarningSign ctermfg=Yellow ctermbg=Blue
+
 " enable autocompletion on tab
 set completeopt=longest,menuone
 
@@ -465,7 +469,7 @@ let g:go_highlight_generate_tags = 1
 
 " automatically display go info
 let g:go_auto_type_info = 1
-set updatetime=500
+set updatetime=300
 
 " automatically highlight matching identifiers
 let g:go_auto_sameids = 1
