@@ -9,7 +9,7 @@ fi
 
 # enable vi mode and set EDITOR to vim
 set -o vi
-export EDITOR="vimx"
+export EDITOR="nvim"
 
 # enable inline expansion of cmds like `!!' when hitting <space>
 # typing `![beginning_of_cmd]' expands according to matching patterns,
@@ -28,14 +28,15 @@ elif [ "$TERM" == "rxvt-unicode-256color" ]; then
     export PS1='[\[\033[0;36m\]\u@\h \[\e[4m\]\[\e[91m\]\W\[\033[0;32m\]\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 " (%s)")\[\033[0m\]] $ '
 else
     # gnome terminal works well with icons that urxvt cannot handle
-    export PS1='\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 "(%s)") 🠞 \[\033[0m\]'
+    export PS1='\[\033[0m\033[0;32m\]$(declare -F __git_ps1 &>/dev/null && __git_ps1 "(%s)") $ \[\033[0m\]'
 fi
 
 # PS2 prompt
-export PS2='\[\e[91m\]      >>\[\033[0m\] '
+export PS2='\[\e[91m\]   >>\[\033[0m\] '
 
 # extra settings for git-part of prompt
-source /usr/share/git-core/contrib/completion/git-prompt.sh
+# source /usr/share/git-core/contrib/completion/git-prompt.sh
+source $HOME/dotfiles/git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWUNTRACKEDFILES=true
@@ -44,10 +45,6 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 #- Path and Env Config -#
 #-----------------------#
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-export PATH
-PATH="/opt/mssql/bin:$PATH"
-export PATH
-PATH="/opt/mssql-tools/bin:$PATH"
 export PATH
 PATH="$HOME/.cabal/bin:$PATH"
 export PATH
@@ -67,8 +64,8 @@ export PATH
 export RANGER_LOAD_DEFAULT_RC=FALSE
 
 # set environment variables for rust
-RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
-export RUST_SRC_PATH
+# RUST_SRC_PATH="$(rustc --print sysroot)/lib/rustlib/src/rust/src"
+# export RUST_SRC_PATH
 
 # configure fzf layout
 export FZF_DEFAULT_OPTS='--layout=reverse --height 80%'
@@ -87,9 +84,9 @@ alias xup="xrdb ~/dotfiles/.Xresources"
 
 # always use vim-x11 for system clipboard access
 alias nv="nvim -p"
-alias v="vimx -p"
-alias vi="vimx -p"
-alias vim="vimx -p"
+alias v="nvim -p"
+alias vi="nvim -p"
+alias vim="nvim -p"
 
 # create for file browsing and viewing
 alias c="clear"

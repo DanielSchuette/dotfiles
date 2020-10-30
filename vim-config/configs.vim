@@ -381,6 +381,10 @@ else
   inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 endif
 
+" Vimtex
+" ------
+let g:tex_flavor = 'latex'
+
 " haskell-vim Configs
 " -------------------
 let g:haskell_enable_quantification = 1   " to enable highlighting of `forall`
