@@ -12,9 +12,10 @@ set relativenumber
 set fileformats=unix,dos,mac " make unix the standard file system
 set textwidth=0 wrapmargin=0 " disable physical line wrapping
 set autoread " check if file was changed outside of vim before saving
-set scrolloff=5 " screen scrolls 5 lines before top/bottom
+set scrolloff=2 " screen scrolls 2 lines before top/bottom
 set history=500
 set wildmenu " enable command line completions
+set wildmode=full
 set ruler " show current position
 set cmdheight=2 " command bar height
 set hidden " hide buffers once abandoned
@@ -47,16 +48,6 @@ set smartindent
 set laststatus=2 " always show status line
 set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
 set noshowmode " because lightline shows the mode
-
-" force python v2 (whodis only works with this version)
-if has('python')
-endif
-
-" avoid garbled characters in Chinese language
-let $LANG='en'
-set langmenu=en
-source $VIMRUNTIME/delmenu.vim
-source $VIMRUNTIME/menu.vim
 
 " neovim-specific configuration
 set guicursor=
@@ -108,44 +99,32 @@ let g:lightline = {
 
 " If Fontawesome or another iconic font is installed, the following
 " icons can be used as linter warning and error indicators:
-let g:lightline#ale#indicator_warnings = "\uf071  "
-let g:lightline#ale#indicator_errors = "\uf05e  "
+let g:lightline#ale#indicator_warnings = "\uf071 "
+let g:lightline#ale#indicator_errors = "\uf05e "
 let g:lightline#ale#indicator_checking = "\uf110"
 let g:lightline#ale#indicator_ok = "\uf00c"
 
 "*********************"
 "** Custom Mappings **"
 "*********************"
-" remap 0 to go to first non-blank character
+" it is more convenient if 0 jumps to the first non-blank character
 map 0 ^
-
-" leader is set to ,
 let mapleader = ','
 
 " remap <ESC> to <leader>n for fast return to normal mode
 inoremap <leader>n <ESC>
 
-" fast quitting with <leader>q
+" fast quitting and saving with <leader>q and <leader>w
 nmap <leader>q :q<cr>
-
-" Fast saving with <leader>w
 nmap <leader>w :w!<cr>
-
-" :W sudo saves the file
-" (eliminates the painful permission-denied error)
-command W w !sudo tee % > /dev/null
 
 " move more intuitively between wrapped lines with j/k
 " instead of gj/gk
 nnoremap j gj
 nnoremap k gk
 
-" display buffer using <leader>b
+" display buffers using <leader>b
 nnoremap <leader>b :ls<CR>:buffer<Space>
-
-" update the current buffer with <leader>u
-" this is useful if the current file was changed somewhere else
-nnoremap <leader>u :edit<CR>
 
 " toggle indentation guides (set by default) with <leader>t
 set list
@@ -166,7 +145,7 @@ endfunction
 
 nnoremap <leader>t :<C-U>call ToggleListchars()<CR>
 
-" remap return to do what one expects
+" remap return to insert a blank line after the cursor's line
 nmap <S-Enter> O<ESC>
 nmap <CR> o<ESC>k
 
@@ -189,9 +168,6 @@ map <leader># :noh<cr>
 " <leader>r executes a `run.sh' script (useful for complex builds)
 nnoremap <leader>r :!chmod +x run.sh && ./run.sh<CR>
 
-" in vim-help buffers, follow links more easily (single tab is for buffers)
-nnoremap <TAB><TAB> <C-]>
-
 "**********************"
 "** Buffers and Tabs **"
 "**********************"
@@ -199,35 +175,16 @@ nnoremap <TAB><TAB> <C-]>
 map <space> /
 map <c-space> ?
 
-" smart way to move between windows
+" easier way to move between windows
 map <C-j> <C-W>j
 map <C-k> <C-W>k
 map <C-h> <C-W>h
 map <C-l> <C-W>l
-
-" close the current buffer
-map <leader>bd :Bclose<cr>:tabclose<cr>gT
-
-" close all buffers
-map <leader>ba :bufdo bd<cr>
+nnoremap <TAB> <C-W>w
 
 " move inbetween buffers
 map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
-
-" useful mappings for managing tabs
-map <leader>tn :tabnew<cr>
-map <leader>to :tabonly<cr>
-map <leader>tc :tabclose<cr>
-map <leader>tm :tabmove
-map <leader>t<leader> :tabnext<cr>
-
-" opens a new tab with the current buffer's path
-" useful when editing files in the same directory
-map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/<cr>
-
-" switch CWD to the directory of the open buffer
-map <leader>cd :cd %:p:h<cr>:pwd<cr>
 
 " specify the behavior when switching between buffers
 try
@@ -235,10 +192,6 @@ try
   set showtabline=2
 catch
 endtry
-
-" use tab to switch between buffers that are open in
-" the same window (much more intuitive than ctrl-ww
-nnoremap <TAB> <c-w>w
 
 "******************"
 "** Autocommands **"
@@ -395,12 +348,6 @@ let g:haskell_enable_typeroles = 1        " to enable highlighting of type roles
 let g:haskell_enable_static_pointers = 1  " to enable highlighting of `static`
 let g:haskell_backpack = 1                " to enable highlighting of backpack keywords
 
-" MRU Configs
-" -----------
-" limit history to 100 files and open most recently used with <leader>m
-let MRU_Max_Entries = 100
-map <leader>m :MRU<CR>
-
 " Vim Racer Configs
 " -----------------
 " `hidden' mode for buffers helps with goto definitions
@@ -535,6 +482,8 @@ let g:ale_elm_ls_elm_path = '/usr/local/bin/elm'
 let g:ale_elm_ls_elm_format_path = '/home/daniel/.local/bin/elm-format'
 let g:ale_elm_ls_elm_test_path = '/home/daniel/.local/bin/elm-test'
 
+let g:ale_glsl_glslang_executable = '/usr/bin/glslangValidator'
+
 let g:ale_fixers = {
 \   'json': ['prettier'],
 \   'python': ['isort', 'autopep8'],
@@ -631,6 +580,19 @@ highlight GitGutterChangeDelete ctermfg=yellow
 highlight ALEErrorSign ctermfg=red
 highlight ALEWarningSign ctermfg=red
 
+highlight link CocErrorSign ALEErrorSign
+highlight link CocWarningSign ALEWarningSign
+highlight link CocInfoSign ALEWarningSign
+highlight link ALEInfoSign ALEWarningSign
+highlight link CocDiagnosticsError Normal
+highlight link CocDiagnosticsWarning Normal
+highlight link CocDiagnosticsInfo Normal
+highlight link CocSelectedText Normal
+highlight link CocErrorVirtualText Normal
+highlight link CocWarningVirtualText Normal
+highlight link CocInfoVirtualText Normal
+highlight link cError Normal
+
 " toggle a color column to visualize a line width of 80 chars with <leader>cc
 function! ToggleColorColumn()
     if &colorcolumn ==# 80
@@ -667,6 +629,8 @@ augroup python_lang
     autocmd FileType python set cindent
     autocmd FileType python set cinkeys-=0#
     autocmd FileType python set indentkeys-=0#
+    " unlink python space error highlighting
+    hi link pythonSpaceError Normal
 augroup END
 
 " JavaScript

@@ -10,6 +10,7 @@ fi
 # enable vi mode and set EDITOR to vim
 set -o vi
 export EDITOR="nvim"
+export PAGER="most"
 
 # enable inline expansion of cmds like `!!' when hitting <space>
 # typing `![beginning_of_cmd]' expands according to matching patterns,

@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/daniel/dotfiles/vim-config/plugins/mru.vim'
+let g:netrw_dirhist_0='/home/daniel/code/cc_src/json/src'
+let g:netrw_dirhist_9='/home/daniel/code/cc_src/json'
+let g:netrw_dirhist_8='/home/daniel/code/cc_src/comp/utils'
+let g:netrw_dirhist_7='/home/daniel/code/cc_src/comp'
+let g:netrw_dirhist_6='/home/daniel/code/cc_src'
+let g:netrw_dirhist_5='/home/daniel/code'
+let g:netrw_dirhist_4='/home/daniel'
+let g:netrw_dirhist_3='/home/daniel/code/cc_src/json/src'
+let g:netrw_dirhist_2='/home/daniel/code/cc_src/json'
