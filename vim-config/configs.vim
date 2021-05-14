@@ -651,9 +651,11 @@ augroup adv_syntax_hi
     autocmd Syntax * syn match MyToDo /\v<(TODO|FIXME|XXX|NOTE|OPTIMIZE)/
         \ containedin=.*Comment,vimCommentTitle
 augroup END
+
 highlight def link MyToDo Todo
-" highlight `TODO' in C++-style comments
-autocmd Syntax * syntax keyword MyToDo NOTE TODO containedin=.*Comment.*
+" highlight `TODO' and so forth in comments
+autocmd Syntax * syntax keyword MyToDo NOTE TODO INCOMPLETE NOCHECKIN containedin=.*Comment.*
+highlight clear Todo
 
 "**********************"
 "** Helper Functions **"
