@@ -50,15 +50,15 @@ export PATH
 PATH="$HOME/.cabal/bin:$PATH"
 export PATH
 
-# set environment variables for go
-GOBIN="$HOME/code/go_src/bin"
-export GOBIN
-GOPATH="$HOME/code/go_src"
-export GOPATH
-GOROOT="/usr/local/go" # needs to be set if go is in custom location
-export GOROOT
-PATH="$GOROOT/bin:$PATH"
-export PATH
+# set environment variables for go (is this even necessary with modern Go?)
+#GOBIN="$HOME/code/go_src/bin"
+#export GOBIN
+#GOPATH="$HOME/code/go_src"
+#export GOPATH
+#GOROOT="/usr/local/go" # needs to be set if go is in custom location
+#export GOROOT
+#PATH="$GOROOT/bin:$PATH"
+#export PATH
 
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger
@@ -84,10 +84,10 @@ alias src="source ~/.bashrc && echo 'sourced .bashrc'"
 alias xup="xrdb ~/dotfiles/.Xresources"
 
 # always use vim-x11 for system clipboard access
-alias nv="nvim -p"
-alias v="nvim -p"
-alias vi="nvim -p"
-alias vim="nvim -p"
+alias nv="nvim"
+alias v="nvim"
+alias vi="nvim"
+alias vim="nvim"
 
 # create for file browsing and viewing
 alias c="clear"
@@ -123,7 +123,7 @@ alias py="ipython"
 alias xclip="xclip -selection clipboard"
 
 # access music player more easily
-alias n="sudo ncmpcpp --screen=media_library --bindings=\$HOME/.ncmpcpp/bindings --config=\$HOME/.ncmpcpp/config"
+alias n="ncmpcpp --screen=media_library --bindings=\$HOME/.config/ncmpcpp/bindings --config=\$HOME/.config/ncmpcpp/config"
 
 # open ipython in vim mode automatically
 alias ipython="ipython --TerminalInteractiveShell.editing_mode=vi"

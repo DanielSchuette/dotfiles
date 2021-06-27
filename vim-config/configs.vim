@@ -304,6 +304,10 @@ highlight CocWarningSign ctermfg=Yellow ctermbg=Blue
 " enable autocompletion on tab
 set completeopt=longest,menuone
 
+" disable completion for TypeScript
+autocmd BufNew,BufEnter *.ts execute "silent! CocDisable"
+autocmd BufLeave *.ts execute "silent! CocEnable"
+
 " Use tab for trigger completion with characters ahead and navigate.
 " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
 " other plugin before putting this into your config.
@@ -425,6 +429,10 @@ set updatetime=300
 " automatically highlight matching identifiers
 let g:go_auto_sameids = 1
 
+" Vim-Modern-Cpp Configs
+" ----------------------
+let g:cpp_no_function_highlight = 1
+
 " Ale Configs
 " -----------
 " enable highlighting of linter findings
@@ -457,9 +465,8 @@ let g:completor_python_binary = '/usr/bin/python3'
 " Usually, tools only need to be installed to work without
 " additional settings in this file. Some language configs are set
 " manually, anyways.
-" NOTE: tslint is sometimes slow, the same is true for clangtidy
 let g:ale_linters = {
-\   'typescript': ['tslint'],
+\   'typescript': ['eslint', 'tsserver'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
 \   'python': ['flake8', 'mypy'],
 \   'go': ['go', 'golint', 'errcheck'],
@@ -472,8 +479,8 @@ let g:ale_linters = {
 let g:ale_cpp_clang_options = '-Wall -Wextra -std=c++20 -x c++'
 let g:ale_cpp_clangtidy_options = '-Wall -Wextra -std=c++20 -x c++'
 let g:ale_cpp_clangcheck_options = '-- -Wall -Wextra -std=c++20 -x c++'
-let g:ale_c_clangtidy_options = '-Wall -Wextra -std=c99 -x c'
-let g:ale_c_clangcheck_options = '-- -Wall -Wextra -std=c99 -x c'
+let g:ale_c_clangtidy_options = '-Wall -Wextra -std=c11 -x c'
+let g:ale_c_clangcheck_options = '-- -Wall -Wextra -std=c11 -x c'
 
 let g:ale_elm_ls_use_global = 1
 let g:ale_elm_ls_executable = '/usr/local/bin/elm-language-server'
@@ -660,6 +667,13 @@ highlight clear Todo
 "**********************"
 "** Helper Functions **"
 "**********************"
+" Displays the highlight group of the word under the cursor.
+" Very useful for color scheme design.
+function! SynGroup()
+    let l:s = synID(line('.'), col('.'), 1)
+    echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+endfun
+
 " Returns true if paste mode is enabled
 function! HasPaste()
     if &paste
