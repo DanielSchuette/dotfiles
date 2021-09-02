@@ -465,6 +465,9 @@ let g:completor_python_binary = '/usr/bin/python3'
 " Usually, tools only need to be installed to work without
 " additional settings in this file. Some language configs are set
 " manually, anyways.
+" NOTE(daniel): We explicitly don't use clang as a C++ linter here,
+" because it sometimes detects obscure errors in libg++.
+" CLANGCHECK probably doesn't add much, so we removed it.
 let g:ale_linters = {
 \   'typescript': ['eslint', 'tsserver'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
@@ -472,10 +475,10 @@ let g:ale_linters = {
 \   'go': ['go', 'golint', 'errcheck'],
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
-\   'cpp': ['clang'],
-\   'cc': ['clang']
+\   'cpp': ['clangtidy', 'gcc'],
 \}
 
+let g:ale_cpp_gcc_options = '-Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
 let g:ale_cpp_clang_options = '-Wall -Wextra -std=c++20 -x c++'
 let g:ale_cpp_clangtidy_options = '-Wall -Wextra -std=c++20 -x c++'
 let g:ale_cpp_clangcheck_options = '-- -Wall -Wextra -std=c++20 -x c++'
@@ -494,8 +497,9 @@ let g:ale_glsl_glslang_executable = '/usr/bin/glslangValidator'
 let g:ale_fixers = {
 \   'json': ['prettier'],
 \   'python': ['isort', 'autopep8'],
-\   'elm': ['elm-format']
+\   'elm': ['elm-format'],
 \}
+" totally possible, but needs configuation: 'cpp': ['clang-format']
 
 " Using `prettier' as a fixer can be annoying, e.g. when writing jsx. If
 " that is the case, just toggle running fixers on save with <leader>j.
