@@ -1,0 +1,38 @@
+{
+    "diagnostic.enableHighlightLineNumber": false,
+    "diagnostic.errorSign": "? ",
+    "diagnostic.hintSign": "* ",
+    "clangd.disableDiagnostics": true,
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": true,
+    "typescript.suggest.enabled": false,
+    "tsserver.enable": true,
+    "javascript.suggest.enabled": true,
+    "languageserver": {
+        "haskell": {
+            "command": "haskell-language-server-wrapper",
+            "args": [
+                "--lsp"
+            ],
+            "rootPatterns": [
+                ".stack.yaml",
+                ".hie-bios",
+                "BUILD.bazel",
+                "cabal.config",
+                "package.yaml"
+            ],
+            "filetypes": [
+                "hs",
+                "lhs",
+                "haskell"
+            ],
+            "initializationOptions": {
+                "languageServerHaskell": {
+                    "hlintOn": false,
+                    "maxNumberOfProblems": 10,
+                    "completionSnippetsOn": true
+                }
+            }
+        }
+    }
+}
