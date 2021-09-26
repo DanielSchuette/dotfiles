@@ -261,6 +261,7 @@ let g:user_emmet_leader_key='<C-D>'
 
 " YCM Configs
 " -----------
+" @NOTE: We are _not_ using YCM right now, we moved to Coc.
 " set path to extra configs (including compiler flags)
 let g:ycm_global_ycm_extra_conf = '~/dotfiles/.ycm_extra_conf.py'
 
@@ -476,6 +477,7 @@ let g:ale_linters = {
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
 \   'cpp': ['clangtidy', 'gcc'],
+\   'lhaskell': ['stack-build', 'hlint', 'stack-ghc']
 \}
 
 let g:ale_cpp_gcc_options = '-Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
