@@ -5,7 +5,7 @@ call ale#Set('scss_sasslint_options', '')
 call ale#Set('scss_sasslint_use_global', get(g:, 'ale_use_global_executables', 0))
 
 function! ale_linters#scss#sasslint#GetExecutable(buffer) abort
-    return ale#node#FindExecutable(a:buffer, 'scss_sasslint', [
+    return ale#path#FindExecutable(a:buffer, 'scss_sasslint', [
     \   'node_modules/sass-lint/bin/sass-lint.js',
     \   'node_modules/.bin/sass-lint',
     \])
@@ -22,7 +22,7 @@ endfunction
 
 call ale#linter#Define('scss', {
 \   'name': 'sasslint',
-\   'executable_callback': 'ale_linters#scss#sasslint#GetExecutable',
-\   'command_callback': 'ale_linters#scss#sasslint#GetCommand',
+\   'executable': function('ale_linters#scss#sasslint#GetExecutable'),
+\   'command': function('ale_linters#scss#sasslint#GetCommand'),
 \   'callback': 'ale#handlers#css#HandleCSSLintFormat',
 \})

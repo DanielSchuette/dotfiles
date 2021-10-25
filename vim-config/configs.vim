@@ -232,12 +232,28 @@ augroup END
 "** Plugin Configs **"
 "********************"
 " Ctags
+" -----
 " Vim supports ctags natively, but some of the keybindings are awkward by
 " default. They are redefined here. Tagbar must be installed separately.
 set tags=./tags,tags; " where to look for tags file
 nnoremap <leader>ct <C-]>
 nnoremap <leader>cT <C-t>
 nnoremap <leader>tb :TagbarToggle<CR>
+
+" Tagbar
+" ------
+let g:tagbar_type_elm = {
+      \ 'kinds' : [
+      \ 'f:function:0:0',
+      \ 'm:modules:0:0',
+      \ 'i:imports:1:0',
+      \ 't:types:1:0',
+      \ 'a:type aliases:0:0',
+      \ 'c:type constructors:0:0',
+      \ 'p:ports:0:0',
+      \ 's:functions:0:0',
+      \ ]
+      \}
 
 " Vim-Markdown Configs
 " --------------------
@@ -452,7 +468,7 @@ let g:ale_echo_msg_format = '[%linter%] %s'
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_enter = 1
 let g:ale_fix_on_save = 1
-let g:ale_completion_enabled = 1
+let g:ale_completion_enabled = 0 " we _do not_ want completion with ale but CoC
 
 " enable auto-completion using github.com/maralla/completor.vim
 let g:completor_gocode_binary = '~/code/go_src/src/github.com/nsf/gocode/'
@@ -488,11 +504,11 @@ let g:ale_c_clangtidy_options = '-Wall -Wextra -std=c11 -x c'
 let g:ale_c_clangcheck_options = '-- -Wall -Wextra -std=c11 -x c'
 
 let g:ale_elm_ls_use_global = 1
-let g:ale_elm_ls_executable = '/usr/local/bin/elm-language-server'
+let g:ale_elm_ls_executable = '/usr/bin/elm-language-server'
 let g:ale_elm_ls_elm_analyse_trigger = 'change'
-let g:ale_elm_ls_elm_path = '/usr/local/bin/elm'
-let g:ale_elm_ls_elm_format_path = '/home/daniel/.local/bin/elm-format'
-let g:ale_elm_ls_elm_test_path = '/home/daniel/.local/bin/elm-test'
+let g:ale_elm_ls_elm_path = '/usr/bin/elm'
+let g:ale_elm_ls_elm_format_path = '/usr/bin/elm-format'
+let g:ale_elm_ls_elm_test_path = '/usr/bin/elm-test'
 
 let g:ale_glsl_glslang_executable = '/usr/bin/glslangValidator'
 
