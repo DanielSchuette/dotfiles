@@ -314,14 +314,27 @@ let g:ycm_filetype_specific_completion_to_disable = {}
 
 " Coc Configs
 " -----------
-" highlights, NOTE: this doesn't really work (didn't bother to fix it)
+" Highlights, NOTE: this doesn't really work (didn't bother to fix it).
 highlight CocErrorSign ctermfg=Red ctermbg=Black
 highlight CocWarningSign ctermfg=Yellow ctermbg=Blue
 
-" enable autocompletion on tab
+" Enable autocompletion on tab.
 set completeopt=longest,menuone
 
-" disable completion for TypeScript
+" Use key up/down for scrolling documentation popup windows.
+if has('nvim-0.4.3') || has('patch-8.2.0750')
+    nnoremap <silent><nowait><expr> <C-f>  coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+    nnoremap <silent><nowait><expr> <C-b>  coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+    inoremap <silent><nowait><expr> <C-f>  coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+    inoremap <silent><nowait><expr> <C-b>  coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+    inoremap <silent><nowait><expr> <down> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<down>"
+    inoremap <silent><nowait><expr> <up>   coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<up>"
+endif
+
+" inoremap <silent><expr> <down> coc#util#has_float() ? FloatScroll(1) : "\<down>"
+" inoremap <silent><expr>  <up>  coc#util#has_float() ? FloatScroll(0) :  "\<up>"
+
+" Disable completion for TypeScript.
 autocmd BufNew,BufEnter *.ts execute "silent! CocDisable"
 autocmd BufLeave *.ts execute "silent! CocEnable"
 
