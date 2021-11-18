@@ -507,7 +507,8 @@ let g:ale_linters = {
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
 \   'cpp': ['clangtidy', 'gcc'],
-\   'lhaskell': ['stack-build', 'hlint', 'stack-ghc']
+\   'haskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie']
+\   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie']
 \}
 
 let g:ale_cpp_gcc_options = '-Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
@@ -530,6 +531,7 @@ let g:ale_fixers = {
 \   'json': ['prettier'],
 \   'python': ['isort', 'autopep8'],
 \   'elm': ['elm-format'],
+\   'haskell': ['hfmt'],
 \}
 " totally possible, but needs configuation: 'cpp': ['clang-format']
 
