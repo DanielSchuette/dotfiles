@@ -533,7 +533,7 @@ let g:ale_fixers = {
 \   'elm': ['elm-format'],
 \   'haskell': ['hfmt']
 \}
-" totally possible, but needs configuation: 'cpp': ['clang-format']
+" Totally usable, but needs configuration: 'cpp': ['clang-format'].
 
 " Using `prettier' as a fixer can be annoying, e.g. when writing jsx. If
 " that is the case, just toggle running fixers on save with <leader>j.
