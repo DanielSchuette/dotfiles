@@ -141,15 +141,11 @@ function! coc#list#scroll_preview(dir) abort
 endfunction
 
 function! coc#list#restore(winid, height)
-  if has('nvim')
-    if nvim_win_is_valid(a:winid)
-      call nvim_win_set_height(a:winid, a:height)
-    endif
-  else
-    if exists('win_execute')
-      call win_execute(a:winid, 'noa resize '.a:height, 'silent!')
-      redraw
-    endif
+  if has('nvim') && nvim_win_is_valid(a:winid)
+    call nvim_win_set_height(a:winid, a:height)
+  elseif s:is_vim && exists('*win_execute')
+    call win_execute(a:winid, 'noa resize '.a:height, 'silent!')
+    redraw
   endif
 endfunction
 
@@ -164,45 +160,19 @@ function! coc#list#hide(original, height, winid) abort
   if !empty(arr) && arr[0] != 0
     silent! pclose!
     let previewwin = coc#list#get_preview(arr[0])
-    call s:close_win(previewwin)
+    call coc#window#close(previewwin)
   endif
   if !empty(getwininfo(a:original))
     call win_gotoid(a:original)
   endif
   if a:winid
-    call s:close_win(a:winid)
+    silent! call coc#window#close(a:winid)
   endif
   if !empty(a:height) && win_getid() == a:original
     if exists('*nvim_win_set_height')
       call nvim_win_set_height(a:original, a:height)
     elseif win_getid() == a:original
       execute 'resize '.a:height
-    endif
-  endif
-endfunction
-
-function! s:close_win(winid) abort
-  if empty(a:winid) || a:winid == -1 || empty(getwininfo(a:winid))
-    return
-  endif
-  if s:is_vim
-    if exists('*win_execute')
-      noa call win_execute(a:winid, 'close!', 'silent!')
-    else
-      if win_getid() == a:winid
-        noa silent! close!
-      else
-        let winid = win_getid()
-        let res = win_gotoid(winid)
-        if res
-          noa silent! close!
-          noa wincmd p
-        endif
-      endif
-    endif
-  else
-    if nvim_win_is_valid(a:winid)
-      silent! noa call nvim_win_close(a:winid, 1)
     endif
   endif
 endfunction
@@ -275,7 +245,7 @@ function! coc#list#preview(lines, config) abort
       execute 'noa '.mod.' sb +resize\ '.height.' '.bufnr
       let winid = win_getid()
     endif
-    noa call winrestview({"lnum": lnum ,"topline":max([1, lnum - 3])})
+    noa call winrestview({"lnum": lnum ,"topline":s:get_topline(a:config, lnum, winid)})
     call setwinvar(winid, '&signcolumn', 'no')
     call setwinvar(winid, '&number', 1)
     call setwinvar(winid, '&cursorline', 0)
@@ -294,8 +264,9 @@ function! coc#list#preview(lines, config) abort
         call nvim_win_set_height(winid, height)
       endif
     endif
-    call coc#compat#execute(winid, ['syntax clear', 'noa call winrestview({"lnum":'.lnum.',"topline":'.max([1, lnum - 3]).'})'])
+    call coc#compat#execute(winid, ['syntax clear', 'noa call winrestview({"lnum":'.lnum.',"topline":'.s:get_topline(a:config, lnum, winid).'})'])
   endif
+  call setwinvar(winid, '&foldenable', 0)
   if s:prefix.' '.name != bufname(bufnr)
     if s:is_vim
       call win_execute(winid, 'noa file '.fnameescape(s:prefix.' '.name), 'silent!')
@@ -340,4 +311,14 @@ function! s:load_buffer(name) abort
     return bufnr
   endif
   return 0
+endfunction
+
+function! s:get_topline(config, lnum, winid) abort
+  let toplineStyle = get(a:config, 'toplineStyle', 'offset')
+  if toplineStyle == 'middle'
+    return max([1, a:lnum - winheight(a:winid)/2])
+  endif
+
+  let toplineOffset = get(a:config, 'toplineOffset', 3)
+  return max([1, a:lnum - toplineOffset])
 endfunction
