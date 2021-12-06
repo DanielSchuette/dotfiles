@@ -506,11 +506,13 @@ let g:ale_linters = {
 \   'go': ['go', 'golint', 'errcheck'],
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
-\   'cpp': ['clangtidy', 'gcc'],
+\   'cpp': ['clangtidy', 'g++'],
 \   'haskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
 \   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie']
 \}
 
+
+let g:ale_cpp_cc_options = ' -Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
 let g:ale_cpp_gcc_options = '-Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
 let g:ale_cpp_clang_options = '-Wall -Wextra -std=c++20 -x c++'
 let g:ale_cpp_clangtidy_options = '-Wall -Wextra -std=c++20 -x c++'
