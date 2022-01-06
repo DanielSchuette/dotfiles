@@ -5,11 +5,21 @@
     "clangd.disableDiagnostics": true,
     "python.linting.enabled": false,
     "python.linting.pylintEnabled": true,
+    "rust.show_warnings": false,
+    "rust.clippy_preference": "on",
     "typescript.suggest.enabled": false,
     "tsserver.enable": true,
     "javascript.suggest.enabled": true,
+    "codeLens.enable": false,
     "languageserver": {
+        "elmLS": {
+            "command": "elm-language-server",
+            "filetypes": ["elm"],
+            "rootPatterns": ["elm.json"],
+            "disableDiagnostics": true
+        },
         "haskell": {
+            "disableDiagnostics": true,
             "command": "haskell-language-server-wrapper",
             "args": [
                 "--lsp"
