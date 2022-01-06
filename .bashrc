@@ -60,6 +60,10 @@ export PATH
 #PATH="$GOROOT/bin:$PATH"
 #export PATH
 
+# Ruby gems location on Manjaro.
+PATH="$HOME/.local/share/gem/ruby/3.0.0/bin:$PATH"
+export PATH
+
 # prevent ranger from loading rc.conf from
 # /usr/share/doc/config/ and ~/.config/ranger
 export RANGER_LOAD_DEFAULT_RC=FALSE

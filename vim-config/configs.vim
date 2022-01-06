@@ -533,7 +533,8 @@ let g:ale_fixers = {
 \   'json': ['prettier'],
 \   'python': ['isort', 'autopep8'],
 \   'elm': ['elm-format'],
-\   'haskell': ['hfmt']
+\   'haskell': ['hfmt'],
+\   'rust': ['rustfmt']
 \}
 " Totally usable, but needs configuration: 'cpp': ['clang-format'].
 
