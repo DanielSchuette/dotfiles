@@ -508,7 +508,8 @@ let g:ale_linters = {
 \   'elm': ['elm_ls'],
 \   'cpp': ['clangtidy', 'g++'],
 \   'haskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
-\   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie']
+\   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
+\   'rust': ['cargo', 'rls', 'rustc', 'analyzer']
 \}
 
 
