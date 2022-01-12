@@ -509,7 +509,7 @@ let g:ale_linters = {
 \   'cpp': ['clangtidy', 'g++'],
 \   'haskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
 \   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
-\   'rust': ['cargo', 'rls', 'rustc', 'analyzer', 'clippy']
+\   'rust': ['cargo', 'rustc', 'analyzer']
 \}
 
 
