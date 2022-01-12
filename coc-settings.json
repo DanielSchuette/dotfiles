@@ -2,24 +2,24 @@
     "diagnostic.enableHighlightLineNumber": false,
     "diagnostic.errorSign": "? ",
     "diagnostic.hintSign": "* ",
+    "diagnostic.warningSign": "* ",
+    "diagnostic.infoSign": "* ",
+    "diagnostic.displayByAle": true,
+
     "clangd.disableDiagnostics": true,
     "python.linting.enabled": false,
     "python.linting.pylintEnabled": true,
-    "rust.show_warnings": false,
-    "rust.clippy_preference": "on",
     "typescript.suggest.enabled": false,
     "tsserver.enable": true,
     "javascript.suggest.enabled": true,
+    "rust-analyzer.inlayHints.enable": false,
+    "rust-analyzer.cargo.allFeatures": true,
+    "rust-analyzer.callInfo.full": true,
+    "rust-analyzer.hover.documentation": true,
+    "rust-analyzer.lens.enable": false,
     "codeLens.enable": false,
     "languageserver": {
-        "elmLS": {
-            "command": "elm-language-server",
-            "filetypes": ["elm"],
-            "rootPatterns": ["elm.json"],
-            "disableDiagnostics": true
-        },
         "haskell": {
-            "disableDiagnostics": true,
             "command": "haskell-language-server-wrapper",
             "args": [
                 "--lsp"
