@@ -34,6 +34,9 @@ syn match     rustAssert      "\<assert\(\w\)*!" contained
 syn match     rustPanic       "\<panic\(\w\)*!" contained
 syn match     rustAsync       "\<async\%(\s\|\n\)\@="
 syn keyword   rustKeyword     break
+" `as` is not a keyword but an operator in Rust. Since we disabled operator
+" highlighting, we're gonna pretend as if `as` were one, though.
+syn keyword   rustKeyword     as
 syn keyword   rustKeyword     box
 syn keyword   rustKeyword     continue
 syn keyword   rustKeyword     crate
