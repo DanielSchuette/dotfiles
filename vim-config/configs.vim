@@ -642,6 +642,11 @@ highlight link CocWarningVirtualText Normal
 highlight link CocInfoVirtualText Normal
 highlight link cError Normal
 
+" spellchecker highlighting should be just an underline
+highlight clear SpellBad
+highlight SpellBad cterm=underline
+highlight SpellBad gui=undercurl
+
 " toggle a color column to visualize a line width of 80 chars with <leader>cc
 function! ToggleColorColumn()
     if &colorcolumn ==# 80
