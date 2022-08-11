@@ -46,9 +46,13 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 #- Path and Env Config -#
 #-----------------------#
 PATH="$HOME/.local/bin:$HOME/bin:$PATH"
-export PATH
 PATH="$HOME/.cabal/bin:$PATH"
-export PATH
+
+PATH="$HOME/bin/quarto-1.0.38/bin/:$PATH"
+QUARTO_VERSION="1.0.38"
+
+# RStudio configuration vars.
+R_LIBS_USER="/home/daniel/code/r_libs"
 
 # set environment variables for go (is this even necessary with modern Go?)
 #GOBIN="$HOME/code/go_src/bin"
@@ -62,6 +66,7 @@ export PATH
 
 # Ruby gems location on Manjaro.
 PATH="$HOME/.local/share/gem/ruby/3.0.0/bin:$PATH"
+
 export PATH
 
 # prevent ranger from loading rc.conf from
@@ -120,8 +125,9 @@ alias ll="exa -lahF --git"
 alias t="tokei"
 alias b="bat"
 
-# easy access to ipython
+# easy access to ipython and R
 alias py="ipython"
+alias r="R --vanilla -q"
 
 # copy to system clipboard by default
 alias xclip="xclip -selection clipboard"

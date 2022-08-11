@@ -499,6 +499,7 @@ let g:completor_python_binary = '/usr/bin/python3'
 " NOTE(daniel): We explicitly don't use clang as a C++ linter here,
 " because it sometimes detects obscure errors in libg++.
 " CLANGCHECK probably doesn't add much, so we removed it.
+" NOTE(daniel): Linting in R is terribly, terribly mem-intensive.
 let g:ale_linters = {
 \   'typescript': ['eslint', 'tsserver'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
@@ -509,9 +510,9 @@ let g:ale_linters = {
 \   'cpp': ['clangtidy', 'g++'],
 \   'haskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
 \   'lhaskell': ['stack-build', 'hlint', 'stack-ghc', 'hls', 'hie'],
-\   'rust': ['cargo', 'rustc', 'analyzer']
+\   'rust': ['cargo', 'rustc', 'analyzer'],
+\   'r': ['lintr']
 \}
-
 
 let g:ale_cpp_cc_options = ' -Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
 let g:ale_cpp_gcc_options = '-Wall -Wextra -Wpedantic -Weffc++ -std=c++20'
