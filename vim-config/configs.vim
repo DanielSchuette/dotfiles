@@ -643,6 +643,9 @@ highlight link CocWarningVirtualText Normal
 highlight link CocInfoVirtualText Normal
 highlight link cError Normal
 
+" R functions is bright yellow are even more ugly than regular R functions.
+highlight  rFunction ctermfg=red
+
 " spellchecker highlighting should be just an underline
 highlight clear SpellBad
 highlight SpellBad cterm=underline
