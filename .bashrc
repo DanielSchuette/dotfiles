@@ -127,7 +127,7 @@ alias b="bat"
 
 # easy access to ipython and R
 alias py="ipython"
-alias r="R --vanilla -q"
+alias r="R --no-save --no-restore --no-site-file --no-init-file -q"
 
 # copy to system clipboard by default
 alias xclip="xclip -selection clipboard"
