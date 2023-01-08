@@ -1,4 +1,4 @@
-# Asynchronous Lint Engine [![GitHub Build Status](https://github.com/dense-analysis/ale/workflows/CI/badge.svg)](https://github.com/dense-analysis/ale/actions?query=event%3Apush+workflow%3ACI+branch%3Amaster++) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/r0ef1xu8xjmik58d/branch/master?svg=true)](https://ci.appveyor.com/project/dense-analysis/ale) [![Join the chat at https://gitter.im/vim-ale/Lobby](https://badges.gitter.im/vim-ale/Lobby.svg)](https://gitter.im/vim-ale/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Asynchronous Lint Engine [![GitHub Build Status](https://github.com/dense-analysis/ale/workflows/CI/badge.svg)](https://github.com/dense-analysis/ale/actions?query=event%3Apush+workflow%3ACI+branch%3Amaster++) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/r0ef1xu8xjmik58d/branch/master?svg=true)](https://ci.appveyor.com/project/dense-analysis/ale) [![Join the Dense Analysis Discord server](https://img.shields.io/badge/chat-Discord-5865F2)](https://discord.gg/5zFD6pQxDk)
 
 
 ![ALE Logo by Mark Grealish - https://www.bhalash.com/](https://user-images.githubusercontent.com/3518142/59195920-2c339500-8b85-11e9-9c22-f6b7f69637b8.jpg)
@@ -7,7 +7,7 @@ ALE (Asynchronous Lint Engine) is a plugin providing linting (syntax checking
 and semantic errors) in NeoVim 0.2.0+ and Vim 8 while you edit your text files,
 and acts as a Vim [Language Server Protocol](https://langserver.org/) client.
 
-<img src="https://user-images.githubusercontent.com/3518142/59195938-3a81b100-8b85-11e9-8e8d-6a601b1db908.gif" alt="A linting example with the darkspectrum color scheme in GVim." title="A linting example with the darkspectrum color scheme in GVim.">
+<video autoplay="true" muted="true" loop="true" controls="false" src="https://user-images.githubusercontent.com/3518142/210141215-8f2ff760-6a87-4704-a11e-c109b8e9ec41.mp4" title="An example showing what ALE can do."></video>
 
 ALE makes use of NeoVim and Vim 8 job control functions and timers to
 run linters on the contents of text buffers and return errors as
@@ -198,14 +198,15 @@ completion manually with `<C-x><C-o>`.
 set omnifunc=ale#completion#OmniFunc
 ```
 
-ALE supports automatic imports from external modules. This behavior is disabled
-by default and can be enabled by setting:
+ALE supports automatic imports from external modules. This behavior is enabled
+by default and can be disabled by setting:
 
 ```vim
-let g:ale_completion_autoimport = 1
+let g:ale_completion_autoimport = 0
 ```
 
-See `:help ale-completion` for more information.
+Note that disabling auto import can result in missing completion items from some
+LSP servers (e.g. eclipselsp). See `:help ale-completion` for more information.
 
 <a name="usage-go-to-definition"></a>
 
@@ -262,6 +263,9 @@ See `:help ale-symbol-search` for more information.
 
 ALE supports renaming symbols in symbols in code such as variables or class
 names with the `ALERename` command.
+
+`ALEFileRename` will rename file and fix import paths (tsserver
+only).
 
 `ALECodeAction` will execute actions on the cursor or applied to a visual
 range selection, such as automatically fixing errors.
@@ -355,7 +359,7 @@ See the Vundle documentation for more information.
 
 <a name="installation-with-vim-plug"></a>
 
-### 3.iiii. Installation with Vim-Plug
+### 3.iv. Installation with Vim-Plug
 
 You can install this plugin using [Vim-Plug](https://github.com/junegunn/vim-plug)
 by adding the GitHub path for this repository to your `~/.vimrc`:
@@ -382,8 +386,8 @@ If you are interested in the general direction of the project, check out the
 [wiki home page](https://github.com/dense-analysis/ale/wiki). The wiki includes
 a Roadmap for the future, and more.
 
-If you'd liked to discuss the project more directly, check out the `#vim-ale` channel
-on Freenode. Web chat is available [here](https://webchat.freenode.net/?channels=vim-ale).
+If you'd liked to discuss ALE and more check out the Dense Analysis Discord
+server here: https://discord.gg/5zFD6pQxDk
 
 <a name="faq"></a>
 
@@ -927,14 +931,14 @@ If the terminal supports Unicode, you might try setting the value like below, to
 make it look nicer.
 
 ```vim
-let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰']
+let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
 ```
 
 Since vim's default uses nice unicode characters when possible, you can trick
 ale into using that default with
 
 ```vim
-let g:ale_floating_window_border = repeat([''], 6)
+let g:ale_floating_window_border = repeat([''], 8)
 ```
 
 <a name="faq-vim-lsp"></a>

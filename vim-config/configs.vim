@@ -231,6 +231,10 @@ augroup END
 "********************"
 "** Plugin Configs **"
 "********************"
+" Zig.vim
+" -------
+let g:zig_fmt_autosave = 0
+
 " Ctags
 " -----
 " Vim supports ctags natively, but some of the keybindings are awkward by

@@ -20,15 +20,14 @@ git_version=$(git describe --always --tags)
 DOCKER_RUN_IMAGE="$image:$image_tag"
 export DOCKER_RUN_IMAGE
 
-tests='test/*.vader test/*/*.vader test/*/*/*.vader test/*/*/*.vader'
+tests='test/*.vader test/*/*.vader test/*/*/*.vader'
 # These flags are forwarded to the script for running Vader tests.
 verbose_flag=''
 quiet_flag=''
 run_neovim_02_tests=1
-run_neovim_04_tests=1
-run_neovim_05_tests=1
+run_neovim_08_tests=1
 run_vim_80_tests=1
-run_vim_82_tests=1
+run_vim_90_tests=1
 run_linters=1
 
 while [ $# -ne 0 ]; do
@@ -43,80 +42,64 @@ while [ $# -ne 0 ]; do
     ;;
     --build-image)
         run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
+        run_neovim_08_tests=0
         run_linters=0
         shift
     ;;
     --neovim-only)
         run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_linters=0
         shift
     ;;
     --neovim-02-only)
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
+        run_neovim_08_tests=0
         run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_linters=0
         shift
     ;;
-    --neovim-04-only)
+    --neovim-08-only)
         run_neovim_02_tests=0
-        run_neovim_05_tests=0
         run_vim_80_tests=0
-        run_vim_82_tests=0
-        run_linters=0
-        shift
-    ;;
-    --neovim-05-only)
-        run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_linters=0
         shift
     ;;
     --vim-only)
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
+        run_neovim_08_tests=0
         run_linters=0
         shift
     ;;
     --vim-80-only)
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
-        run_vim_82_tests=0
+        run_neovim_08_tests=0
+        run_vim_90_tests=0
         run_linters=0
         shift
     ;;
-    --vim-82-only)
+    --vim-90-only)
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
+        run_neovim_08_tests=0
         run_vim_80_tests=0
         run_linters=0
         shift
     ;;
     --linters-only)
         run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=0
+        run_neovim_08_tests=0
         shift
     ;;
     --fast)
         run_vim_80_tests=0
-        run_vim_82_tests=0
+        run_vim_90_tests=0
         run_neovim_02_tests=0
-        run_neovim_04_tests=0
-        run_neovim_05_tests=1
+        run_neovim_08_tests=1
         shift
     ;;
     --help)
@@ -131,11 +114,10 @@ while [ $# -ne 0 ]; do
         echo '  --build-image     Run docker image build only.'
         echo '  --neovim-only     Run tests only for NeoVim'
         echo '  --neovim-02-only  Run tests only for NeoVim 0.2'
-        echo '  --neovim-04-only  Run tests only for NeoVim 0.4'
-        echo '  --neovim-05-only  Run tests only for NeoVim 0.5'
+        echo '  --neovim-08-only  Run tests only for NeoVim 0.8'
         echo '  --vim-only        Run tests only for Vim'
-        echo '  --vim-80-only     Run tests only for Vim 8.0'
-        echo '  --vim-82-only     Run tests only for Vim 8.2'
+        echo '  --vim-80-only     Run tests only for Vim 8.2'
+        echo '  --vim-90-only     Run tests only for Vim 9.0'
         echo '  --linters-only    Run only Vint and custom checks'
         echo '  --fast            Run only the fastest Vim and custom checks'
         echo '  --help            Show this help text'
@@ -170,7 +152,7 @@ fi
 find test -name '*.swp' -delete
 
 # Check if docker un image is available locally
-has_image=$(docker images ls --filter reference="${image}:${image_tag}" --quiet | wc -l)
+has_image=$(docker images --quiet "${image}:${image_tag}" | wc -l)
 
 if [ "$has_image" -eq 0 ]
 then
@@ -236,10 +218,9 @@ trap cancel_tests INT TERM
 
 for vim in $(docker run --rm "$DOCKER_RUN_IMAGE" ls /vim-build/bin | grep '^neovim\|^vim' ); do
     if ( [[ $vim =~ ^vim-v8.0 ]] && ((run_vim_80_tests)) ) \
-    || ( [[ $vim =~ ^vim-v8.2 ]] && ((run_vim_82_tests)) ) \
+    || ( [[ $vim =~ ^vim-v9.0 ]] && ((run_vim_90_tests)) ) \
     || ( [[ $vim =~ ^neovim-v0.2 ]] && ((run_neovim_02_tests)) ) \
-    || ( [[ $vim =~ ^neovim-v0.4 ]] && ((run_neovim_04_tests)) ) \
-    || ( [[ $vim =~ ^neovim-v0.5 ]] && ((run_neovim_05_tests)) ); then
+    || ( [[ $vim =~ ^neovim-v0.8 ]] && ((run_neovim_08_tests)) ); then
         echo "Starting Vim: $vim..."
         file_number=$((file_number+1))
         test/script/run-vader-tests $quiet_flag $verbose_flag "$vim" "$tests" \
