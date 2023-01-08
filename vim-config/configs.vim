@@ -488,6 +488,9 @@ let g:ale_lint_on_enter = 1
 let g:ale_fix_on_save = 1
 let g:ale_completion_enabled = 0 " we _do not_ want completion with ale but CoC
 
+" This is a fairly knew, super annoying feature that I'll always disable.
+let g:ale_virtualtext_cursor = 0
+
 " enable auto-completion using github.com/maralla/completor.vim
 let g:completor_gocode_binary = '~/code/go_src/src/github.com/nsf/gocode/'
 let g:completor_python_binary = '/usr/bin/python3'
@@ -540,9 +543,9 @@ let g:ale_fixers = {
 \   'python': ['isort', 'autopep8'],
 \   'elm': ['elm-format'],
 \   'haskell': ['hfmt'],
-\   'rust': ['rustfmt']
 \}
 " Totally usable, but needs configuration: 'cpp': ['clang-format'].
+" currently unusable: 'rust': ['rustfmt']
 
 " Using `prettier' as a fixer can be annoying, e.g. when writing jsx. If
 " that is the case, just toggle running fixers on save with <leader>j.
