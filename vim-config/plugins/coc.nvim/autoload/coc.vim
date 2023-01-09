@@ -6,10 +6,12 @@ let g:coc_selected_text = ''
 let g:coc_vim_commands = []
 let s:watched_keys = []
 let s:is_vim = !has('nvim')
-let s:error_sign = get(g:, 'coc_status_error_sign', has('mac') ? '❌ ' : 'E')
-let s:warning_sign = get(g:, 'coc_status_warning_sign', has('mac') ? '⚠️ ' : 'W')
+let s:utf = has('nvim') || &encoding =~# '^utf'
+let s:error_sign = get(g:, 'coc_status_error_sign', has('mac') && s:utf ? "\u274c " : 'E ')
+let s:warning_sign = get(g:, 'coc_status_warning_sign', has('mac') && s:utf ? "\u26a0\ufe0f " : 'W ')
 let s:select_api = exists('*nvim_select_popupmenu_item')
 let s:callbacks = {}
+let s:hide_pum = has('nvim-0.6.1') || has('patch-8.2.3389')
 
 function! coc#expandable() abort
   return coc#rpc#request('snippetCheck', [1, 0])
@@ -31,89 +33,21 @@ function! coc#add_command(id, cmd, ...)
   call coc#rpc#notify('addCommand', [config])
 endfunction
 
-function! coc#refresh() abort
-  return "\<c-r>=coc#start()\<CR>"
-endfunction
-
 function! coc#on_enter()
   call coc#rpc#notify('CocAutocmd', ['Enter', bufnr('%')])
   return ''
 endfunction
 
 function! coc#_insert_key(method, key, ...) abort
+  let prefix = ''
   if get(a:, 1, 1)
-    call coc#_cancel()
+    if coc#pum#visible()
+      let prefix = "\<C-r>=coc#pum#close()\<CR>"
+    elseif pumvisible() && s:hide_pum
+      let prefix = "\<C-x>\<C-z>"
+    endif
   endif
-  return "\<c-r>=coc#rpc#".a:method."('doKeymap', ['".a:key."'])\<CR>"
-endfunction
-
-function! coc#_complete() abort
-  let items = get(g:coc#_context, 'candidates', [])
-  let preselect = get(g:coc#_context, 'preselect', -1)
-  let startcol = g:coc#_context.start + 1
-  if s:select_api && len(items) && preselect != -1
-    noa call complete(startcol, items)
-    call nvim_select_popupmenu_item(preselect, v:false, v:false, {})
-    " use <cmd> specific key to preselect item at once
-    call feedkeys("\<Cmd>\<CR>" , 'i')
-  else
-    call complete(startcol, items)
-  endif
-  return ''
-endfunction
-
-function! coc#_do_complete(start, items, preselect)
-  let g:coc#_context = {
-        \ 'start': a:start,
-        \ 'candidates': a:items,
-        \ 'preselect': a:preselect
-        \}
-  if mode() =~# 'i' && &paste != 1
-    call feedkeys("\<Plug>CocRefresh", 'i')
-  endif
-endfunction
-
-function! coc#_select_confirm() abort
-  if !exists('*complete_info')
-    throw 'coc#_select_confirm requires complete_info function to work'
-  endif
-  let selected = complete_info()['selected']
-  if selected != -1
-     return "\<C-y>"
-  elseif pumvisible()
-    return "\<down>\<C-y>"
-  endif
-  return ''
-endfunction
-
-function! coc#_selected()
-  if !pumvisible() | return 0 | endif
-  return coc#rpc#request('hasSelected', [])
-endfunction
-
-function! coc#_hide() abort
-  if !pumvisible() | return | endif
-  call feedkeys("\<C-e>", 'in')
-endfunction
-
-function! coc#_cancel()
-  " hack for close pum
-  if pumvisible()
-    let g:coc#_context = {'start': 0, 'preselect': -1,'candidates': []}
-    call feedkeys("\<Plug>CocRefresh", 'i')
-    call coc#rpc#notify('stopCompletion', [])
-  endif
-endfunction
-
-function! coc#_select() abort
-  if !pumvisible() | return | endif
-  call feedkeys("\<C-y>", 'in')
-endfunction
-
-function! coc#start(...)
-  let opt = coc#util#get_complete_option()
-  call CocActionAsync('startCompletion', extend(opt, get(a:, 1, {})))
-  return ''
+  return prefix."\<c-r>=coc#rpc#".a:method."('doKeymap', ['".a:key."'])\<CR>"
 endfunction
 
 " used for statusline
@@ -126,14 +60,7 @@ function! coc#status()
   if !empty(info) && get(info, 'warning', 0)
     call add(msgs, s:warning_sign . info['warning'])
   endif
-  return s:trim(join(msgs, ' ') . ' ' . get(g:, 'coc_status', ''))
-endfunction
-
-function! s:trim(str)
-  if exists('*trim')
-    return trim(a:str)
-  endif
-  return substitute(a:str, '\s\+$', '', '')
+  return coc#compat#trim(join(msgs, ' ') . ' ' . get(g:, 'coc_status', ''))
 endfunction
 
 function! coc#config(section, value)
@@ -167,24 +94,10 @@ function! s:GlobalChange(dict, key, val)
   call coc#rpc#notify('GlobalChange', [a:key, get(a:val, 'old', v:null), get(a:val, 'new', v:null)])
 endfunction
 
-function! coc#_map()
-  if !s:select_api | return | endif
-  for i in range(1, 9)
-    exe 'inoremap <buffer> '.i.' <Cmd>call nvim_select_popupmenu_item('.(i - 1).', v:true, v:true, {})<cr>'
-  endfor
-endfunction
-
-function! coc#_unmap()
-  if !s:select_api | return | endif
-  for i in range(1, 9)
-    exe 'silent! iunmap <buffer> '.i
-  endfor
-endfunction
-
 function! coc#on_notify(id, method, Cb)
   let key = a:id. '-'.a:method
   let s:callbacks[key] = a:Cb
-  call coc#rpc#notify('registNotification', [a:id, a:method])
+  call coc#rpc#notify('registerNotification', [a:id, a:method])
 endfunction
 
 function! coc#do_notify(id, method, result)
@@ -193,4 +106,41 @@ function! coc#do_notify(id, method, result)
   if !empty(Fn)
     call Fn(a:result)
   endif
+endfunction
+
+" Deprecated, not used any more
+function! coc#_complete() abort
+  let items = get(g:coc#_context, 'candidates', [])
+  let preselect = get(g:coc#_context, 'preselect', -1)
+  let startcol = g:coc#_context.start + 1
+  if s:select_api && len(items) && preselect != -1
+    noa call complete(startcol, items)
+    call nvim_select_popupmenu_item(preselect, v:false, v:false, {})
+    " use <cmd> specific key to preselect item at once
+    call feedkeys("\<Cmd>\<CR>" , 'i')
+  else
+    if pumvisible()
+      let g:coc_disable_complete_done = 1
+    endif
+    call complete(startcol, items)
+  endif
+  return ''
+endfunction
+
+function! coc#start(...)
+  call CocActionAsync('startCompletion', get(a:, 1, {}))
+  return ''
+endfunction
+
+" Could be used by coc extensions
+function! coc#_cancel(...)
+  call coc#pum#close()
+endfunction
+
+function! coc#refresh() abort
+  return "\<c-r>=coc#start()\<CR>"
+endfunction
+
+function! coc#_select_confirm() abort
+  return "\<C-r>=coc#pum#select_confirm()\<CR>"
 endfunction

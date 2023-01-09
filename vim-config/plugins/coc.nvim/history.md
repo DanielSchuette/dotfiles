@@ -1,3 +1,653 @@
+# 2022-12-25
+
+- Create symbol tree from SymbolInformation list.
+
+# 2022-12-23
+
+- Support `URI` as param for API `workspace.jumpTo()`.
+
+# 2022-12-22
+
+- Support popup window for window related APIs.
+
+# 2022-12-21
+
+- When create `CocSem` highlight group, replace invalid character of token types
+  and token modifiers with underline.
+
+# 2022-12-20
+
+- Export `Buffer.setKeymap` and `Buffer.deleteKeymap` with vim and neovim support.
+- Make `workspace.registerLocalKeymap` accept bufnr argument.
+
+# 2022-12-12
+
+- Allow configuration of `window` scoped used by folder configuration file, like
+  VSCode.
+- Add location support for `getHover` action.
+- Use unique id for each tab on vim.
+- Chinese word segmentation for keywords.
+
+# 2022-12-05
+
+- Add `switchConsole` method to `LanguageClient`
+
+# 2022-12-03
+
+- Add configuration `suggest.insertMode`.
+
+# 2022-12-02
+
+- Expand variables for string configuration value.
+
+# 2022-11-30
+
+- File fragment support for `workspace.jumpTo()`.
+- Support `g:coc_open_url_command`.
+- Support `contributes.configuration` from extension as array.
+
+# 2022-11-29
+
+- Add documentations for develop of coc.nvim extensions.
+- Remove unused variable `g:coc_channel_timeout`.
+
+# 2022-11-28
+
+- Placeholder and update value support for `InputBox` and `QuickPick`.
+- `triggerOnly` option property for vim completion source.
+- Export `getExtensionById` from `extensions` module.
+
+# 2022-11-26
+
+- Use CTRL-R expression instead of timer for pum related functions:
+
+  - `coc#pum#insert()`
+  - `coc#pum#one_more()`
+  - `coc#pum#next()`
+  - `coc#pum#prev()`
+  - `coc#pum#stop()`
+  - `coc#pum#cancel()`
+  - `coc#pum#confirm()`
+
+# 2022-11-25
+
+- Avoid view change on list create.
+- Add configurations `links.enable` and `links.highlight`.
+- Use cursorline for list on neovim (to have correct highlight).
+- Fix highlight not work on neovim 0.5.0 by use `luaeval`.
+
+# 2022-11-22
+
+- Add command `document.toggleCodeLens`.
+
+# 2022-11-21
+
+- Add `CocAction('addWorkspaceFolder')`.
+
+# 2022-11-20
+
+- Support code lens feature on vim9.
+- `codeLens.subseparator` default changed to `|`, like VSCode.
+- Add configuration `coc.preferences.enableGFMBreaksInMarkdownDocument`, default to `true`
+- Add key-mappings `<Plug>(coc-codeaction-selected)` and `<Plug>(coc-codeaction-refactor-selected)`.
+
+# 2022-11-19
+
+- Create highlights after VimEnter.
+- Action 'organizeImport' return false instead of throw error when import code
+  action not found.
+
+# 2022-11-18
+
+- Throw error when rpc request error, instead of echo message.
+
+# 2022-11-13
+
+- Plugin emit ready after extensions activated.
+
+# 2022-11-12
+
+- Not cancel completion when request for in complete sources.
+
+# 2022-11-11
+
+- Support filter and display completion items with different start positions.
+- Remove configuration `suggest.fixInsertedWord`, insert word would always
+  be fixed.
+- Configuration `suggest.invalidInsertCharacters` default to line break
+  characters.
+
+# 2022-11-10
+
+- Not reset 'Search' highlight on float window as it could be used.
+- Note remap `<esc>` on float preview window.
+- Add new action `feedkeys!` to list.
+- Add new configuration `list.floatPreview`.
+
+# 2022-11-07
+
+- Add API `CocAction('snippetInsert')` for snippet insert from vim plugin.
+- Snippet support for vim source, snippet item should have `isSnippet` to be
+  `true` and `insertText` to be snippet text, when `on_complete` function exists,
+  the snippet expand should be handled completion source.
+
+# 2022-11-06
+
+- `window.createQuickPick()` API that show QuickPick by default, call `show()`
+- Fix change value property for QuickPick not works.
+
+# 2022-10-30
+
+- Add configuration `colors.enable`, mark `colors.filetypes` deprecated.
+- Add command `document.toggleColors` for toggle colors of current buffer.
+- Changed filter of completion to use code from VSCode.
+- Add configuration `suggest.filterGraceful`
+
+# 2022-10-39
+
+- Add configuration `suggest.enableFloat` back.
+
+# 2022-10-27
+
+- Use `workspace.rootPatterns` replace `coc.preferences.rootPatterns`, old
+  configuration still works when exists.
+- Store configurations with configuration registry.
+
+# 2022-10-25
+
+- Add `--height` support to `CocList`.
+
+# 2022-10-24
+
+- Use builtin static words source for snippet choices.
+- Remove configuration `"snippet.choicesMenuPicker"`
+- Remove unused internal functions `coc#complete_indent()` and
+  `coc#_do_complete()`
+
+# 2022-10-21
+
+- Consider utf-16 code unit instead of unicode code point.
+- Add `coc#string#character_index()` `coc#string#byte_index()` and
+  `coc#string#character_length()`.
+
+# 2022-10-20
+
+- Add `coc#pum#one_more()`
+
+# 2022-10-19
+
+- Trigger for trigger sources when no filter results available.
+
+# 2022-10-18
+
+- Change `suggest.maxCompleteItemCount` default to 256.
+
+# 2022-10-17
+
+- Set `g:coc_service_initialized` to `0` before service restart.
+- Show warning when diagnostic jump failed.
+- Use strwidth.wasm module for string display width.
+- Add API `workspace.getDisplayWidth`.
+
+# 2022-10-15
+
+- Add configuration `inlayHint.display`.
+
+# 2022-10-07
+
+- Use `CocFloatActive` for highlight active parameters.
+
+# 2022-09-28
+
+- Limit popupmenu width when exceed screen to &pumwidth, instead of change
+  completion column.
+- Make escape of `${name}` for ultisnip snippets the same behavior as
+  Ultisnip.vim.
+
+# 2022-09-27
+
+- Use fuzzy.wasm for native fuzzy match.
+- Add `binarySearch` and `isFalsyOrEmpty` functions for array.
+- `suggest.localityBonus` works like VSCode, using selection ranges.
+- Add and export `workspace.computeWordRanges`.
+- Rework keywords parse for better performance (parse changed lines only and use
+  yield to reduce iteration).
+
+# 2022-09-12
+
+- All configurations are now scoped #4185
+- No `onDidChangeConfiguration` event fired when workspace folder changed.
+- Deprecated configuration `suggest.detailMaxLength`, use `suggest.labelMaxLength` instead.
+- Deprecated configuration `inlayHint.filetypes`, use `inlayHint.enable` with scoped languages instead.
+- Deprecated configuration `semanticTokens.filetypes`, use `semanticTokens.enable` with scoped languages instead.
+- Use `workspaceFolderValue` instead of `workspaceValue` for `ConfigurationInspect` returned by `WorkspaceConfiguration.inspect()`.
+
+# 2022-09-04
+
+- Add configuration "snippet.choicesMenuPicker".
+
+# 2022-09-03
+
+- Send "WinClosed" event to node client.
+- Add `onDidFilterStateChange` and `onDidCursorMoved` to `TreeView`.
+- Support `autoPreview` for outline.
+
+# 2022-09-02
+
+- Support `diagnostic.virtualTextFormat`.
+- Add command `workspace.writeHeapSnapshot`.
+
+# 2022-09-01
+
+- Add configuration "suggest.asciiMatch"
+- Support `b:coc_force_attach`.
+
+# 2022-08-31
+
+- Add configuration "suggest.reversePumAboveCursor".
+- Use `DiagnosticSign*` highlight groups when possible.
+- Use `DiagnosticUnderline*` highlight groups when possible.
+
+# 2022-08-30
+
+- Export `LineBuilder` class.
+
+# 2022-08-29
+
+- Fix semanticTokens highlights unexpected cleared
+- Fix range of `doQuickfix` action.
+- Check reverse of `CocFloating`, use `border` and `Normal` highlight when reversed.
+- Make `CocInlayHint` use background of `SignColumn`.
+- Add command `document.toggleInlayHint`.
+
+# 2022-08-28
+
+- Make `CocMenuSel` use background of `PmenuSel`.
+- Snippet related configuration changed (old configuration still works until next release)
+  - "coc.preferences.snippetStatusText" -> "snippet.statusText"
+  - "coc.preferences.snippetHighlight" -> "snippet.highlight"
+  - "coc.preferences.nextPlaceholderOnDelete" -> "snippet.nextPlaceholderOnDelete"
+- Add configuration `"list.smartCase"`
+- Add configurations for inlay hint
+  - "inlayHint.refreshOnInsertMode"
+  - "inlayHint.enableParameter"
+  - "inlayHint.typeSeparator"
+  - "inlayHint.parameterSeparator"
+  - "inlayHint.subSeparator"
+
+# 2022-08-27
+
+- Avoid use `EasyMotion#is_active`, use autocmd to disable linting.
+- Show message when call hierarchy provider not found or bad position.
+
+# 2022-08-26
+
+- Remove `completeOpt` from `workspace.env`.
+- Add configuration `"diagnostic.virtualTextAlign"`.
+- Add warning when required features not compiled with vim.
+- Not echo error for semanticTokens request (log only).
+- Merge results form providers when possible.
+
+# 2022-08-24
+
+- Virtual text of suggest on vim9.
+- Virtual text of diagnostics on vim9.
+- Add configuration `inlayHint.filetypes`.
+- Inlay hint support on vim9.
+
+# 2022-08-23
+
+- Retry semanticTokens request on server cancel (LSP 3.17).
+- `RelativePattern` support for `workspace.createFileSystemWatcher()`.
+- `relativePatternSupport` for `DidChangeWatchedFiles` (LSP 3.17).
+- Not echo error on `doComplete()`.
+
+# 2022-08-21
+
+- Added `window.createFloatFactory()`, deprecated `FloatFactory` class.
+- Support `labelDetails` field of `CompleteItem`(LSP 3.17).
+- Added `triggerKind` to `CodeActionContext`, export `CodeActionTriggerKind`.
+
+# 2022-08-20
+
+- Support pull diagnostics `:h coc-pullDiagnostics`.
+- Break change: avoid extension overwrite builtin configuration defaults.
+- Change default value of configuration "diagnostic.format".
+- 'line' changes to 'currline' for `CocAction('codeAction')`.
+- Check NodeJS version on syntax error.
+
+# 2022-08-10
+
+- Change "notification.highlightGroup" default to "Normal".
+
+# 2022-08-07
+
+- Add configuration 'suggest.pumFloatConfig'.
+
+# 2022-08-04
+
+- Make diagnostic float window with the same background as CocFloating.
+
+# 2022-08-03
+
+- Add highlight group 'CocFloatingDividingLine'.
+
+# 2022-08-01
+
+- Use custom popup menu, #3862.
+- Use "first" instead of "none" for configuration `suggest.selection`.
+- Make "first" default for `suggest.selection`, like VSCode.
+- Add default blue color for hlgroup `CocMenuSel`.
+
+# 2022-06-14
+
+- Add highlight groups `CocListLine` and `CocListSearch`.
+
+# 2022-06-11
+
+- Add configuration "notification.disabledProgressSources"
+- Add "rounded" property to "floatConfig"
+
+# 2022-06-04
+
+- Add configuration `workspace.openOutputCommand`.
+- Log channel message of vim when `g:node_client_debug` enabled.
+
+# 2022-05-30
+
+- Disable `progressOnInitialization` for language client by default.
+
+# 2022-05-28
+
+- Support `repeat#set` for commands that make changes only.
+
+# 2022-05-24
+
+- Add transition and annotation support for `workspace.applyEdits()`.
+- Add command `workspace.undo` and `workspace.redo`.
+- Remove configuration `coc.preferences.promptWorkspaceEdit`.
+- Remove command `CocAction` and `CocFix`.
+
+# 2022-05-22
+
+- Check for previous position when not able to find completion match.
+- Add `content` support to `window.showMenuPicker()`
+
+# 2022-05-17
+
+- Add `QuickPick` module.
+- Add API `window.showQuickPick()` and `window.createQuickPick()`.
+
+# 2022-05-16
+
+- Add properties `title`, `loading` & `borderhighlight` to `InputBox`
+
+# 2022-05-14
+
+- Add `InputOption` support to `window.requestInput`
+- Add API `window.createInputBox()`.
+
+# 2022-05-13
+
+- Notification support like VSCode https://github.com/neoclide/coc.nvim/discussions/3813
+- Add configuration `notification.minProgressWidth`
+- Add configuration `notification.preferMenuPicker`
+- Support `source` in notification windows.
+
+# 2022-05-07
+
+- Show sort method as description in outline view.
+- Add configuration `outline.switchSortKey`, default to `<C-s>`.
+- Add configuration `outline.detailAsDescription`, default to `true`.
+- Add variable `g:coc_max_treeview_width`.
+- Add `position: 'center'` support to `window.showMenuPicker()`
+
+# 2022-05-06
+
+- Use menu for `window.showQuickpick()`.
+- Add configuration `outline.autoWidth`, default to `true`.
+
+# 2022-05-05
+
+- Add key bindings to dialog (created by `window.showDialog()`) on neovim.
+
+# 2022-05-04
+
+- Add `languages.registerInlayHintsProvider()` for inlay hint support.
+
+# 2022-04-25
+
+- Add `LinkedEditing` support
+
+# 2022-04-23
+
+- Add `WinScrolled` event to events.
+
+# 2022-04-20
+
+- Select recent item when input is empty and selection is `recentUsedByPrefix`.
+- Add `coc#snippet#prev()` and `coc#snippet#next()`.
+- Add command `document.checkBuffer`.
+- Add `region` param to `window.diffHighlights()`.
+
+# 2022-04-06
+
+- `workspace.onDidOpenTextDocument` fire `contentChanges` as empty array when
+  document changed with same lines.
+
+# 2022-04-04
+
+- Avoid `CompleteDone` cancel next completion.
+- Avoid indent change on `<C-n>` and `<C-p>` during completion.
+- Support `joinUndo` and `move` with `document.applyEdits()`.
+
+# 2022-04-02
+
+- Change `suggest.triggerCompletionWait` default to `0`.
+- Not trigger completion on `TextChangedP`.
+- Remove configuration `suggest.echodocSupport`.
+- Fix complettion triggered after `<C-e>`.
+
+# 2022-03-31
+
+- Check buffer rename on write.
+
+# 2022-03-30
+
+- Improve words parse performance.
+- Remove configurations `coc.source.around.firstMatch` and `coc.source.buffer.firstMatch`.
+- Fix `coc.source.buffer.ignoreGitignore` not works
+
+# 2022-03-30
+
+- Check document reload on detach.
+
+# 2022-03-29
+
+- Add menu actions to refactor buffer.
+
+# 2022-03-12
+
+- Avoid use `<sapce><bs>` for cancel completion.
+
+# 2022-03-05
+
+- Make `WinClosed` event fires on `CursorHold` to support vim8.
+- Add events `TabNew` and `TabClose`.
+- Make outline reuse TreeView buffer.
+
+# 2022-03-02
+
+- Add ultisnip option to `snippetManager.insertSnippet()` and
+  `snippetManager.resolveSnippet()`.
+- Support ultisnip regex option: `/a` (ascii option).
+- Support transform replacement of ultisnip, including:
+  - Variable placeholders, `$0`, `$1` etc.
+  - Escape sequence `\u` `\l` `\U` `\L` `\E` `\n` `\t`
+  - Conditional replacement: `(?no:text:other text)`
+
+# 2022-02-28
+
+- Change `workspace.ignoredFiletypes` default value to `[]`
+
+# 2022-02-24
+
+- Add `window.activeTextEditor`, `window.visibleTextEditors`.
+- Add events `window.onDidChangeActiveTextEditor` `window.onDidChangeVisibleTextEditors`.
+- Add class `RelativePattern`.
+- Add `workspace.findFiles()`.
+
+# 2022-02-23
+
+- Add `workspace.openTextDocument()`
+- Add `Workspace.getRelativePath()`.
+- Add `window.terminals` `window.onDidOpenTerminal` `window.onDidCloseTerminal`
+  and `window.createTerminal`.
+- Add `exitStatus` property to `Terminal`.
+- Support `strictEnv` in `TerminalOptions` on neovim.
+- Deprecated warning for `workspace.createTerminal()`,
+  `workspace.onDidOpenTerminal` and `workspace.onDidCloseTerminal`
+
+# 2022-02-18
+
+- Clear all highlights created by coc.nvim before restart.
+- Support strike through for ansiparse.
+- Support `highlights` for `Documentation` in float window.
+
+# 2022-02-17
+
+- Change workspace configuration throw error when workspace folder can't be
+  resolved.
+- Remove configuration `diagnostic.highlightOffset`.
+
+# 2022-02-15
+
+- Add `events.race`.
+- Change default `suggest.triggerCompletionWait` to 50.
+- Support trigger completion after indent fix.
+
+# 2022-02-14
+
+- Add `pumvisible` property to events.
+
+# 2022-02-10
+
+- Add shortcut support for `window.showMenuPicker()`.
+- Add configuration `dialog.shortcutHighlight` for shortcut highlight.
+- Add configuration `list.menuAction` for choose action by menu picker.
+
+# 2022-02-09
+
+- Add error log to `nvim_error_event`.
+- Add `nvim.lua()` which replace `nvim.executeLua()` to typings.d.ts.
+
+# 2022-02-08
+
+- Support `MenuItem` with disabled property for `window.showMenuPicker`
+- Support show disabled code actions in menu picker.
+
+# 2022-02-07
+
+- Change `:CocLocalConfig` to open configuration file of current workspace
+  folder.
+
+# 2022-02-05
+
+- Support `version` from `textDocument/publishDiagnostics` notification's parameter.
+- Support `codeDescription` of diagnostics by add href to float window.
+- Support `showDocument` request from language server.
+- Support `label` from DocumentSymbolOptions in outline tree.
+- Support extra url use regexp under cursor with `openLink` action.
+- Support `activeParameter` from signature information.
+- Add `trimTrailingWhitespace`, `insertFinalNewline` and `trimFinalNewlines` to FormattingOptions.
+- Add configuration `links.tooltip`, default to `false`.
+
+# 2022-02-04
+
+- Add `--reverse` option to list.
+- Add `<esc>` key-mapping to cancel list in preview window (neovim only).
+
+# 2022-02-02
+
+- Remove `disableWorkspaceFolders` `disableDiagnostics` and `disableCompletion`
+  from language client option.
+- Add configuration `documentHighlight.timeout`.
+- Add `tabPersist` option to `ListAction`.
+- Add `refactor` to `LocationList`
+
+# 2022-01-30
+
+- Add configuration `diagnostics.virtualTextLevel`.
+- Remove configuration `suggest.numberSelect`
+
+# 2022-01-26
+
+- Use `nvim_buf_set_text` when possible to keep extmarks.
+
+# 2022-01-25
+
+- Not trigger completion when filtered is succeed.
+- Move methods `workspace.getSelectedRange` `workspace.selectRange` to `window`
+  module, show deprecated warning when using old methods.
+
+# 2022-01-23
+
+- Support semantic tokens highlights from range provider.
+
+# 2022-01-22
+
+- Not set `gravity` with api `nvim_buf_set_extmark` because highlight bug, wait neovim fix.
+- Support watch later created workspace folders for file events.
+
+# 2022-01-21
+
+- Changed semantic token highlight prefix from `CocSem_` to `CocSem`.
+- Changed semantic token highlight disabled by default, use configuration
+  `semanticTokens.filetypes`
+- Add configuration `semanticTokens.filetypes`.
+- Add configuration `semanticTokens.highlightPriority`.
+- Add configuration `semanticTokens.incrementTypes`.
+- Add configuration `semanticTokens.combinedModifiers`.
+- Add command `semanticTokens.refreshCurrent`.
+- Add command `semanticTokens.inspect`.
+- Add action `inspectSemanticToken`.
+- Rework command `semanticTokens.checkCurrent` to show highlight information.
+- Support semantic tokens highlight group composed with type and modifier.
+
+# 2022-01-21
+
+- Add configuration `workspace.ignoredFolders`.
+- Add configuration `workspace.workspaceFolderFallbackCwd`.
+
+# 2022-01-20
+
+- Remove deprecated method `workspace.resolveRootFolder`.
+
+# 2022-01-17
+
+- Extend `buffer.updateHighlights` to support `priority`, `combine`, `start_incl` and `end_incl`.
+- Add configuration `diagnostic.highlightPriority`.
+- Add configuration `colors.filetypes` and `colors.highlightPriority`.
+
+# 2022-01-16
+
+- Add configuration `codeLens.position`.
+
+# 2022-01-14
+
+- Add configuration `suggest.selection`.
+
+# 2022-01-13
+
+- `codeLens.separator` now defaults to `""` and will be placed above lines on neovim >= 0.6.0 .
+- Add configurations 'diagnostic.locationlistLevel', 'diagnostic.signLevel', 'diagnostic.messageLevel'.
+
+# 2022-01-12
+
+- Add document.lineAt(), export TextLine class.
+- Upgrade node-client, support nvim.exec().
+- Add documentHighlight.priority configuration.
+
 # 2019-08-18 0.0.74
 
 - feat(cursors): support multiple cursors.
@@ -30,7 +680,7 @@
 - feat(plugin): add highligher module
 - feat(refactor): add `<Plug>(coc-refactor)` for refactor window
 - feat(extension): use mv module for folder rename
-- feat(extension): support install taged extension
+- feat(extension): support install tagged extension
 - feat(extension): support custom extension root `g:coc_extension_root`
 - feat(handler): close signature float window on ')'
 - feat(list): support `g:coc_quickfix_open_command`
@@ -102,7 +752,7 @@
 - Add `disableDiagnostics` & `disableCompletion` to languageclient configuration.
 - Add `signature.triggerSignatureWait` configuration.
 - Add vim-repeat support for run command and quickfix.
-- Add prefered `codeAction` support.
+- Add preferred `codeAction` support.
 - Add `prompt.paste` action to list.
 - Add title as argument support for `codeAction` action.
 - Add `suggest.floatEnable` configuration.
@@ -153,16 +803,16 @@
 - **Break change** logic for resolve workspace folder changed.
 - Add `Task` module.
 - Add `getCurrentFunctionSymbol` action.
-- Add `list.source.outline.ctagsFilestypes` setting.
+- Add `list.source.outline.ctagsFiletypes` setting.
 - Add `suggest.disableMenu` and `suggest.disableMenu` settings.
 - Add `equal` support for complete items.
 - Add support for do action with visual select lines of list.
 - Add expand tilder support for language server command.
 - Add switch matcher support to list.
-- Add select all support to lsit.
+- Add select all support to list.
 - Add quickfix action to list.
 - Add `selectionRanges` of LSP.
-- Add load extentions for &rtp support.
+- Add load extensions for &rtp support.
 - Add `coc#on_enter()` for formatOnType and add new lines on enter.
 - Improve completion by support trigger completion when pumvisible.
 - Remove document check on `BufWritePre`.
@@ -172,7 +822,7 @@
 - **Break change** not using vim-node-rpc from npm modules any more.
 - **Break change** rename `<Plug>_` to `<Plug>CocRefresh`.
 - Fix wrong format options send to server.
-- Fix throw eror when extention root not created.
+- Fix throw error when extension root not created.
 - Fix MarkedString not considered as markdown.
 - Fix echo message on vim exit.
 - Fix error throw on file watch.
@@ -183,11 +833,11 @@
 - Add `workspace.resolveRootFolder`.
 - Add `diagnostic.joinMessageLines` setting.
 - Add `suggest.completionItemKindLabels` setting.
-- Add `memento` support for extention.
+- Add `memento` support for extension.
 - Add `workspace.getSelectedRange`.
 - Add `Terminal` module.
 - Add command `workbench.action.reloadWindow`.
-- Fix extention not activated by command.
+- Fix extension not activated by command.
 - Fix broken undo with floating window.
 - Fix document create possible wrong uri & filetype.
 - Improve highlight with floating window.
@@ -218,7 +868,7 @@
 - Fix critical performance issue on diff text.
 - Improve color of `CocHighlightText`.
 - Improve sort of complete items.
-- Improve extention list with version and open action.
+- Improve extension list with version and open action.
 
 # 2019-03-16
 
@@ -238,14 +888,14 @@
 
 - **Break change** change buffers instead of disk file for `workspace.applyEdits`.
 - **Break change** add config errors to diagnostic list instead of jump locations.
-- **Break change** hack for popup menu flicker is remvoed, use `suggest.reloadPumOnInsertChar` to enable it.
+- **Break change** hack for popup menu flicker is removed, use `suggest.reloadPumOnInsertChar` to enable it.
 - **Break change** use `nvim_select_popupmenu_item` for number select completion.
 - Add floating window for completion items.
 - Add floating window support for diagnostics.
 - Add floating window support for hover documentation.
 - Add `coc#on_enter()` for notify enter pressed.
 - Add setting `coc.preferences.useQuickfixForLocations`.
-- Add support of `g:coc_watch_extensions` for automatic reload extentions.
+- Add support of `g:coc_watch_extensions` for automatic reload extensions.
 - Add command: `editor.action.doCodeAction`.
 - Fix service on restarted on windows after rebuild.
 - Fix config of airline.
@@ -270,7 +920,7 @@
 
 - **Break change** default of `suggest.detailMaxLength` changed to 100.
 - **Break change** option of `workspace.registerKeymap` changed.
-- Add settings: `suggest.defailField`.
+- Add settings: `suggest.detailField`.
 - Add check for autocmd in health check.
 - Add trigger patterns support for complete sources.
 - Add support of `coc-snippets-expand-jump`
@@ -283,7 +933,7 @@
 - **Break change** no longer automatic trigger for CursorHoldI #452.
 - **Break change** add preview option of `completeopt` according to `suggest.enablePreview`.
 - Add statusItem for CocUpdate.
-- Add `-sycn` option for `:CocInstall`
+- Add `-sync` option for `:CocInstall`
 - Add support for floating preview window.
 - Add more module export.
 - Fix check of vim-node-rpc throw error.
@@ -340,15 +990,15 @@
   not found.
 - Add support for configure sign in statusline.
 - Add help action for list.
-- Fix parse error on extentions update.
+- Fix parse error on extensions update.
 - Fix wrong uri on windows.
 - Fix cancel list without close ui.
 - Improve startup time by remove jobwait.
 
 # 2019-02-02
 
-- **Break change:** extentions now update automatically, prompt is removed.
-- Add check for extention compatibility.
+- **Break change:** extensions now update automatically, prompt is removed.
+- Add check for extension compatibility.
 - Add transform support for placeholder.
 - Add check for node version.
 - Add error check for list.
@@ -356,7 +1006,7 @@
 - Fix preview window not shown.
 - Fix highlight not cleared on vim.
 - Fix highlight commands of list block vim on start.
-- Improve extention load.
+- Improve extension load.
 - Improve list experience.
 
 # 2019-01-28
@@ -371,7 +1021,7 @@
 
 # 2019-01-24
 
-- **Break change:** python code for denite support moved to seperated repo.
+- **Break change:** python code for denite support moved to separated repo.
 - **Break change:** Quickfix list no longer used.
 - Add list support.
 - Add configuration: `coc.preferences.diagnostic.virtualText`.
@@ -416,7 +1066,7 @@
 
 - **Break change:** created keymaps use rpcrequest instead of rpcnotify.
 - **Break change:** snippets provider is removed, use `coc-snippets` for
-  extention snippets.
+  extension snippets.
 - Add command: `coc.action.insertSnippet`
 - Fix position of snippets.
 - Fix modifier of registered keymaps.
@@ -434,7 +1084,7 @@
 # 2018-12-27
 
 - **Break change:** no more message on service ready.
-- **Break change:** vim source now registered as extention.
+- **Break change:** vim source now registered as extension.
 - **Break change:** complete item sort have reworked.
 - **Break change:** request send to coc would throw when service not ready.
 - Add support for check current state on diagnostic update.
@@ -464,7 +1114,7 @@
 - Add command `workspace.clearWatchman`.
 - Add `quickfixs`, `doCodeAction` and `doQuickfix` actions.
 - Add `g:vim_node_rpc_args` for debug purpose.
-- Add `coc#add_extension()` for specify extentions to install.
+- Add `coc#add_extension()` for specify extensions to install.
 - Fix clients not restarted on CocRestart.
 - Fix `execArgv` and `runtime` not work for node language server.
 - Fix detail of complete item not echoed sometimes.
@@ -475,7 +1125,7 @@
 
 # 2018-12-17
 
-- **Break change** `vim-node-rpc` now upgrade in bacground.
+- **Break change** `vim-node-rpc` now upgrade in background.
 - Add `ignoredRootPaths` to `languageserver` option.
 - Add detect of vim running state.
 - Add `client.vim` for create clients.
@@ -489,7 +1139,7 @@
 - **Break change** `fixInsertedWord` fix inserted word which ends with word
   after.
 - **Break change** `onCompleteSelect` is removed.
-- Add `workspace.registerKeymap` for regist keymap.
+- Add `workspace.registerKeymap` for register keymap.
 - Add match score for sort complete items.
 - Fix possible connection lost.
 - Fix priority of diagnostic signs.
@@ -516,7 +1166,7 @@
   `never`.
 - Fix can't install on windows vim.
 - Fix `displayByAle` not clearing diagnostics.
-- Add check for `vim-node-rpc` udpate on vim.
+- Add check for `vim-node-rpc` update on vim.
 - Add `Resolver` module.
 - Improve apply `WorkspaceEdit`, support `0` as document version and merge
   edits for same document.
@@ -528,7 +1178,7 @@
 - Add setting: `coc.preferences.hoverTarget`, support use echo.
 - Add setting `coc.preferences.diagnostic.displayByAle` for use ale to display errors.
 - Add setting `coc.preferences.extensionUpdateCheck` for control update check of
-  extentions.
+  extensions.
 - Add `coc#config` for set configuration in vim.
 - Fix rootPath not resolved on initialize.
 - Fix possible wrong `tabSize` by use `shiftwidth` option.
@@ -552,7 +1202,7 @@
 - Add echo message when provider not found for some actions.
 - Add support for `formatexpr`
 - Add support for locality bonus like VSCode.
-- Add support of `applyAdditionaLEdits` on item selected by `<esc>`
+- Add support of `applyAdditionalLEdits` on item selected by `<esc>`
 - Add `coc.preferences.useQuickfixForLocations`
 - Add `coc.preferences.messageLevel`
 - Add support for trigger command which not registered by server.
@@ -569,13 +1219,13 @@
 
 # 2018-11-24
 
-- **Break change** sources exluding `around`, `buffer` or `file` are extracted
+- **Break change** sources excluding `around`, `buffer` or `file` are extracted
   as extensions.
-- **Break change** custom source not exists any more.
+- **Break change** custom source doesn't exist any more.
 - Add `coc.preferences.preferCompleteThanJumpPlaceholder` to make jump
   placeholder behavior as confirm completion when possible.
 - Add `CocDiagnosticChange` autocmd for force statusline update.
-- Add `onDidUnloadExtension` event on extention unload.
+- Add `onDidUnloadExtension` event on extension unload.
 - Fix `getDiagnosticsInRange`, consider all interactive ranges.
 - Fix completion throw when `data` on complete item is `string`.
 - Fix `commitCharacters` not works.
@@ -839,7 +1489,7 @@
 
 # 2018-09-07
 
-- **Break change**: all extension all seperated from core, checkout
+- **Break change**: all extension all separated from core, checkout
   [Using coc extension](https://github.com/neoclide/coc.nvim/wiki/Using-coc-extensions)
 - Fix `textDocumentSync` option not work when received as object.
 - Fix wrong diagnostic info when using multiple lint servers.
@@ -959,7 +1609,7 @@
 - Add support filetype change of buffer.
 - Add basic test for completion.
 - Improve loading speed, use child process to initialize vim sources.
-- Improve install.sh, install node when not exists.
+- Improve install.sh, install node when it doesn't exist.
 - Improve interface of workspace.
 - Fix loading of configuration content.
 
