@@ -228,6 +228,13 @@ augroup on_save
     autocmd BufWritePre * %s/\s\+$//e
 augroup END
 
+augroup js_ts_tabs
+    autocmd!
+
+    autocmd FileType javascript setlocal shiftwidth=2 tabstop=2
+    autocmd FileType typescript setlocal shiftwidth=2 tabstop=2
+augroup END
+
 "********************"
 "** Plugin Configs **"
 "********************"
@@ -402,14 +409,19 @@ nnoremap <silent> <leader>d :GitGutterToggle<cr>
 
 " Vim Go Configs
 " --------------
+" The following settings refer to go-vim. It seems to be a great
+" plugin, but it really pollutes VIM with all sorts of error messages
+" and non-customizable behavior like quickfix lists. Thus, we switched
+" to coc-go and removed go-vim completely.
+
 " set `goimports' to be used to format src files
 let g:go_fmt_command = 'goimports'
 
 " add golang linter path to runtime path
 set runtimepath+=$GOPATH/src/github.com/golang/lint/misc/vim
 
-" disable location lists for go-vim
-"let g:go_list_type = "quickfix"
+" only quickfix, no location lists for go-vim
+let g:go_list_type = "quickfix"
 
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
@@ -445,8 +457,8 @@ let g:go_highlight_generate_tags = 1
 let g:go_auto_type_info = 1
 set updatetime=300
 
-" automatically highlight matching identifiers
-let g:go_auto_sameids = 1
+" disable automatic highlighting of matching identifiers
+let g:go_auto_sameids = 0
 
 " Vim-Modern-Cpp Configs
 " ----------------------
@@ -496,7 +508,7 @@ let g:ale_linters = {
 \   'typescript': ['eslint', 'tsserver'],
 \   'javascript': ['prettier', 'eslint', 'jshint'],
 \   'python': ['flake8', 'mypy'],
-\   'go': ['go', 'golint', 'errcheck'],
+\   'go': ['go', 'golint', 'errcheck', 'golangci-lint', 'govet', 'gofmt'],
 \   'vim': ['vint'],
 \   'elm': ['elm_ls'],
 \   'cpp': ['clangtidy', 'g++'],
@@ -528,6 +540,7 @@ let g:ale_fixers = {
 \   'python': ['isort', 'autopep8'],
 \   'elm': ['elm-format'],
 \   'haskell': ['hfmt'],
+\   'go': ['gofmt'],
 \}
 " Totally usable, but needs configuration: 'cpp': ['clang-format'].
 " currently unusable: 'rust': ['rustfmt']

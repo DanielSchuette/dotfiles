@@ -119,9 +119,9 @@ alias vimrc="v ~/dotfiles/vim-config/configs.vim"
 alias tmux_conf="v ~/dotfiles/.tmux.conf"
 
 # remap some GNU utils to rust utilities
-alias ls="exa --git"
-alias l="exa -lahF --git"
-alias ll="exa -lahF --git"
+alias ls="exa"
+alias l="exa -lahF"
+alias ll="exa -lahF"
 alias t="tokei"
 alias b="bat"
 
